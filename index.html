@@ -1223,7 +1223,7 @@ function analyze(){
   const banner=document.getElementById('biasBanner');
   banner.className='bias-banner '+bias.toLowerCase();
   document.getElementById('bAsset').textContent=asset;
-  document.getElementById('bTf').textContent={{m15:'M15 · 15 MINUTE',h1:'H1 · HOURLY',h4:'H4 · 4-HOUR',d1:'D1 · DAILY',w1:'W1 · WEEKLY'}[tf]||tf};
+  document.getElementById('bTf').textContent=({m15:'M15 · 15 MINUTE',h1:'H1 · HOURLY',h4:'H4 · 4-HOUR',d1:'D1 · DAILY',w1:'W1 · WEEKLY'})[tf]||tf;
   document.getElementById('bVal').textContent=bias;
   document.getElementById('bScore').textContent=cs;
   document.getElementById('bBull').textContent=bull;
@@ -1749,26 +1749,6 @@ async function loadMacro(){
     }catch(e){}
   }
 
-  // Alpha Vantage: Live RSI for SPY (free, international)
-  const avKey2=STATE.apiKeys['alphavantage'];
-  if(avKey2){
-    try{
-      const r=await fetch('https://www.alphavantage.co/query?function=RSI&symbol=SPY&interval=weekly&time_period=14&series_type=close&apikey='+avKey2,{signal:AbortSignal.timeout(8000)});
-      if(r.ok){
-        const data=await r.json();
-        const latest=Object.values(data?.['Technical Analysis: RSI']||{})[0];
-        if(latest?.RSI){
-          const rsi=parseFloat(latest.RSI).toFixed(1);
-          const rsiStatus=rsi>70?'OVERBOUGHT':rsi<30?'OVERSOLD':'NEUTRAL';
-          const rsiCol=rsi>70?'var(--bear)':rsi<30?'var(--bull)':'var(--text2)';
-          const existing=document.getElementById('correlations').innerHTML;
-          document.getElementById('correlations').innerHTML=existing+
-            '<div class="tgt-item"><div><div class="tgt-name">SPY RSI-14 (weekly)</div><div class="tgt-sub">Alpha Vantage live indicator</div></div><div style="text-align:right"><div class="tgt-price" style="color:'+rsiCol+'">'+rsi+'</div><div class="tgt-prob" style="background:rgba(0,212,255,0.08);color:'+rsiCol+'">'+rsiStatus+'</div></div></div>';
-        }
-      }
-    }catch(e){}
-  }
-
   document.getElementById('cbPolicy').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">'
     +[{bank:'FED',rate:'5.50%',bias:'HOLD',col:'var(--text2)'},{bank:'ECB',rate:'4.50%',bias:'DOVISH',col:'var(--bull)'},{bank:'BOJ',rate:'-0.10%',bias:'HAWKISH',col:'var(--bear)'},{bank:'BOE',rate:'5.25%',bias:'HOLD',col:'var(--text2)'},{bank:'RBA',rate:'4.35%',bias:'HOLD',col:'var(--text2)'},{bank:'SNB',rate:'1.75%',bias:'DOVISH',col:'var(--bull)'}].map(cb=>'<div style="background:var(--bg);border:1px solid var(--border);padding:12px;border-radius:2px;text-align:center;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:800;color:var(--text);">'+cb.bank+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:var(--accent);margin:4px 0;">'+cb.rate+'</div><div style="font-size:9px;font-weight:700;color:'+cb.col+';letter-spacing:2px;">'+cb.bias+'</div></div>').join('')+'</div>';
 }
@@ -1972,7 +1952,16 @@ window.SS.sanitize=function(s){if(typeof s!=='string')return'';return s.replace(
 const SEED='ss_'+navigator.userAgent.slice(0,14);
 function xor(s){return btoa(s.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^SEED.charCodeAt(i%SEED.length))).join(''));}
 function dexor(s){try{const d=atob(s);return d.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^SEED.charCodeAt(i%SEED.length))).join('');}catch{return '';}}
-window.SS.saveKey=function(p,k){if(!k)return;const m=window.SS.loadKeys();m[p]=xor(k);try{localStorage.setItem('ss_keys_enc',JSON.stringify(m));}catch(e){}// Also sync to STATE so API calls work immediatelyif(typeof STATE!=='undefined'){STATE.apiKeys[p]=k;try{localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));}catch(e){}}};
+window.SS.saveKey=function(p,k){
+  if(!k)return;
+  const m=window.SS.loadKeys();
+  m[p]=xor(k);
+  try{localStorage.setItem('ss_keys_enc',JSON.stringify(m));}catch(e){}
+  if(typeof STATE!=='undefined'){
+    STATE.apiKeys[p]=k;
+    try{localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));}catch(e){}
+  }
+};
 window.SS.loadKeys=function(){try{const r=localStorage.getItem('ss_keys_enc');const e=r?JSON.parse(r):{};const o={};Object.entries(e).forEach(([k,v])=>{o[k]=dexor(v);});return o;}catch{return {};}};
 /* Merge encrypted + plain keys into STATE on boot */
 (function mergeKeys(){
@@ -1989,8 +1978,7 @@ window.SS.loadKeys=function(){try{const r=localStorage.getItem('ss_keys_enc');co
   if(typeof STATE!=='undefined'){
     try{localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));}catch(e){}
   }
-  // Restore into input fields
-  const KEY_IDS={finnhub:'keyFinnhub',alphavantage:'keyAlphaVantage',polygon:'keyPolygon',whales:'keyWhales',benzinga:'keyBenzinga'};
+  // Restore into input fields (uses top-level KEY_IDS)
   Object.entries(STATE?.apiKeys||{}).forEach(([k,v])=>{
     if(!v)return;
     const inputId=KEY_IDS[k]||('key'+k.charAt(0).toUpperCase()+k.slice(1));
