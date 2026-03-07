@@ -22,7 +22,7 @@
   --gold:#f0b429; --gold-dim:#b8882a;
   --bull:#00e87a; --bear:#ff3358;
   --warn:#ff8c00; --purple:#8b5cf6;
-  --text:#e8f4ff; --text2:#a8c8e0; --dim:#7090a8;
+  --text:#ffffff; --text2:#c8e4f8; --dim:#90b8d8;
   --tier-free:#3a5060; --tier-pro:#00d4ff; --tier-inst:#f0b429;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -30,7 +30,7 @@ html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden;}
 
 /* Scanline overlay */
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9998;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:-1;}
 
 /* Grid bg */
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.018) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
@@ -38,7 +38,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* ═══════════════════════════════════════
    LAYOUT
 ═══════════════════════════════════════ */
-.app{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 16px 80px;}
+.app{position:relative;z-index:10;max-width:1280px;margin:0 auto;padding:0 16px 80px;}
 
 /* ═══════════════════════════════════════
    PAYWALL GATE (blocks UI when locked)
@@ -60,13 +60,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .logo h1{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;letter-spacing:1px;line-height:1;}
 .logo h1 .s1{color:#fff;}
 .logo h1 .s2{color:var(--accent);}
-.logo p{font-size:9px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-top:2px;}
+.logo p{font-size:9px;color:#90c8e8;letter-spacing:3px;text-transform:uppercase;margin-top:2px;}
 .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .tier-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;border:1px solid;cursor:pointer;transition:all 0.2s;}
 .tier-free{border-color:var(--tier-free);color:var(--tier-free);}
 .tier-pro{border-color:var(--tier-pro);color:var(--tier-pro);background:rgba(0,212,255,0.07);}
 .tier-inst{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,0.07);box-shadow:0 0 12px rgba(240,180,41,0.15);}
-.live-clock{font-size:10px;color:var(--text2);letter-spacing:1px;}
+.live-clock{font-size:10px;color:#c8e4f8;letter-spacing:1px;}
 .asset-pill{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--warn);letter-spacing:2px;min-width:80px;}
 
 /* ═══════════════════════════════════════
@@ -74,7 +74,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 ═══════════════════════════════════════ */
 .nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;scrollbar-width:none;}
 .nav-tabs::-webkit-scrollbar{display:none;}
-.nav-tab{padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:7px;}
+.nav-tab{padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#b0d4f0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:7px;}
 .nav-tab:hover{color:var(--text);}
 .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .nav-tab .tab-lock{font-size:9px;color:var(--gold);margin-left:2px;}
@@ -97,7 +97,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .card.accent-bear::before{background:linear-gradient(90deg,var(--bear),transparent);}
 .card.accent-purple::before{background:linear-gradient(90deg,var(--purple),transparent);}
 .card-head{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;}
-.card-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text2);}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#e8f6ff;}
 .card-body{padding:0 18px 16px;}
 
 /* ═══════════════════════════════════════
@@ -113,10 +113,11 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
    FIELD
 ═══════════════════════════════════════ */
 .field{display:flex;flex-direction:column;gap:4px;}
-.field label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
-.field input,.field select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:2px;outline:none;transition:border-color 0.2s;width:100%;}
+.field label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#c0dff5;}
+.field input,.field select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:2px;outline:none;transition:border-color 0.2s;width:100%;position:relative;z-index:20;-webkit-user-select:text;user-select:text;}
 .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(0,212,255,0.08);}
-.field input::placeholder{color:var(--dim);font-size:10px;}
+.field input,.field select,input[type='password'],input[type='text'],input[type='number']{-webkit-tap-highlight-color:rgba(0,212,255,0.2);touch-action:manipulation;}
+.field input::placeholder{color:#6090b0;font-size:10px;}
 .field input.auto-filled{border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.03);}
 .field select option{background:var(--surface);}
 .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;}
@@ -198,7 +199,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
    CONFLUENCE METERS
 ═══════════════════════════════════════ */
 .cm{margin-bottom:10px;}
-.cm-label{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-bottom:4px;}
+.cm-label{display:flex;justify-content:space-between;font-size:9px;color:#90b8d8;margin-bottom:4px;}
 .cm-track{height:3px;background:var(--border);border-radius:3px;overflow:hidden;}
 .cm-fill{height:100%;border-radius:3px;transition:width 0.9s ease;}
 
@@ -381,7 +382,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* ═══════════════════════════════════════
    PANEL COLLAPSE
 ═══════════════════════════════════════ */
-.collapsible .col-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;user-select:none;transition:background 0.12s;}
+.collapsible .col-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background 0.12s;}
 .collapsible .col-head:hover{background:rgba(255,255,255,0.02);}
 .collapsible .col-body{display:none;padding:14px 18px;}
 .collapsible .col-body.open{display:block;}
@@ -541,7 +542,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
             <option value="stocks">Stocks / Indices</option><option value="futures">Futures</option>
           </select>
         </div>
-        <div class="field"><label>Timeframe</label>
+        <div class="field"><label style="color:#d0eeff;">Timeframe</label>
           <select id="timeframe" onchange="onCtxChange()">
             <option value="m15">M15</option><option value="h1">H1</option>
             <option value="h4" selected>H4</option><option value="d1">Daily</option><option value="w1">Weekly</option>
@@ -653,7 +654,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <span class="col-chev">▼</span>
     </div>
     <div class="col-body">
-      <div style="font-size:9px;color:var(--dim);margin-bottom:10px;line-height:1.8;"><span style="color:var(--bear)">EXT</span> = Beyond swing H/L (stop hunts) · <span style="color:var(--accent)">INT</span> = Equal highs/lows in range</div>
+      <div style="font-size:9px;color:#90b8d8;margin-bottom:10px;line-height:1.8;"><span style="color:var(--bear)">EXT</span> = Beyond swing H/L (stop hunts) · <span style="color:var(--accent)">INT</span> = Equal highs/lows in range</div>
       <div id="liqRows">
         <div class="liq-row"><span class="liq-badge liq-ext">EXT</span><div class="field"><label>Level</label><input type="number" step="any" class="lp" data-lt="ext" placeholder="Price"></div><div class="field"><label>Side</label><select class="ls"><option value="above">Above</option><option value="below">Below</option></select></div></div>
         <div class="liq-row"><span class="liq-badge liq-ext">EXT</span><div class="field"><label>Level</label><input type="number" step="any" class="lp" data-lt="ext" placeholder="Price"></div><div class="field"><label>Side</label><select class="ls"><option value="above">Above</option><option value="below" selected>Below</option></select></div></div>
@@ -877,10 +878,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="api-key-row"><div class="field"><label>Gemini API Key <span style="color:var(--accent)">FREE · AI Suite · aistudio.google.com</span></label><input type="password" id="keyGemini" placeholder="Paste Gemini key here → AI Suite activates instantly"></div><button class="btn btn-primary" onclick="saveKey('gemini')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-gemini"></span></div>
         <div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin:14px 0 10px;">&#9670; PRO UPGRADES — Optional paid tiers</div>
         <div class="api-key-row"><div class="field"><label>Benzinga Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyBenzinga" placeholder="benzinga.com PRO API"></div><button class="btn btn-primary" onclick="saveKey('benzinga')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-benzinga"></span></div>
-        <div style="font-size:9px;color:var(--dim);margin-top:14px;line-height:1.8;">CFTC (COT data) and FINRA (dark pool) load automatically — no key needed.</div>
+        <div style="font-size:9px;color:#90b8d8;margin-top:14px;line-height:1.8;">CFTC (COT data) and FINRA (dark pool) load automatically — no key needed.</div>
         <div style="margin-top:16px;">
           <button class="btn btn-primary" onclick="testAllConnections()" style="width:100%;font-size:10px;letter-spacing:2px;padding:10px;">⚡ TEST ALL CONNECTIONS</button>
-          <div id="connectionStatus" style="margin-top:10px;font-size:10px;line-height:2.2;color:var(--text2);"></div>
+          <div id="connectionStatus" style="margin-top:10px;font-size:10px;line-height:2.2;color:#c8e8ff;"></div>
         </div>
       </div>
     </div>
@@ -893,10 +894,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           <div style="font-size:9px;color:var(--dim);margin-top:4px;" id="planFeatureCount"></div>
         </div>
         <button class="btn btn-gold btn-full" onclick="openPricing()" style="margin-top:12px;">VIEW ALL PLANS ↗</button>
-        <div style="margin-top:16px;font-size:10px;color:var(--dim);text-align:center;line-height:1.8;">
-          SokoScan · by Zack<br>
-          Institutional Intelligence Platform<br>
-          v5.0 · PWA
+        <div style="margin-top:16px;font-size:10px;color:#90b8d8;text-align:center;line-height:1.8;">
+          <span style="color:#a0c8e8;">SokoScan · by Zack</span><br>
+          <span style="color:#c0dff5;">Institutional Intelligence Platform</span><br>
+          <span style="color:#7090b0;">v5.0 · PWA</span>
         </div>
       </div>
     </div>
@@ -1053,7 +1054,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <span style="font-size:9px;color:var(--gold);letter-spacing:1px;" id="kzCurrentTime">--:-- UTC</span>
     </div>
     <div id="killZonesFeed"></div>
-    <div style="padding:12px 18px;font-size:9px;color:var(--dim);line-height:1.8;">
+    <div style="padding:12px 18px;font-size:9px;color:#90b8d8;line-height:1.8;">
       Kill Zones are high-probability windows when institutional players are most active. Price sweeps liquidity, creates displacement, and forms order blocks during these sessions.
     </div>
   </div>
@@ -1176,7 +1177,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <button class="pricing-cta" style="background:linear-gradient(135deg,var(--gold),#e8950a);border-color:var(--gold);color:#000;" onclick="selectPlan('institutional')">GO INSTITUTIONAL ↗</button>
       </div>
     </div>
-    <div style="text-align:center;padding:0 24px 24px;font-size:10px;color:var(--dim);line-height:1.8;">
+    <div style="text-align:center;padding:0 24px 24px;font-size:10px;color:#90b8d8;line-height:1.8;">
       All plans include 7-day free trial · Cancel anytime · Billed via Stripe · Questions? <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ef958e8c84af9c8084809c8c8e81c18680">[email&#160;protected]</a>
     </div>
   </div>
@@ -2482,17 +2483,23 @@ async function generateAISummary(){
 }
 
 // ═══════════════════════════ ANTI-REVERSE-ENGINEER ═══════════
-// 1. Disable right-click context menu
-document.addEventListener('contextmenu',e=>e.preventDefault());
-// 2. Disable F12 / Ctrl+Shift+I / Ctrl+U
+// 1. Block right-click EXCEPT on input/textarea (needed for paste on Android)
+document.addEventListener('contextmenu',e=>{
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||e.target.isContentEditable) return;
+  e.preventDefault();
+});
+// 2. Disable F12 / Ctrl+Shift+I / Ctrl+U (desktop only, no effect on mobile)
 document.addEventListener('keydown',e=>{
   if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key))||(e.ctrlKey&&e.key==='U')){
     e.preventDefault();
     toast('⚠ Developer tools restricted');
   }
 });
-// 3. Disable text selection on sensitive UI elements
+// 3. Disable text selection only on display elements, NOT inputs
 document.addEventListener('selectstart',e=>{
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
   if(e.target.closest('.intel-terminal,.whale-row,.zone-card')){e.preventDefault();}
 });
 // 4. Obfuscate STATE object from console inspection
