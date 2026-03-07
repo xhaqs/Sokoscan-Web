@@ -825,6 +825,16 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="api-key-row"><div class="field"><label>Unusual Whales Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyWhales" placeholder="unusualwhales.com API"></div><button class="btn btn-primary" onclick="saveKey('whales')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-whales"></span></div>
         <div class="api-key-row"><div class="field"><label>Benzinga Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyBenzinga" placeholder="benzinga.com PRO API"></div><button class="btn btn-primary" onclick="saveKey('benzinga')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-benzinga"></span></div>
         <div style="font-size:9px;color:var(--dim);margin-top:14px;line-height:1.8;">CFTC (COT data) and FINRA (dark pool) load automatically — no key needed.</div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="testAllConnections()" style="width:100%;font-size:10px;letter-spacing:2px;padding:10px;">⚡ TEST ALL CONNECTIONS</button>
+          <div id="connectionStatus" style="margin-top:10px;font-size:10px;line-height:2.2;color:var(--text2);"></div>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="testAllConnections()" style="width:100%;font-size:10px;letter-spacing:2px;padding:10px;">
+            ⚡ TEST ALL CONNECTIONS
+          </button>
+          <div id="connectionStatus" style="margin-top:10px;font-size:10px;line-height:2;color:var(--text2);"></div>
+        </div>
       </div>
     </div>
     <div class="card accent-gold">
@@ -935,7 +945,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════ STATE ═══════════════════════════
 const STATE = {
-  tier: localStorage.getItem('ss_tier') || 'free', // free | pro | institutional
+  tier: localStorage.getItem('ss_tier') || 'institutional', // free | pro | institutional — default unlocks all for owner
   apiKeys: JSON.parse(localStorage.getItem('ss_keys') || '{}'),
   newsFilter: 'all',
   dpFilter: 'all',
@@ -1867,17 +1877,128 @@ function closePricing(){document.getElementById('pricingModal').classList.remove
 document.getElementById('pricingModal').addEventListener('click',e=>{if(e.target===document.getElementById('pricingModal'))closePricing();});
 
 // ═══════════════════════════ API KEYS ════════════════════════
+// Map provider id -> input element id
+const KEY_IDS={finnhub:'keyFinnhub',alphavantage:'keyAlphaVantage',polygon:'keyPolygon',whales:'keyWhales',benzinga:'keyBenzinga'};
+
 function saveKey(provider){
-  const key=document.getElementById('key'+provider.charAt(0).toUpperCase()+provider.slice(1))?.value;
+  const inputId=KEY_IDS[provider]||('key'+provider.charAt(0).toUpperCase()+provider.slice(1));
+  const key=document.getElementById(inputId)?.value?.trim();
   if(!key){toast('Enter a key first');return;}
-  STATE.apiKeys[provider]=key;localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));
-  const el=document.getElementById('st-'+provider);if(el){el.className='api-status api-ok';el.textContent='✓ SAVED';}
-  toast(`✓ ${provider} key saved`);
+  STATE.apiKeys[provider]=key;
+  localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));
+  const el=document.getElementById('st-'+provider);
+  if(el){el.className='api-status api-ok';el.textContent='✓ SAVED';}
+  toast('✓ '+provider+' key saved — reloading data...');
+  // Reload live data immediately with new key
+  if(provider==='finnhub'){loadNews();loadCalendar();}
+  if(provider==='alphavantage'){loadFlow();loadNews();}
+  if(provider==='polygon'){loadFlow();}
 }
-// Load saved keys on boot
-Object.entries(STATE.apiKeys).forEach(([k,v])=>{const el=document.getElementById('key'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.value=v;const st=document.getElementById('st-'+k);if(st){st.className='api-status api-ok';st.textContent='✓ SAVED';}});
+
+// Load saved keys on boot — restore into input fields + mark as saved
+Object.entries(STATE.apiKeys).forEach(([k,v])=>{
+  if(!v)return;
+  const inputId=KEY_IDS[k]||('key'+k.charAt(0).toUpperCase()+k.slice(1));
+  const el=document.getElementById(inputId);if(el)el.value=v;
+  const st=document.getElementById('st-'+k);if(st){st.className='api-status api-ok';st.textContent='✓ SAVED';}
+});
 
 function saveNotifPrefs(){toast('✓ Notification preferences saved');}
+
+function testAllConnections(){
+  // async IIFE so we can use await
+  (async()=>{
+    const status=document.getElementById('connectionStatus');
+    if(!status)return;
+    status.innerHTML='<span style="color:var(--accent);">Testing connections...</span>';
+    const results=[];
+
+    // CFTC (free, no key)
+    try{const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=1'),{signal:AbortSignal.timeout(8000)});
+    results.push(r.ok?'<span style="color:var(--bull);">&#x25cf; CFTC/COT</span> — Connected':'<span style="color:var(--bear);">&#x25cf; CFTC/COT</span> — Unreachable');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; CFTC/COT</span> — Timeout');}
+
+    // FINRA (free, no key)
+    try{const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://cdn.finra.org/equity/regsho/daily/SPYshortdate.txt'),{signal:AbortSignal.timeout(8000)});
+    results.push(r.ok?'<span style="color:var(--bull);">&#x25cf; FINRA ATS</span> — Connected':'<span style="color:var(--bear);">&#x25cf; FINRA ATS</span> — Unreachable');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; FINRA ATS</span> — Timeout');}
+
+    // Finnhub
+    const fhKey=STATE.apiKeys['finnhub'];
+    if(fhKey){try{const r=await fetch('https://finnhub.io/api/v1/news?category=general&token='+fhKey,{signal:AbortSignal.timeout(7000)});const d=await r.json();results.push(Array.isArray(d)&&d.length?'<span style="color:var(--bull);">&#x25cf; Finnhub</span> — Live — '+d.length+' headlines':'<span style="color:var(--bear);">&#x25cf; Finnhub</span> — Invalid key');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; Finnhub</span> — Timeout');}}
+    else results.push('<span style="color:var(--dim);">&#x25cb; Finnhub</span> — No key saved');
+
+    // Alpha Vantage
+    const avKey=STATE.apiKeys['alphavantage'];
+    if(avKey){try{const r=await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=SPY&apikey='+avKey,{signal:AbortSignal.timeout(9000)});const d=await r.json();const q=d?.['Global Quote'];results.push(q&&q['05. price']?'<span style="color:var(--bull);">&#x25cf; Alpha Vantage</span> — Live — SPY $'+parseFloat(q['05. price']).toFixed(2):'<span style="color:var(--bear);">&#x25cf; Alpha Vantage</span> — Key invalid or rate limited');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; Alpha Vantage</span> — Timeout');}}
+    else results.push('<span style="color:var(--dim);">&#x25cb; Alpha Vantage</span> — No key saved');
+
+    // Polygon
+    const polyKey=STATE.apiKeys['polygon'];
+    if(polyKey){try{const r=await fetch('https://api.polygon.io/v2/aggs/ticker/SPY/prev?adjusted=true&apiKey='+polyKey,{signal:AbortSignal.timeout(9000)});const d=await r.json();results.push(d?.resultsCount>0?'<span style="color:var(--bull);">&#x25cf; Polygon.io</span> — Live — SPY prev $'+d.results[0]?.c?.toFixed(2):'<span style="color:var(--bear);">&#x25cf; Polygon.io</span> — Invalid key');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; Polygon.io</span> — Timeout');}}
+    else results.push('<span style="color:var(--dim);">&#x25cb; Polygon.io</span> — No key saved');
+
+    status.innerHTML=results.join('<br>');
+    toast('Connection test complete');
+  })();
+}
+
+async function testAllConnections(){
+  const status=document.getElementById('connectionStatus');
+  if(!status)return;
+  status.innerHTML='<span style="color:var(--accent);">Testing connections...</span>';
+  const results=[];
+
+  // Test CFTC (no key)
+  try{
+    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=1'),{signal:AbortSignal.timeout(8000)});
+    results.push(r.ok?'<span style="color:var(--bull);">&#9679; CFTC (COT)</span> &mdash; Connected, free':'<span style="color:var(--bear);">&#9679; CFTC (COT)</span> &mdash; Unreachable');
+  }catch(e){results.push('<span style="color:var(--warn);">&#9675; CFTC (COT)</span> &mdash; Timeout');}
+
+  // Test FINRA (no key)
+  try{
+    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://cdn.finra.org/equity/regsho/daily/SPYshortdate.txt'),{signal:AbortSignal.timeout(8000)});
+    results.push(r.ok?'<span style="color:var(--bull);">&#9679; FINRA ATS</span> &mdash; Connected, free':'<span style="color:var(--bear);">&#9679; FINRA ATS</span> &mdash; Unreachable');
+  }catch(e){results.push('<span style="color:var(--warn);">&#9675; FINRA ATS</span> &mdash; Timeout');}
+
+  // Test Finnhub
+  const fhKey=STATE.apiKeys['finnhub'];
+  if(fhKey){
+    try{
+      const r=await fetch('https://finnhub.io/api/v1/news?category=general&token='+fhKey,{signal:AbortSignal.timeout(7000)});
+      const d=await r.json();
+      results.push(Array.isArray(d)&&d.length?'<span style="color:var(--bull);">&#9679; Finnhub</span> &mdash; Live &mdash; '+d.length+' headlines':'<span style="color:var(--bear);">&#9679; Finnhub</span> &mdash; Invalid key');
+    }catch(e){results.push('<span style="color:var(--warn);">&#9675; Finnhub</span> &mdash; Timeout');}
+  } else {
+    results.push('<span style="color:var(--dim);">&#9675; Finnhub</span> &mdash; No key saved');
+  }
+
+  // Test Alpha Vantage
+  const avKey=STATE.apiKeys['alphavantage'];
+  if(avKey){
+    try{
+      const r=await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=SPY&apikey='+avKey,{signal:AbortSignal.timeout(9000)});
+      const d=await r.json();
+      const q=d?.['Global Quote'];
+      results.push(q&&q['05. price']?'<span style="color:var(--bull);">&#9679; Alpha Vantage</span> &mdash; Live &mdash; SPY $'+parseFloat(q['05. price']).toFixed(2):'<span style="color:var(--bear);">&#9679; Alpha Vantage</span> &mdash; Invalid key or rate limited');
+    }catch(e){results.push('<span style="color:var(--warn);">&#9675; Alpha Vantage</span> &mdash; Timeout');}
+  } else {
+    results.push('<span style="color:var(--dim);">&#9675; Alpha Vantage</span> &mdash; No key saved');
+  }
+
+  // Test Polygon
+  const polyKey=STATE.apiKeys['polygon'];
+  if(polyKey){
+    try{
+      const r=await fetch('https://api.polygon.io/v2/aggs/ticker/SPY/prev?adjusted=true&apiKey='+polyKey,{signal:AbortSignal.timeout(9000)});
+      const d=await r.json();
+      results.push(d?.resultsCount>0?'<span style="color:var(--bull);">&#9679; Polygon.io</span> &mdash; Live &mdash; SPY prev close $'+d.results[0]?.c?.toFixed(2):'<span style="color:var(--bear);">&#9679; Polygon.io</span> &mdash; Invalid key');
+    }catch(e){results.push('<span style="color:var(--warn);">&#9675; Polygon.io</span> &mdash; Timeout');}
+  } else {
+    results.push('<span style="color:var(--dim);">&#9675; Polygon.io</span> &mdash; No key saved');
+  }
+
+  status.innerHTML=results.join('<br>');
+  toast('Connection test complete');
+}
 
 // ═══════════════════════════ PWA ═════════════════════════════
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -1885,9 +2006,13 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();STATE.defer
 window.addEventListener('appinstalled',()=>{document.getElementById('installBar').classList.remove('show');toast('✓ SokoScan installed!');});
 function installPWA(){if(STATE.deferredInstall){STATE.deferredInstall.prompt();STATE.deferredInstall.userChoice.then(()=>{STATE.deferredInstall=null;document.getElementById('installBar').classList.remove('show');});}}
 
-// ═══════════════════════════ BOOT ════════════════applyTier();
+// ═══════════════════════════ BOOT ════════════════
+applyTier();
+loadNews();
 loadCalendar();
-setTimeout(()=>{if(document.getElementById('tab-flow').classList.contains('active'))loadFlow();},500);
+setTimeout(()=>loadFlow(), 400);
+setTimeout(()=>loadDarkPool(), 800);
+setTimeout(()=>loadMacro(), 1200);
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════
