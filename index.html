@@ -22,7 +22,7 @@
   --gold:#f0b429; --gold-dim:#b8882a;
   --bull:#00e87a; --bear:#ff3358;
   --warn:#ff8c00; --purple:#8b5cf6;
-  --text:#c8dae8; --text2:#8099b0; --dim:#3a5060;
+  --text:#e8f4ff; --text2:#a8c8e0; --dim:#7090a8;
   --tier-free:#3a5060; --tier-pro:#00d4ff; --tier-inst:#f0b429;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -873,8 +873,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="api-key-row"><div class="field"><label>Finnhub API Key <span style="color:var(--bull)">FREE · 60 calls/min</span></label><input type="password" id="keyFinnhub" placeholder="finnhub.io → free signup → API key"></div><button class="btn btn-primary" onclick="saveKey('finnhub')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-finnhub"></span></div>
         <div class="api-key-row"><div class="field"><label>Alpha Vantage Key <span style="color:var(--bull)">FREE · Options + Technicals</span></label><input type="password" id="keyAlphaVantage" placeholder="alphavantage.co → get free API key"></div><button class="btn btn-primary" onclick="saveKey('alphavantage')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-alphavantage"></span></div>
         <div class="api-key-row"><div class="field"><label>Polygon.io Key <span style="color:var(--bull)">FREE · Options chains</span></label><input type="password" id="keyPolygon" placeholder="polygon.io → free signup → Dashboard"></div><button class="btn btn-primary" onclick="saveKey('polygon')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-polygon"></span></div>
-        <div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin:12px 0 10px;">&#9670; PRO UPGRADES — Optional paid tiers</div>
-        <div class="api-key-row"><div class="field"><label>Gemini API Key <span style="color:var(--gold)">INST · AI Suite</span></label><input type="password" id="keyGemini" placeholder="aistudio.google.com → Get API key (free)"></div><button class="btn btn-primary" onclick="saveKey('gemini')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-gemini"></span></div>
+        <div style="font-size:9px;color:var(--accent);letter-spacing:1px;margin:14px 0 10px;padding:6px 10px;background:rgba(0,212,255,0.08);border-radius:4px;border-left:2px solid var(--accent);">&#9670; INSTITUTIONAL AI — Gemini Required</div>
+        <div class="api-key-row"><div class="field"><label>Gemini API Key <span style="color:var(--accent)">FREE · AI Suite · aistudio.google.com</span></label><input type="password" id="keyGemini" placeholder="Paste Gemini key here → AI Suite activates instantly"></div><button class="btn btn-primary" onclick="saveKey('gemini')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-gemini"></span></div>
+        <div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin:14px 0 10px;">&#9670; PRO UPGRADES — Optional paid tiers</div>
         <div class="api-key-row"><div class="field"><label>Benzinga Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyBenzinga" placeholder="benzinga.com PRO API"></div><button class="btn btn-primary" onclick="saveKey('benzinga')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-benzinga"></span></div>
         <div style="font-size:9px;color:var(--dim);margin-top:14px;line-height:1.8;">CFTC (COT data) and FINRA (dark pool) load automatically — no key needed.</div>
         <div style="margin-top:16px;">
