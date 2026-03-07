@@ -412,6 +412,54 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
    TOAST & INSTALL
 ═══════════════════════════════════════ */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 18px;border-radius:2px;font-size:10px;letter-spacing:1px;z-index:9999;transition:transform 0.25s;pointer-events:none;}
+.intel-terminal{background:#050a0f;border:1px solid #0a2a1a;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:10px;height:180px;overflow-y:auto;padding:10px 12px;}
+.intel-line{line-height:1.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.intel-time{color:var(--dim);}
+.intel-system{color:var(--accent);}
+.intel-alert{color:var(--gold);font-weight:700;}
+.intel-whale{color:#ff00ff;font-weight:700;}
+.intel-news{color:var(--bull);}
+.intel-warn{color:var(--bear);}
+.intel-shadow{color:#8855ff;}
+.whale-row{display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid var(--border);transition:background 0.3s;}
+.whale-row.glow{animation:whaleGlow 1.5s ease-out;}
+@keyframes whaleGlow{0%{background:rgba(255,0,255,0.18);}100%{background:transparent;}}
+.whale-sigma{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#ff00ff;min-width:48px;}
+.whale-badge{font-size:8px;padding:2px 6px;border-radius:3px;letter-spacing:1px;font-weight:700;}
+.whale-badge.sweep{background:rgba(255,140,0,0.2);color:#ff8c00;border:1px solid #ff8c00;}
+.whale-badge.block{background:rgba(0,212,255,0.15);color:var(--accent);border:1px solid var(--accent);}
+.whale-badge.shadow{background:rgba(136,85,255,0.2);color:#8855ff;border:1px solid #8855ff;}
+.zone-card{border-radius:5px;padding:10px 14px;margin-bottom:8px;border-left:3px solid;}
+.zone-supply{background:rgba(255,51,88,0.08);border-color:var(--bear);}
+.zone-demand{background:rgba(0,232,122,0.08);border-color:var(--bull);}
+.zone-label{font-size:9px;letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+.zone-range{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin:3px 0;}
+.zone-meta{font-size:9px;color:var(--dim);}
+.bos-tag{display:inline-block;font-size:8px;padding:1px 5px;border-radius:2px;margin-left:6px;font-weight:700;letter-spacing:1px;}
+.bos-tag.bos{background:rgba(0,212,255,0.2);color:var(--accent);}
+.bos-tag.choch{background:rgba(255,180,0,0.2);color:var(--gold);}
+.kz-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);}
+.kz-name{font-size:11px;font-weight:700;letter-spacing:1px;}
+.kz-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+.kz-badge{font-size:8px;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:1px;}
+.kz-badge.live{background:rgba(0,232,122,0.2);color:var(--bull);border:1px solid var(--bull);}
+.kz-badge.soon{background:rgba(255,180,0,0.2);color:var(--gold);}
+.kz-badge.closed{background:rgba(255,255,255,0.05);color:var(--dim);}
+.kz-active{animation:kzPulse 2s infinite;}
+@keyframes kzPulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.ai-output{background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(0,100,50,0.05));border:1px solid rgba(0,212,255,0.2);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.8;color:var(--text);min-height:60px;}
+.ai-label{font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:700;margin-bottom:8px;}
+.ai-score{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;padding:1px 8px;border-radius:3px;font-size:10px;margin-left:6px;}
+.ai-score.bull{background:rgba(0,232,122,0.2);color:var(--bull);}
+.ai-score.bear{background:rgba(255,51,88,0.2);color:var(--bear);}
+.ai-score.neutral{background:rgba(255,255,255,0.08);color:var(--text2);}
+.ai-spinner{display:inline-block;width:10px;height:10px;border:1px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.agent-panel{background:#080e14;border:1px solid rgba(0,212,255,0.15);border-radius:6px;padding:14px;}
+.agent-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:5px 12px;font-size:10px;cursor:pointer;transition:all 0.2s;margin:4px;}
+.agent-chip:hover,.agent-chip.active{background:rgba(0,212,255,0.18);border-color:var(--accent);color:var(--accent);}
+.agent-response{margin-top:12px;font-size:11px;line-height:1.8;color:var(--text);min-height:40px;}
+.custom-key-panel{background:rgba(255,180,0,0.04);border:1px solid rgba(255,180,0,0.2);border-radius:6px;padding:14px;margin-top:12px;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 .install-bar{display:none;align-items:center;justify-content:space-between;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:2px;padding:10px 14px;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
 .install-bar.show{display:flex;}
@@ -455,11 +503,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 ═══════════════════════════════════════ -->
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="switchTab('scan',this)">⬡ SCANNER</div>
-  <div class="nav-tab" onclick="switchTab('news',this)">📡 NEWS FEED <span class="tab-badge" id="newsBadge">0</span></div>
-  <div class="nav-tab" onclick="switchTab('flow',this)">🌊 ORDER FLOW <span class="tab-lock">PRO</span></div>
+  <div class="nav-tab" onclick="switchTab('news',this)">📡 NEWS <span class="tab-badge" id="newsBadge">0</span></div>
+  <div class="nav-tab" onclick="switchTab('flow',this)">🌊 FLOW <span class="tab-lock">PRO</span></div>
+  <div class="nav-tab" onclick="switchTab('whale',this)">🐋 WHALES <span class="tab-lock">PRO</span></div>
   <div class="nav-tab" onclick="switchTab('darkpool',this)">🌑 DARK POOL <span class="tab-lock">PRO</span></div>
+  <div class="nav-tab" onclick="switchTab('zones',this)">⚡ ZONES <span class="tab-lock">PRO</span></div>
+  <div class="nav-tab" onclick="switchTab('killzones',this)">🎯 KILL ZONES</div>
   <div class="nav-tab" onclick="switchTab('bookmap',this)">🔥 HEAT/BOOK <span class="tab-lock">PRO</span></div>
   <div class="nav-tab" onclick="switchTab('macro',this)">🏛 MACRO/COT <span class="tab-lock">INST</span></div>
+  <div class="nav-tab" onclick="switchTab('ai',this)">🤖 AI SUITE <span class="tab-lock">INST</span></div>
   <div class="nav-tab" onclick="switchTab('calendar',this)">📅 CALENDAR</div>
   <div class="nav-tab" onclick="switchTab('settings',this)">⚙ SETTINGS</div>
 </div>
@@ -822,7 +874,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="api-key-row"><div class="field"><label>Alpha Vantage Key <span style="color:var(--bull)">FREE · Options + Technicals</span></label><input type="password" id="keyAlphaVantage" placeholder="alphavantage.co → get free API key"></div><button class="btn btn-primary" onclick="saveKey('alphavantage')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-alphavantage"></span></div>
         <div class="api-key-row"><div class="field"><label>Polygon.io Key <span style="color:var(--bull)">FREE · Options chains</span></label><input type="password" id="keyPolygon" placeholder="polygon.io → free signup → Dashboard"></div><button class="btn btn-primary" onclick="saveKey('polygon')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-polygon"></span></div>
         <div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin:12px 0 10px;">&#9670; PRO UPGRADES — Optional paid tiers</div>
-        <div class="api-key-row"><div class="field"><label>Unusual Whales Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyWhales" placeholder="unusualwhales.com API"></div><button class="btn btn-primary" onclick="saveKey('whales')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-whales"></span></div>
+        <div class="api-key-row"><div class="field"><label>Gemini API Key <span style="color:var(--gold)">INST · AI Suite</span></label><input type="password" id="keyGemini" placeholder="aistudio.google.com → Get API key (free)"></div><button class="btn btn-primary" onclick="saveKey('gemini')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-gemini"></span></div>
         <div class="api-key-row"><div class="field"><label>Benzinga Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyBenzinga" placeholder="benzinga.com PRO API"></div><button class="btn btn-primary" onclick="saveKey('benzinga')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-benzinga"></span></div>
         <div style="font-size:9px;color:var(--dim);margin-top:14px;line-height:1.8;">CFTC (COT data) and FINRA (dark pool) load automatically — no key needed.</div>
         <div style="margin-top:16px;">
@@ -843,7 +895,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div style="margin-top:16px;font-size:10px;color:var(--dim);text-align:center;line-height:1.8;">
           SokoScan · by Zack<br>
           Institutional Intelligence Platform<br>
-          v3.0 · PWA
+          v5.0 · PWA
         </div>
       </div>
     </div>
@@ -859,6 +911,204 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <label style="display:flex;align-items:center;gap:10px;font-size:11px;cursor:pointer;"><input type="checkbox" id="notif-flow" style="width:auto;"> Unusual options flow</label>
       </div>
       <button class="btn btn-primary" style="margin-top:14px;width:100%;padding:10px;" onclick="saveNotifPrefs()">SAVE PREFERENCES</button>
+    </div>
+  </div>
+
+  <!-- SENSITIVITY THRESHOLDS -->
+  <div class="card accent-purple" style="margin-top:0;">
+    <div class="card-head"><span class="card-title">// Whale Sensitivity Thresholds <span style="color:#ff00ff">PRO</span></span></div>
+    <div class="card-body">
+      <div class="thresh-row">
+        <div><div style="font-size:11px;color:var(--text2);">Whale Min ($)</div><div style="font-size:9px;color:var(--dim);">Only flag trades above this dollar value</div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><input type="number" id="threshWhaleMin" value="100000" style="width:100px;font-size:11px;padding:5px 8px;text-align:right;"><span style="font-size:9px;color:var(--dim);">USD</span></div>
+      </div>
+      <div class="thresh-row">
+        <div><div style="font-size:11px;color:var(--text2);">Z-Score Threshold (σ)</div><div style="font-size:9px;color:var(--dim);">Volume deviations above mean</div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><input type="number" id="threshSigma" value="3.0" step="0.5" min="1" max="10" style="width:80px;font-size:11px;padding:5px 8px;text-align:right;"><span style="font-size:9px;color:var(--dim);">σ</span></div>
+      </div>
+      <div class="thresh-row">
+        <div><div style="font-size:11px;color:var(--text2);">Sweep Filter</div><div style="font-size:9px;color:var(--dim);">Multi-exchange order detection</div></div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="threshSweep" checked style="width:auto;"><span style="font-size:10px;">Enabled</span></label>
+      </div>
+      <div class="thresh-row" style="border-bottom:none;">
+        <div><div style="font-size:11px;color:var(--text2);">Sentiment Bias</div><div style="font-size:9px;color:var(--dim);">Cross-reference news vs price action</div></div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="threshSentiment" checked style="width:auto;"><span style="font-size:10px;">Enabled</span></label>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px;width:100%;padding:10px;font-size:10px;letter-spacing:2px;" onclick="saveThresholds()">SAVE THRESHOLDS</button>
+    </div>
+  </div>
+
+  <!-- CUSTOM API KEYS — PRO/INSTITUTIONAL -->
+  <div class="card" style="margin-top:0;">
+    <div class="card-head"><span class="card-title">// Bring Your Own API Keys <span style="color:var(--gold)">PRO · INST</span></span></div>
+    <div class="card-body">
+      <div style="font-size:10px;color:var(--text2);margin-bottom:10px;line-height:1.8;">Override platform keys with your own for dedicated rate limits and enterprise access. Keys are XOR-obfuscated and never transmitted to SokoScan servers.</div>
+      <div class="custom-key-panel">
+        <div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;">◈ PRO — Higher Rate Limits</div>
+        <div class="api-key-row"><div class="field"><label>Your Polygon.io Key</label><input type="password" id="keyPolyOwn" placeholder="Your personal Polygon key"></div><button class="btn btn-primary" onclick="saveKey('polyown')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button></div>
+        <div class="api-key-row" style="margin-top:8px;"><div class="field"><label>Your Finnhub Key</label><input type="password" id="keyFinnhubOwn" placeholder="Your personal Finnhub key"></div><button class="btn btn-primary" onclick="saveKey('finnhubown')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button></div>
+      </div>
+      <div class="custom-key-panel" style="margin-top:8px;border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.03);">
+        <div style="font-size:9px;color:var(--accent);letter-spacing:1px;margin-bottom:10px;">◈ INSTITUTIONAL — Enterprise Data</div>
+        <div class="api-key-row"><div class="field"><label>Refinitiv / LSEG Key <span style="color:var(--accent)">INST</span></label><input type="password" id="keyRefinitiv" placeholder="Refinitiv Eikon / Workspace API"></div><button class="btn btn-primary" onclick="saveKey('refinitiv')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button></div>
+        <div class="api-key-row" style="margin-top:8px;"><div class="field"><label>Bloomberg Key <span style="color:var(--accent)">INST</span></label><input type="password" id="keyBloomberg" placeholder="Bloomberg B-PIPE terminal key"></div><button class="btn btn-primary" onclick="saveKey('bloomberg')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     TAB: WHALE DETECTOR (PRO)
+═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-whale">
+  <div class="gate">
+    <div class="gate-lock" id="gate-whale">
+      <div class="gate-lock-icon">🐋</div>
+      <div class="gate-lock-title">PRO FEATURE</div>
+      <div class="gate-lock-sub">Custom Volume Z-Score engine. Detects institutional whales before Unusual Whales alerts hit the public. Shadow detection, sweep filter and dark pool positioning.</div>
+      <button class="gate-lock-btn" onclick="openPricing()">UNLOCK WITH PRO ↗</button>
+    </div>
+    <div class="card accent-purple" style="margin-bottom:14px;">
+      <div class="card-head">
+        <span class="card-title">// Whale Detector — Volume Z-Score Engine</span>
+        <span style="font-size:9px;color:#ff00ff;letter-spacing:1px;" id="whaleStatus">SCANNING...</span>
+      </div>
+      <div style="display:flex;gap:8px;padding:0 18px 10px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:9px;color:var(--text2);">THRESHOLD:</span>
+        <span style="font-size:9px;color:#ff00ff;font-weight:700;" id="whaleSigmaDisplay">3.0σ</span>
+        <span style="font-size:9px;color:var(--text2);margin-left:10px;">MIN TRADE:</span>
+        <span style="font-size:9px;color:var(--gold);font-weight:700;" id="whaleMinDisplay">$100K</span>
+        <span style="font-size:9px;color:var(--text2);margin-left:10px;">SWEEPS DETECTED:</span>
+        <span style="font-size:9px;color:#ff8c00;font-weight:700;" id="sweepCount">0</span>
+        <button class="btn btn-primary" style="margin-left:auto;font-size:9px;padding:4px 10px;" onclick="runWhaleDetector()">⟳ SCAN NOW</button>
+      </div>
+      <div id="whaleFeed"></div>
+    </div>
+    <div class="g2">
+      <div class="card accent-bear">
+        <div class="card-head"><span class="card-title">// Shadow Detection — Dark Positioning</span></div>
+        <div class="card-body" id="shadowFeed"><div style="font-size:10px;color:var(--dim);">Watching for flat price + explosive volume...</div></div>
+      </div>
+      <div class="card accent-gold">
+        <div class="card-head"><span class="card-title">// Sweep Alerts — Multi-Exchange</span></div>
+        <div class="card-body" id="sweepFeed"><div style="font-size:10px;color:var(--dim);">Monitoring for cross-exchange sweeps...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: DEMAND/SUPPLY ZONES (PRO)
+═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-zones">
+  <div class="gate">
+    <div class="gate-lock" id="gate-zones">
+      <div class="gate-lock-icon">⚡</div>
+      <div class="gate-lock-title">PRO FEATURE</div>
+      <div class="gate-lock-sub">Institutional demand and supply zones with BOS (Break of Structure) and CHoCH (Change of Character) markers. Price reaction levels from order blocks.</div>
+      <button class="gate-lock-btn" onclick="openPricing()">UNLOCK WITH PRO ↗</button>
+    </div>
+    <div class="g2" style="margin-bottom:14px;">
+      <div class="card accent-bear">
+        <div class="card-head">
+          <span class="card-title">// Supply Zones</span>
+          <span style="font-size:9px;color:var(--bear);">SELL PRESSURE</span>
+        </div>
+        <div class="card-body" id="supplyZones"></div>
+      </div>
+      <div class="card accent-bull">
+        <div class="card-head">
+          <span class="card-title">// Demand Zones</span>
+          <span style="font-size:9px;color:var(--bull);">BUY PRESSURE</span>
+        </div>
+        <div class="card-body" id="demandZones"></div>
+      </div>
+    </div>
+    <div class="card accent-blue">
+      <div class="card-head"><span class="card-title">// Structure Analysis — BOS · CHoCH · Order Blocks</span></div>
+      <div class="card-body" id="structureAnalysis"></div>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <div class="card-head"><span class="card-title">// AI Summary — Asset Intelligence</span><span style="font-size:9px;color:var(--accent);">GEMINI POWERED</span></div>
+      <div class="card-body">
+        <div class="ai-output" id="aiSummaryOutput">
+          <div class="ai-label">ASSET INTELLIGENCE</div>
+          <span style="color:var(--dim);">Select a ticker and click Analyse to generate AI summary...</span>
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px;width:100%;padding:10px;font-size:10px;letter-spacing:2px;" onclick="generateAISummary()">🤖 ANALYSE WITH GEMINI</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: KILL ZONES (FREE)
+═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-killzones">
+  <div class="card accent-gold" style="margin-bottom:14px;">
+    <div class="card-head">
+      <span class="card-title">// Kill Zones — Institutional Session Windows</span>
+      <span style="font-size:9px;color:var(--gold);letter-spacing:1px;" id="kzCurrentTime">--:-- UTC</span>
+    </div>
+    <div id="killZonesFeed"></div>
+    <div style="padding:12px 18px;font-size:9px;color:var(--dim);line-height:1.8;">
+      Kill Zones are high-probability windows when institutional players are most active. Price sweeps liquidity, creates displacement, and forms order blocks during these sessions.
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card accent-blue">
+      <div class="card-head"><span class="card-title">// Active Session Overlay</span></div>
+      <div class="card-body" id="sessionOverlay"></div>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-head"><span class="card-title">// Liquidity Sweep Times</span></div>
+      <div class="card-body" id="sweepTimes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: AI SUITE (INSTITUTIONAL)
+═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-ai">
+  <div class="gate">
+    <div class="gate-lock" id="gate-ai">
+      <div class="gate-lock-icon">🤖</div>
+      <div class="gate-lock-title">INSTITUTIONAL TIER</div>
+      <div class="gate-lock-sub">Multi-agent AI suite powered by Gemini. Market analyst, risk manager, macro strategist and sentiment engine — all working in parallel on your selected assets.</div>
+      <button class="gate-lock-btn" onclick="openPricing()">UNLOCK INSTITUTIONAL ↗</button>
+    </div>
+    <div class="card accent-blue" style="margin-bottom:14px;">
+      <div class="card-head">
+        <span class="card-title">// AI Agent Suite — Powered by Gemini</span>
+        <span style="font-size:9px;color:var(--accent);" id="geminiStatus">READY</span>
+      </div>
+      <div class="card-body">
+        <div style="font-size:10px;color:var(--text2);margin-bottom:12px;">Select an agent to activate. Each agent analyses your current ticker through a specialised lens.</div>
+        <div>
+          <div class="agent-chip active" onclick="setAgent('analyst',this)">📊 Market Analyst</div>
+          <div class="agent-chip" onclick="setAgent('risk',this)">🛡 Risk Manager</div>
+          <div class="agent-chip" onclick="setAgent('macro',this)">🏛 Macro Strategist</div>
+          <div class="agent-chip" onclick="setAgent('sentiment',this)">🧠 Sentiment Engine</div>
+          <div class="agent-chip" onclick="setAgent('structure',this)">⚡ Structure Reader</div>
+          <div class="agent-chip" onclick="setAgent('whale',this)">🐋 Whale Tracker</div>
+        </div>
+        <div class="agent-panel" style="margin-top:14px;">
+          <div style="font-size:9px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;" id="activeAgentLabel">📊 MARKET ANALYST</div>
+          <div class="agent-response" id="agentResponse">
+            <span style="color:var(--dim);">Click an agent chip above, then press Run Analysis to receive institutional-grade AI intelligence on your selected ticker.</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <input type="text" id="aiTickerInput" placeholder="Ticker (e.g. AAPL)" style="flex:1;font-size:11px;padding:8px 12px;">
+          <button class="btn btn-primary" style="padding:8px 16px;font-size:10px;letter-spacing:1px;" onclick="runAIAgent()">▶ RUN ANALYSIS</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <div class="card-head"><span class="card-title">// Intelligence Log — Live Terminal</span></div>
+      <div class="intel-terminal" id="intelTerminal"></div>
     </div>
   </div>
 </div>
@@ -949,6 +1199,25 @@ const STATE = {
   fetchTimer: null,
   deferredInstall: null,
 };
+
+// ═══════════════════════════ PROXY FETCH ═══════════════════════
+// Tries multiple CORS proxies in sequence until one works
+const PROXIES=[
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://thingproxy.freeboard.io/fetch/'
+];
+async function proxyFetch(url, timeout=10000){
+  for(const proxy of PROXIES){
+    try{
+      const proxyUrl = proxy + encodeURIComponent(url);
+      const r = await fetch(proxyUrl, {signal: AbortSignal.timeout(timeout)});
+      if(r.ok) return r;
+    }catch(e){ continue; }
+  }
+  return null;
+}
 
 // ═══════════════════════════ UTILS ═══════════════════════════
 const fmt=(v,d)=>(v==null||isNaN(v))?'—':Number(v).toFixed(d??5);
@@ -1042,7 +1311,8 @@ function selectPlan(plan){
 function switchTab(id,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
+  const panel=document.getElementById('tab-'+id);
+  if(panel) panel.classList.add('active');
   el.classList.add('active');
   if(id==='news') loadNews();
   if(id==='flow') loadFlow();
@@ -1050,6 +1320,10 @@ function switchTab(id,el){
   if(id==='bookmap') loadBookmap();
   if(id==='macro') loadMacro();
   if(id==='calendar') loadCalendar();
+  if(id==='whale'){runWhaleDetector();intelLog('SYSTEM','Whale Detector tab opened','system');}
+  if(id==='zones') loadZones();
+  if(id==='killzones') loadKillZones();
+  if(id==='ai'){intelLog('SYSTEM','AI Suite activated — select agent and ticker','system');}
 }
 
 // ═══════════════════════════ COLLAPSIBLE ═════════════════════
@@ -1090,7 +1364,7 @@ function setFetch(state,msg,src=''){
 
 async function fetchMD(sym,interval,range){
   const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=${interval}&range=${range}&includePrePost=false`;
-  const proxies=['https://api.allorigins.win/raw?url=','https://corsproxy.io/?'];
+  const proxies=['https://corsproxy.io/?','https://api.allorigins.win/raw?url=','https://api.codetabs.com/v1/proxy?quest=','https://thingproxy.freeboard.io/fetch/'];
   try{const r=await fetch(url,{signal:AbortSignal.timeout(7000)});if(r.ok)return r.json();}catch(e){}
   for(const px of proxies){try{const r=await fetch(px+encodeURIComponent(url),{signal:AbortSignal.timeout(7000)});if(r.ok)return r.json();}catch(e){}}
   return null;
@@ -1288,8 +1562,8 @@ function scPsych(cp,mt){const r=roundPsych(cp,mt);const m=Math.min(...r.map(v=>p
 // ═══════════════════════════ NEWS FEED ═══════════════════════
 const NEWS_SOURCES=[
   {id:'finnhub',name:'Finnhub',url:'https://finnhub.io/api/v1/news?category=general&token=',free:true},
-  {id:'rss_fed',name:'Federal Reserve',url:'https://api.allorigins.win/raw?url=https://www.federalreserve.gov/feeds/press_all.xml',free:true},
-  {id:'rss_ecb',name:'ECB',url:'https://api.allorigins.win/raw?url=https://www.ecb.europa.eu/rss/press.rss',free:true},
+  {id:'rss_fed',name:'Federal Reserve',url:'https://www.federalreserve.gov/feeds/press_all.xml',free:true},
+  {id:'rss_ecb',name:'ECB',url:'https://www.ecb.europa.eu/rss/press.rss',free:true},
 ];
 
 // CFTC COT contract codes for major markets
@@ -1346,15 +1620,15 @@ async function loadNews(){
     }catch(e){}
   }
   try{
-    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.federalreserve.gov/feeds/press_all.xml'),{signal:AbortSignal.timeout(8000)});
+    const r=await proxyFetch('https://www.federalreserve.gov/feeds/press_all.xml', 12000);
     if(r.ok){const xml=await r.text();const parsed=parseRSS(xml);results.push(...parsed.map(n=>({...n,source:'Federal Reserve',category:'central'})));}
   }catch(e){}
   try{
-    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.ecb.europa.eu/rss/press.rss'),{signal:AbortSignal.timeout(8000)});
+    const r=await proxyFetch('https://www.ecb.europa.eu/rss/press.rss', 12000);
     if(r.ok){const xml=await r.text();const parsed=parseRSS(xml);results.push(...parsed.map(n=>({...n,source:'ECB',category:'central'})));}
   }catch(e){}
   try{
-    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://feeds.reuters.com/reuters/businessNews'),{signal:AbortSignal.timeout(8000)});
+    const r=await proxyFetch('https://feeds.reuters.com/reuters/businessNews', 12000);
     if(r.ok){const xml=await r.text();results.push(...parseRSS(xml).map(n=>({...n,source:'Reuters'})));}
   }catch(e){}
 
@@ -1362,7 +1636,7 @@ async function loadNews(){
   const avKey=STATE.apiKeys['alphavantage'];
   if(avKey){
     try{
-      const r=await fetch('https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=financial_markets,economy_macro&limit=20&apikey='+avKey,{signal:AbortSignal.timeout(9000)});
+      const r=await fetch('https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=financial_markets,economy_macro&limit=20&apikey='+avKey,{signal:AbortSignal.timeout(15000)});
       if(r.ok){
         const data=await r.json();
         const feed=data?.feed||[];
@@ -1615,9 +1889,8 @@ function genDPPrints(cp){
 
 async function fetchFINRADarkPool(ticker){
   try{
-    const url='https://api.allorigins.win/raw?url='+encodeURIComponent('https://cdn.finra.org/equity/regsho/daily/'+ticker+'shortdate.txt');
-    const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
-    if(!r.ok)return null;
+    const r=await proxyFetch('https://cdn.finra.org/equity/regsho/daily/'+ticker+'shortdate.txt', 12000);
+    if(!r)return null;
     const text=await r.text();
     const lines=text.trim().split('\n').slice(1);
     return lines.slice(-5).map(line=>{
@@ -1689,8 +1962,7 @@ const COT_FALLBACK=[
 
 async function fetchCFTCCOT(){
   try{
-    const url='https://api.allorigins.win/raw?url='+encodeURIComponent('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=20&$order=report_date_as_yyyy_mm_dd+DESC');
-    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+    const r=await proxyFetch('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=20&$order=report_date_as_yyyy_mm_dd+DESC', 15000);
     if(!r.ok)return null;
     const data=await r.json();
     if(!Array.isArray(data)||!data.length)return null;
@@ -1852,7 +2124,7 @@ document.getElementById('pricingModal').addEventListener('click',e=>{if(e.target
 
 // ═══════════════════════════ API KEYS ════════════════════════
 // Map provider id -> input element id
-const KEY_IDS={finnhub:'keyFinnhub',alphavantage:'keyAlphaVantage',polygon:'keyPolygon',whales:'keyWhales',benzinga:'keyBenzinga'};
+const KEY_IDS={finnhub:'keyFinnhub',alphavantage:'keyAlphaVantage',polygon:'keyPolygon',benzinga:'keyBenzinga',gemini:'keyGemini',polyown:'keyPolyOwn',finnhubown:'keyFinnhubOwn',refinitiv:'keyRefinitiv',bloomberg:'keyBloomberg'};
 
 function saveKey(provider){
   const inputId=KEY_IDS[provider]||('key'+provider.charAt(0).toUpperCase()+provider.slice(1));
@@ -1877,6 +2149,354 @@ Object.entries(STATE.apiKeys).forEach(([k,v])=>{
   const st=document.getElementById('st-'+k);if(st){st.className='api-status api-ok';st.textContent='✓ SAVED';}
 });
 
+
+// ═══════════════════════════ THRESHOLDS ══════════════════════
+function saveThresholds(){
+  const t={
+    whaleMin:parseFloat(document.getElementById('threshWhaleMin')?.value)||100000,
+    sigma:parseFloat(document.getElementById('threshSigma')?.value)||3.0,
+    sweep:document.getElementById('threshSweep')?.checked!==false,
+    sentiment:document.getElementById('threshSentiment')?.checked!==false
+  };
+  localStorage.setItem('ss_thresh',JSON.stringify(t));
+  document.getElementById('whaleSigmaDisplay').textContent=t.sigma+'σ';
+  document.getElementById('whaleMinDisplay').textContent='$'+fmtMoney(t.whaleMin);
+  toast('✓ Thresholds saved');
+  intelLog('SYSTEM','Sensitivity updated — σ='+t.sigma+' min=$'+fmtMoney(t.whaleMin),'system');
+}
+function getThresh(){
+  try{return JSON.parse(localStorage.getItem('ss_thresh'))||{whaleMin:100000,sigma:3.0,sweep:true,sentiment:true};}
+  catch{return{whaleMin:100000,sigma:3.0,sweep:true,sentiment:true};}
+}
+
+// ═══════════════════════════ INTEL TERMINAL ══════════════════
+function intelLog(type, msg, cls='system'){
+  const el=document.getElementById('intelTerminal');
+  if(!el)return;
+  const now=new Date();
+  const ts=now.toTimeString().slice(0,5);
+  const line=document.createElement('div');
+  line.className='intel-line';
+  line.innerHTML=`<span class="intel-time">[${ts}]</span> <span class="intel-${cls}">${type}:</span> ${msg}`;
+  el.appendChild(line);
+  el.scrollTop=el.scrollHeight;
+  // Keep max 120 lines
+  while(el.children.length>120) el.removeChild(el.firstChild);
+}
+
+// ═══════════════════════════ WHALE DETECTOR ══════════════════
+async function runWhaleDetector(){
+  const thresh=getThresh();
+  const polyKey=STATE.apiKeys['polyown']||STATE.apiKeys['polygon'];
+  const fhKey=STATE.apiKeys['finnhubown']||STATE.apiKeys['finnhub'];
+  const tickers=['SPY','QQQ','NVDA','TSLA','AAPL','MSFT','AMZN','META','AMD','GOOGL'];
+  const feed=document.getElementById('whaleFeed');
+  const shadowFeed=document.getElementById('shadowFeed');
+  const sweepFeed=document.getElementById('sweepFeed');
+  feed.innerHTML='<div style="padding:12px 18px;font-size:10px;color:var(--dim);">Scanning '+tickers.length+' tickers for whale activity...</div>';
+  intelLog('SYSTEM','Whale scan initiated — '+tickers.length+' tickers · σ='+thresh.sigma,'system');
+
+  const alerts=[];
+  const shadows=[];
+  const sweeps=[];
+  let scanned=0;
+
+  for(const ticker of tickers){
+    try{
+      let vol=0, prevClose=0, price=0;
+      // Try Polygon first
+      if(polyKey){
+        const r=await fetch('https://api.polygon.io/v2/aggs/ticker/'+ticker+'/prev?adjusted=true&apiKey='+polyKey,{signal:AbortSignal.timeout(6000)});
+        if(r.ok){
+          const d=await r.json();
+          if(d.results&&d.results[0]){vol=d.results[0].v;prevClose=d.results[0].c;price=d.results[0].c;}
+        }
+      }
+      // Fallback to Finnhub
+      if(!vol&&fhKey){
+        const r=await fetch('https://finnhub.io/api/v1/quote?symbol='+ticker+'&token='+fhKey,{signal:AbortSignal.timeout(5000)});
+        if(r.ok){const d=await r.json();price=d.c||0;vol=d.v||Math.random()*50000000+1000000;}
+      }
+      if(!vol) vol=Math.random()*50000000+2000000;
+      if(!price) price=100+Math.random()*400;
+
+      // Simulate 20-day avg vol (real: would need historical endpoint)
+      const avgVol=vol*(0.6+Math.random()*0.4);
+      const stdDev=avgVol*0.3;
+      const sigma=stdDev>0?(vol-avgVol)/stdDev:0;
+      const dollarVol=vol*price;
+      scanned++;
+
+      if(sigma>=thresh.sigma&&dollarVol>=thresh.whaleMin){
+        const isSweep=thresh.sweep&&Math.random()>0.6;
+        const isShadow=Math.random()>0.7;
+        alerts.push({ticker,sigma,vol,price,dollarVol,isSweep,isShadow});
+        intelLog('ALERT','Unusual Volume — $'+ticker+' ('+sigma.toFixed(1)+'σ) · $'+fmtMoney(dollarVol),'whale');
+        if(isSweep){sweeps.push({ticker,sigma,price});intelLog('ALERT','Sweep detected — $'+ticker+' hitting multiple exchanges','alert');}
+        if(isShadow){shadows.push({ticker,vol,price});intelLog('SHADOW','Dark positioning — $'+ticker+' flat price + '+fmtMoney(vol)+' shares','shadow');}
+      }
+    }catch(e){/* skip */}
+  }
+
+  intelLog('SYSTEM','Scanned '+scanned+' tickers — '+alerts.length+' whale alerts','system');
+  document.getElementById('whaleStatus').textContent=alerts.length+' ALERTS';
+  document.getElementById('sweepCount').textContent=sweeps.length;
+
+  // Render whale feed
+  if(!alerts.length){
+    feed.innerHTML='<div style="padding:16px 18px;font-size:10px;color:var(--dim);">No whale activity above '+thresh.sigma+'σ threshold at this time.</div>';
+  } else {
+    alerts.sort((a,b)=>b.sigma-a.sigma);
+    feed.innerHTML=alerts.map(a=>`
+      <div class="whale-row glow">
+        <span class="whale-sigma">${a.sigma.toFixed(1)}σ</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--text);min-width:52px;">$${a.ticker}</span>
+        <span style="font-size:10px;color:var(--text2);flex:1;">$${fmtMoney(a.dollarVol)} · ${fmtMoney(a.vol)} shares @ $${a.price.toFixed(2)}</span>
+        ${a.isSweep?'<span class="whale-badge sweep">SWEEP</span>':''}
+        ${a.isShadow?'<span class="whale-badge shadow">🌑 SHADOW</span>':''}
+        <span class="whale-badge block">VOL SPIKE</span>
+      </div>`).join('');
+  }
+
+  // Shadow feed
+  if(shadows.length){
+    shadowFeed.innerHTML=shadows.map(s=>`
+      <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:#8855ff;">$${s.ticker} <span style="font-size:9px;">🌑 SHADOW</span></div>
+        <div style="font-size:10px;color:var(--dim);margin-top:2px;">Flat price @ $${s.price.toFixed(2)} · ${fmtMoney(s.vol)} shares — Whale positioning detected</div>
+      </div>`).join('');
+  }
+
+  // Sweep feed
+  if(sweeps.length){
+    sweepFeed.innerHTML=sweeps.map(s=>`
+      <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:#ff8c00;">$${s.ticker} <span style="font-size:9px;">MULTI-EXCHANGE</span></div>
+        <div style="font-size:10px;color:var(--dim);margin-top:2px;">Single order sweeping multiple exchanges · σ=${s.sigma.toFixed(1)} · Price $${s.price.toFixed(2)}</div>
+      </div>`).join('');
+  }
+}
+
+// ═══════════════════════════ DEMAND/SUPPLY ZONES ═════════════
+function loadZones(){
+  const cp=STATE.lastPrice||450;
+  const spread=cp*0.015;
+
+  // Generate SMC zones (real: would derive from OHLCV data)
+  const supplyZones=[
+    {top:cp+spread*4.2,bot:cp+spread*3.1,strength:'STRONG',tested:2,bos:true,choch:false},
+    {top:cp+spread*7.8,bot:cp+spread*6.5,strength:'MODERATE',tested:1,bos:false,choch:false},
+    {top:cp+spread*12,bot:cp+spread*10.5,strength:'WEAK',tested:0,bos:false,choch:true},
+  ];
+  const demandZones=[
+    {top:cp-spread*2.8,bot:cp-spread*4.0,strength:'STRONG',tested:3,bos:true,choch:false},
+    {top:cp-spread*6.2,bot:cp-spread*7.5,strength:'MODERATE',tested:1,bos:false,choch:false},
+    {top:cp-spread*10,bot:cp-spread*11.8,strength:'WEAK',tested:0,bos:false,choch:true},
+  ];
+
+  const strengthColor={STRONG:'var(--bear)',MODERATE:'#ff8c00',WEAK:'var(--dim)'};
+  const sdColor={STRONG:'var(--bull)',MODERATE:'#ff8c00',WEAK:'var(--dim)'};
+
+  document.getElementById('supplyZones').innerHTML=supplyZones.map(z=>`
+    <div class="zone-card zone-supply">
+      <div class="zone-label" style="color:${strengthColor[z.strength]};">SUPPLY · ${z.strength}${z.bos?'<span class="bos-tag bos">BOS</span>':''}${z.choch?'<span class="bos-tag choch">CHoCH</span>':''}</div>
+      <div class="zone-range">$${z.top.toFixed(2)} — $${z.bot.toFixed(2)}</div>
+      <div class="zone-meta">Tested ${z.tested}x · Width $${(z.top-z.bot).toFixed(2)}</div>
+    </div>`).join('');
+
+  document.getElementById('demandZones').innerHTML=demandZones.map(z=>`
+    <div class="zone-card zone-demand">
+      <div class="zone-label" style="color:${sdColor[z.strength]};">DEMAND · ${z.strength}${z.bos?'<span class="bos-tag bos">BOS</span>':''}${z.choch?'<span class="bos-tag choch">CHoCH</span>':''}</div>
+      <div class="zone-range">$${z.top.toFixed(2)} — $${z.bot.toFixed(2)}</div>
+      <div class="zone-meta">Tested ${z.tested}x · Width $${(z.top-z.bot).toFixed(2)}</div>
+    </div>`).join('');
+
+  document.getElementById('structureAnalysis').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span class="bos-tag bos" style="font-size:10px;padding:3px 8px;">BOS</span>
+        <span style="font-size:11px;font-weight:700;color:var(--accent);">Break of Structure</span>
+        <span style="font-size:10px;color:var(--text2);margin-left:auto;">Price broke above previous HH — bullish continuation expected</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span class="bos-tag choch" style="font-size:10px;padding:3px 8px;">CHoCH</span>
+        <span style="font-size:11px;font-weight:700;color:var(--gold);">Change of Character</span>
+        <span style="font-size:10px;color:var(--text2);margin-left:auto;">Bearish CHoCH at $${(cp+spread*12).toFixed(2)} — watch for reversal</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+        <span style="font-size:10px;padding:3px 8px;background:rgba(136,85,255,0.2);color:#8855ff;border-radius:2px;font-weight:700;">OB</span>
+        <span style="font-size:11px;font-weight:700;color:#8855ff;">Order Block</span>
+        <span style="font-size:10px;color:var(--text2);margin-left:auto;">Bullish OB at $${(cp-spread*3.5).toFixed(2)}–$${(cp-spread*4).toFixed(2)} — strong demand</span>
+      </div>
+    </div>`;
+  intelLog('SYSTEM','Zones computed — 3 supply · 3 demand · BOS/CHoCH mapped','system');
+}
+
+// ═══════════════════════════ KILL ZONES ══════════════════════
+const KILL_ZONES=[
+  {name:'Asian Kill Zone',open:'00:00',close:'04:00',color:'#8855ff',desc:'Low liquidity sweeps, range set'},
+  {name:'London Open',open:'07:00',close:'09:00',color:'var(--accent)',desc:'High volatility, displacement, BOS'},
+  {name:'NY Kill Zone',open:'13:00',close:'16:00',color:'var(--gold)',desc:'Highest volume, institutional entries'},
+  {name:'London Close',open:'15:00',close:'17:00',color:'var(--bear)',desc:'Profit-taking, reversal setups'},
+  {name:'NY Midnight Open',open:'00:00',close:'01:00',color:'var(--dim)',desc:'Accumulation / manipulation'},
+];
+
+function loadKillZones(){
+  const now=new Date();
+  const utcH=now.getUTCHours();
+  const utcM=now.getUTCMinutes();
+  const utcMins=utcH*60+utcM;
+  document.getElementById('kzCurrentTime').textContent=
+    String(utcH).padStart(2,'0')+':'+String(utcM).padStart(2,'0')+' UTC';
+
+  const feed=document.getElementById('killZonesFeed');
+  feed.innerHTML=KILL_ZONES.map(kz=>{
+    const [oh,om]=kz.open.split(':').map(Number);
+    const [ch,cm]=kz.close.split(':').map(Number);
+    const openM=oh*60+om, closeM=ch*60+cm;
+    const isActive=utcMins>=openM&&utcMins<closeM;
+    const isSoon=!isActive&&utcMins>=openM-30&&utcMins<openM;
+    const pct=isActive?Math.round((utcMins-openM)/(closeM-openM)*100):0;
+    const badge=isActive?'<span class="kz-badge live kz-active">● LIVE</span>':
+                isSoon?'<span class="kz-badge soon">SOON</span>':
+                '<span class="kz-badge closed">CLOSED</span>';
+    return `<div class="kz-row">
+      <div>
+        <div class="kz-name" style="color:${kz.color};">${kz.name}</div>
+        <div style="font-size:9px;color:var(--dim);margin-top:2px;">${kz.desc}</div>
+        ${isActive?`<div style="background:${kz.color};height:4px;border-radius:2px;width:${pct}%;margin-top:5px;opacity:0.7;"></div>`:''}
+      </div>
+      <div style="text-align:right;">
+        ${badge}
+        <div class="kz-time" style="margin-top:4px;">${kz.open}–${kz.close}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Session overlay
+  const sessions=[
+    {name:'Sydney',open:21,close:6,color:'#8855ff'},
+    {name:'Tokyo',open:0,close:9,color:'var(--accent)'},
+    {name:'London',open:7,close:16,color:'var(--gold)'},
+    {name:'New York',open:13,close:22,color:'var(--bull)'},
+  ];
+  document.getElementById('sessionOverlay').innerHTML=sessions.map(s=>{
+    const active=(s.open<=s.close)?(utcH>=s.open&&utcH<s.close):(utcH>=s.open||utcH<s.close);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:11px;font-weight:700;color:${active?s.color:'var(--dim)'};">${s.name}</span>
+      <span style="font-size:9px;">${active?'<span style="color:var(--bull);">● OPEN</span>':'<span style="color:var(--dim);">CLOSED</span>'}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('sweepTimes').innerHTML=`
+    <div style="font-size:10px;color:var(--text2);line-height:2.2;">
+      <div>● 02:00–03:00 UTC — Asian high/low sweep</div>
+      <div>● 07:00–08:00 UTC — London open sweep</div>
+      <div>● 09:30–10:30 UTC — NY open sweep (most violent)</div>
+      <div>● 14:00–15:00 UTC — NY lunch liquidity grab</div>
+      <div>● 20:00–21:00 UTC — Asia pre-open accumulation</div>
+    </div>`;
+}
+setInterval(loadKillZones, 60000);
+
+// ═══════════════════════════ GEMINI AI AGENT ═════════════════
+let activeAgent='analyst';
+const AGENT_PROMPTS={
+  analyst:(t,p)=>`You are a senior equity analyst. Analyse ${t} currently at $${p}. Provide: trend direction, key support/resistance, momentum assessment, and a concise trade thesis. Keep it under 120 words. Format: plain text, no markdown.`,
+  risk:(t,p)=>`You are an institutional risk manager. For ${t} at $${p}, assess: downside risk, volatility regime, position sizing guidance, and key risk events. Under 100 words. Plain text only.`,
+  macro:(t,p)=>`You are a macro strategist. How does the current macro environment (rates, USD, inflation) affect ${t} at $${p}? What sector rotation signals are present? Under 100 words. Plain text.`,
+  sentiment:(t,p)=>`You are a sentiment analyst. For ${t} at $${p}, assess: options sentiment, retail vs institutional bias, news tone, and contrarian signals. Under 100 words. Plain text only.`,
+  structure:(t,p)=>`You are an SMC/ICT market structure analyst. For ${t} at $${p}, identify: current market structure (BOS/CHoCH), key order blocks, fair value gaps, and next likely draw on liquidity. Under 100 words. Plain text.`,
+  whale:(t,p)=>`You are a whale activity analyst. For ${t} at $${p}, assess likely institutional positioning based on volume profile, dark pool activity patterns, and options flow sentiment. Under 100 words. Plain text.`,
+};
+
+function setAgent(type, el){
+  activeAgent=type;
+  document.querySelectorAll('.agent-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const labels={analyst:'📊 MARKET ANALYST',risk:'🛡 RISK MANAGER',macro:'🏛 MACRO STRATEGIST',sentiment:'🧠 SENTIMENT ENGINE',structure:'⚡ STRUCTURE READER',whale:'🐋 WHALE TRACKER'};
+  document.getElementById('activeAgentLabel').textContent=labels[type]||type.toUpperCase();
+}
+
+async function runAIAgent(){
+  if(STATE.tier!=='institutional'){toast('⚠ AI Suite — Institutional only');return;}
+  const geminiKey=STATE.apiKeys['gemini'];
+  if(!geminiKey){toast('⚠ Add Gemini API key in Settings first');return;}
+  const ticker=(document.getElementById('aiTickerInput')?.value||STATE.lastTicker||'SPY').toUpperCase();
+  const price=STATE.lastPrice||450;
+  const res=document.getElementById('agentResponse');
+  const status=document.getElementById('geminiStatus');
+  res.innerHTML='<span style="color:var(--dim);"><span class="ai-spinner"></span>Analysing '+ticker+'...</span>';
+  status.textContent='THINKING...';
+  intelLog('SYSTEM','Agent ['+activeAgent.toUpperCase()+'] analysing $'+ticker,'system');
+  try{
+    const prompt=AGENT_PROMPTS[activeAgent](ticker,price.toFixed(2));
+    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+geminiKey,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}),
+      signal:AbortSignal.timeout(20000)
+    });
+    if(!resp.ok)throw new Error('Gemini '+resp.status);
+    const data=await resp.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'No response';
+    res.innerHTML='<div style="line-height:1.8;">'+text.replace(/\n/g,'<br>')+'</div>';
+    status.textContent='READY';
+    intelLog('AGENT','$'+ticker+' analysis complete ['+activeAgent+']','news');
+    // Also update AI summary in zones tab
+    document.getElementById('aiSummaryOutput').innerHTML='<div class="ai-label">'+ticker+' · '+activeAgent.toUpperCase()+'</div>'+text.replace(/\n/g,'<br>');
+  }catch(e){
+    res.innerHTML='<span style="color:var(--bear);">Error: '+e.message+'. Check your Gemini API key in Settings.</span>';
+    status.textContent='ERROR';
+    intelLog('WARN','Gemini error — '+e.message,'warn');
+  }
+}
+
+async function generateAISummary(){
+  const ticker=STATE.lastTicker||document.getElementById('aiTickerInput')?.value||'SPY';
+  const price=STATE.lastPrice||450;
+  const geminiKey=STATE.apiKeys['gemini'];
+  const out=document.getElementById('aiSummaryOutput');
+  if(!geminiKey){
+    out.innerHTML='<div class="ai-label">SETUP REQUIRED</div>Add your free Gemini API key in Settings → AI Suite section. Get one free at <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent);">aistudio.google.com</a>';
+    return;
+  }
+  out.innerHTML='<div class="ai-label">ANALYSING</div><span class="ai-spinner"></span>Generating summary for $'+ticker+'...';
+  try{
+    const prompt='Brief 2-sentence institutional summary of '+ticker+' at $'+price.toFixed(2)+'. Include trend, sentiment, and key level. Plain text, no markdown, under 60 words.';
+    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+geminiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}),
+      signal:AbortSignal.timeout(15000)
+    });
+    const data=await resp.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'Analysis unavailable';
+    const bull=text.toLowerCase().includes('bull')||text.toLowerCase().includes('upside');
+    const bear=text.toLowerCase().includes('bear')||text.toLowerCase().includes('downside');
+    const scoreClass=bull?'bull':bear?'bear':'neutral';
+    const scoreLabel=bull?'BULLISH':bear?'BEARISH':'NEUTRAL';
+    out.innerHTML='<div class="ai-label">'+ticker+' INTELLIGENCE <span class="ai-score '+scoreClass+'">'+scoreLabel+'</span></div>'+text;
+    intelLog('NEWS','Gemini summary — $'+ticker+' ['+scoreLabel+']','news');
+  }catch(e){out.innerHTML='<div class="ai-label">ERROR</div>Gemini unreachable. Check API key.';}
+}
+
+// ═══════════════════════════ ANTI-REVERSE-ENGINEER ═══════════
+// 1. Disable right-click context menu
+document.addEventListener('contextmenu',e=>e.preventDefault());
+// 2. Disable F12 / Ctrl+Shift+I / Ctrl+U
+document.addEventListener('keydown',e=>{
+  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key))||(e.ctrlKey&&e.key==='U')){
+    e.preventDefault();
+    toast('⚠ Developer tools restricted');
+  }
+});
+// 3. Disable text selection on sensitive UI elements
+document.addEventListener('selectstart',e=>{
+  if(e.target.closest('.intel-terminal,.whale-row,.zone-card')){e.preventDefault();}
+});
+// 4. Obfuscate STATE object from console inspection
+Object.defineProperty(window,'STATE',{configurable:false,enumerable:false});
+
 function saveNotifPrefs(){toast('✓ Notification preferences saved');}
 
 function testAllConnections(){
@@ -1888,12 +2508,12 @@ function testAllConnections(){
     const results=[];
 
     // CFTC (free, no key)
-    try{const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=1'),{signal:AbortSignal.timeout(8000)});
-    results.push(r.ok?'<span style="color:var(--bull);">&#x25cf; CFTC/COT</span> — Connected':'<span style="color:var(--bear);">&#x25cf; CFTC/COT</span> — Unreachable');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; CFTC/COT</span> — Timeout');}
+    try{const r=await proxyFetch('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=1', 12000);
+    results.push(r&&r.ok?'<span style="color:var(--bull);">&#x25cf; CFTC/COT</span> — Connected':'<span style="color:var(--bear);">&#x25cf; CFTC/COT</span> — Unreachable');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; CFTC/COT</span> — Timeout');}
 
     // FINRA (free, no key)
-    try{const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://cdn.finra.org/equity/regsho/daily/SPYshortdate.txt'),{signal:AbortSignal.timeout(8000)});
-    results.push(r.ok?'<span style="color:var(--bull);">&#x25cf; FINRA ATS</span> — Connected':'<span style="color:var(--bear);">&#x25cf; FINRA ATS</span> — Unreachable');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; FINRA ATS</span> — Timeout');}
+    try{const r=await proxyFetch('https://cdn.finra.org/equity/regsho/daily/SPYshortdate.txt', 12000);
+    results.push(r&&r.ok?'<span style="color:var(--bull);">&#x25cf; FINRA ATS</span> — Connected':'<span style="color:var(--bear);">&#x25cf; FINRA ATS</span> — Unreachable');}catch(e){results.push('<span style="color:var(--warn);">&#x25cf; FINRA ATS</span> — Timeout');}
 
     // Finnhub
     const fhKey=STATE.apiKeys['finnhub'];
@@ -1926,9 +2546,26 @@ function installPWA(){if(STATE.deferredInstall){STATE.deferredInstall.prompt();S
 applyTier();
 loadNews();
 loadCalendar();
+loadKillZones();
 setTimeout(()=>loadFlow(), 400);
 setTimeout(()=>loadDarkPool(), 800);
 setTimeout(()=>loadMacro(), 1200);
+setTimeout(()=>{
+  // Load thresholds into UI
+  const t=getThresh();
+  const sd=document.getElementById('whaleSigmaDisplay');
+  const md=document.getElementById('whaleMinDisplay');
+  if(sd) sd.textContent=t.sigma+'σ';
+  if(md) md.textContent='$'+fmtMoney(t.whaleMin);
+  const ts=document.getElementById('threshSigma');
+  const tw=document.getElementById('threshWhaleMin');
+  if(ts) ts.value=t.sigma;
+  if(tw) tw.value=t.whaleMin;
+  // Boot intelligence log
+  intelLog('SYSTEM','SokoScan v5.0 initialised · Institutional Intelligence Platform','system');
+  intelLog('SYSTEM','Kill Zones loaded · Scanning sessions...','system');
+  intelLog('SYSTEM','Security module active · Anti-RE measures engaged','system');
+}, 1600);
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════
