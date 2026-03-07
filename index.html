@@ -475,7 +475,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <div class="topbar">
   <div class="logo">
     <h1><span class="s1">Soko</span><span class="s2">Scan</span></h1>
-    <p>Institutional Intelligence · by Zack</p>
+    <p>Institutional Intelligence · by <span style="color:var(--gold);font-weight:700;">Zack</span></p>
   </div>
   <div class="topbar-right">
     <div class="asset-pill" id="assetPill">—</div>
@@ -871,13 +871,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div class="card-body">
         <div style="font-size:10px;color:var(--text2);margin-bottom:14px;line-height:1.8;">Connect free API keys for live data. All providers below accept international signups including Kenya.</div>
         <div style="font-size:9px;color:var(--bull);letter-spacing:1px;margin-bottom:10px;">&#9679; FREE KEYS — No credit card needed</div>
-        <div class="api-key-row"><div class="field"><label>Finnhub API Key <span style="color:var(--bull)">FREE · 60 calls/min</span></label><input type="password" id="keyFinnhub" placeholder="finnhub.io → free signup → API key"></div><button class="btn btn-primary" onclick="saveKey('finnhub')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-finnhub"></span></div>
-        <div class="api-key-row"><div class="field"><label>Alpha Vantage Key <span style="color:var(--bull)">FREE · Options + Technicals</span></label><input type="password" id="keyAlphaVantage" placeholder="alphavantage.co → get free API key"></div><button class="btn btn-primary" onclick="saveKey('alphavantage')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-alphavantage"></span></div>
-        <div class="api-key-row"><div class="field"><label>Polygon.io Key <span style="color:var(--bull)">FREE · Options chains</span></label><input type="password" id="keyPolygon" placeholder="polygon.io → free signup → Dashboard"></div><button class="btn btn-primary" onclick="saveKey('polygon')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-polygon"></span></div>
+        <div class="api-key-row"><div class="field"><label>Finnhub API Key <span style="color:var(--bull)">FREE · 60 calls/min</span></label><input type="password" id="keyFinnhub" data-ph="finnhub.io → free signup → API key" placeholder="finnhub.io → free signup → API key"></div><button class="btn btn-primary" onclick="saveKey('finnhub')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-finnhub"></span></div>
+        <div class="api-key-row"><div class="field"><label>Alpha Vantage Key <span style="color:var(--bull)">FREE · Options + Technicals</span></label><input type="password" id="keyAlphaVantage" data-ph="alphavantage.co → get free API key" placeholder="alphavantage.co → get free API key"></div><button class="btn btn-primary" onclick="saveKey('alphavantage')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-alphavantage"></span></div>
+        <div class="api-key-row"><div class="field"><label>Polygon.io Key <span style="color:var(--bull)">FREE · Options chains</span></label><input type="password" id="keyPolygon" data-ph="polygon.io → free signup → Dashboard" placeholder="polygon.io → free signup → Dashboard"></div><button class="btn btn-primary" onclick="saveKey('polygon')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-polygon"></span></div>
         <div style="font-size:9px;color:var(--accent);letter-spacing:1px;margin:14px 0 10px;padding:6px 10px;background:rgba(0,212,255,0.08);border-radius:4px;border-left:2px solid var(--accent);">&#9670; INSTITUTIONAL AI — Gemini Required</div>
-        <div class="api-key-row"><div class="field"><label>Gemini API Key <span style="color:var(--accent)">FREE · AI Suite · aistudio.google.com</span></label><input type="password" id="keyGemini" placeholder="Paste Gemini key here → AI Suite activates instantly"></div><button class="btn btn-primary" onclick="saveKey('gemini')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-gemini"></span></div>
+        <div class="api-key-row"><div class="field"><label>Gemini API Key <span style="color:var(--accent)">FREE · AI Suite · aistudio.google.com</span></label><input type="password" id="keyGemini" data-ph="Paste Gemini key here → AI Suite activates instantly" placeholder="Paste Gemini key here → AI Suite activates instantly"></div><button class="btn btn-primary" onclick="saveKey('gemini')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-gemini"></span></div>
         <div style="font-size:9px;color:var(--gold);letter-spacing:1px;margin:14px 0 10px;">&#9670; PRO UPGRADES — Optional paid tiers</div>
-        <div class="api-key-row"><div class="field"><label>Benzinga Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyBenzinga" placeholder="benzinga.com PRO API"></div><button class="btn btn-primary" onclick="saveKey('benzinga')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-benzinga"></span></div>
+        <div class="api-key-row"><div class="field"><label>Benzinga Key <span style="color:var(--gold)">PRO</span></label><input type="password" id="keyBenzinga" data-ph="benzinga.com PRO API" placeholder="benzinga.com PRO API"></div><button class="btn btn-primary" onclick="saveKey('benzinga')" style="height:35px;padding:0 12px;font-size:9px;">SAVE</button><span class="api-status" id="st-benzinga"></span></div>
         <div style="font-size:9px;color:#90b8d8;margin-top:14px;line-height:1.8;">CFTC (COT data) and FINRA (dark pool) load automatically — no key needed.</div>
         <div style="margin-top:16px;">
           <button class="btn btn-primary" onclick="testAllConnections()" style="width:100%;font-size:10px;letter-spacing:2px;padding:10px;">⚡ TEST ALL CONNECTIONS</button>
@@ -895,7 +895,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         </div>
         <button class="btn btn-gold btn-full" onclick="openPricing()" style="margin-top:12px;">VIEW ALL PLANS ↗</button>
         <div style="margin-top:16px;font-size:10px;color:#90b8d8;text-align:center;line-height:1.8;">
-          <span style="color:#a0c8e8;">SokoScan · by Zack</span><br>
+          <span style="color:#a0c8e8;">SokoScan · by <span style="color:var(--gold);font-weight:800;">Zack</span></span><br>
           <span style="color:#c0dff5;">Institutional Intelligence Platform</span><br>
           <span style="color:#7090b0;">v5.0 · PWA</span>
         </div>
@@ -2130,17 +2130,26 @@ const KEY_IDS={finnhub:'keyFinnhub',alphavantage:'keyAlphaVantage',polygon:'keyP
 
 function saveKey(provider){
   const inputId=KEY_IDS[provider]||('key'+provider.charAt(0).toUpperCase()+provider.slice(1));
-  const key=document.getElementById(inputId)?.value?.trim();
+  const input=document.getElementById(inputId);
+  const key=input?.value?.trim();
   if(!key){toast('Enter a key first');return;}
   STATE.apiKeys[provider]=key;
   localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));
+  // Clear the field so it doesn't show dots — replace with placeholder confirmation
+  if(input){
+    input.value='';
+    input.placeholder='✓ Key saved — enter new key to update';
+    input.style.borderColor='var(--bull)';
+    setTimeout(()=>{input.style.borderColor='';input.placeholder=input.getAttribute('data-ph')||'';},4000);
+  }
   const el=document.getElementById('st-'+provider);
   if(el){el.className='api-status api-ok';el.textContent='✓ SAVED';}
-  toast('✓ '+provider+' key saved — reloading data...');
+  toast('✓ '+provider+' key saved');
   // Reload live data immediately with new key
   if(provider==='finnhub'){loadNews();loadCalendar();}
   if(provider==='alphavantage'){loadFlow();loadNews();}
   if(provider==='polygon'){loadFlow();}
+  if(provider==='gemini'){intelLog('SYSTEM','Gemini API key saved — AI Suite ready','news');}
 }
 
 // Load saved keys on boot — restore into input fields + mark as saved
@@ -2404,12 +2413,85 @@ setInterval(loadKillZones, 60000);
 // ═══════════════════════════ GEMINI AI AGENT ═════════════════
 let activeAgent='analyst';
 const AGENT_PROMPTS={
-  analyst:(t,p)=>`You are a senior equity analyst. Analyse ${t} currently at $${p}. Provide: trend direction, key support/resistance, momentum assessment, and a concise trade thesis. Keep it under 120 words. Format: plain text, no markdown.`,
-  risk:(t,p)=>`You are an institutional risk manager. For ${t} at $${p}, assess: downside risk, volatility regime, position sizing guidance, and key risk events. Under 100 words. Plain text only.`,
-  macro:(t,p)=>`You are a macro strategist. How does the current macro environment (rates, USD, inflation) affect ${t} at $${p}? What sector rotation signals are present? Under 100 words. Plain text.`,
-  sentiment:(t,p)=>`You are a sentiment analyst. For ${t} at $${p}, assess: options sentiment, retail vs institutional bias, news tone, and contrarian signals. Under 100 words. Plain text only.`,
-  structure:(t,p)=>`You are an SMC/ICT market structure analyst. For ${t} at $${p}, identify: current market structure (BOS/CHoCH), key order blocks, fair value gaps, and next likely draw on liquidity. Under 100 words. Plain text.`,
-  whale:(t,p)=>`You are a whale activity analyst. For ${t} at $${p}, assess likely institutional positioning based on volume profile, dark pool activity patterns, and options flow sentiment. Under 100 words. Plain text.`,
+  analyst:(t,p)=>`You are a senior institutional analyst writing a terse briefing for a fund manager. Today's date is ${new Date().toDateString()}. Asset: ${t} at $${p}.
+
+Write exactly this structure — brief and punchy, no padding:
+
+MARKET SNAPSHOT
+Price: $${p} | Trend: [Up/Down X%] | Sentiment: [label]
+
+KEY DRIVERS
+List 2-3 sharp one-line drivers (macro, technical, flow) with an arrow prefix →
+
+TECHNICAL READ
+One sentence: structure, key level, and next expected move.
+
+VERDICT
+One bold sentence. Bias: [BULLISH/BEARISH/NEUTRAL]. Target: $X. Invalidation: $Y.
+
+Keep total response under 150 words. No markdown headers, use plain caps for sections.`,
+
+  risk:(t,p)=>`You are an institutional risk officer. Asset: ${t} at $${p}. Date: ${new Date().toDateString()}.
+
+RISK SNAPSHOT
+Write 3 bullet risks (1 line each): macro risk, technical risk, liquidity risk.
+
+POSITION GUIDANCE
+Max position size suggestion and stop placement. One sentence each.
+
+VERDICT: Risk/Reward in one line. Under 100 words total. Plain text.`,
+
+  macro:(t,p)=>`You are a macro strategist at a hedge fund. Asset: ${t} at $${p}. Date: ${new Date().toDateString()}.
+
+MACRO CONTEXT
+Rate environment, USD trend, and commodity impact — 2 lines max.
+
+SECTOR SIGNAL
+One sentence on institutional rotation relevant to ${t}.
+
+CATALYST WATCH
+1-2 upcoming macro events that could move ${t}.
+
+VERDICT: Macro tailwind or headwind. Under 100 words. Plain text.`,
+
+  sentiment:(t,p)=>`You are a sentiment desk analyst. Asset: ${t} at $${p}. Date: ${new Date().toDateString()}.
+
+SENTIMENT SNAPSHOT
+Fear/Greed regime, retail vs institutional lean — 1 line each.
+
+OPTIONS FLOW
+Put/call bias and notable positioning — 1 line.
+
+CONTRARIAN SIGNAL
+Is the crowd wrong? One sentence.
+
+VERDICT: Sentiment score [0-100, 0=extreme fear]. Under 100 words. Plain text.`,
+
+  structure:(t,p)=>`You are an SMC/ICT institutional analyst. Asset: ${t} at $${p}. Date: ${new Date().toDateString()}.
+
+MARKET STRUCTURE
+Current: [Bullish/Bearish]. Last event: [BOS/CHoCH] at $X.
+
+KEY LEVELS
+Supply zone: $X–$Y | Demand zone: $X–$Y | FVG: $X
+
+DRAW ON LIQUIDITY
+Where is price being pulled next and why — one sentence.
+
+VERDICT: Structure bias with entry trigger. Under 100 words. Plain text.`,
+
+  whale:(t,p)=>`You are a dark pool and whale activity analyst. Asset: ${t} at $${p}. Date: ${new Date().toDateString()}.
+
+INSTITUTIONAL FOOTPRINT
+Volume profile bias, dark pool tone, and accumulation/distribution signal — 2 lines.
+
+WHALE SIGNAL
+Notable positioning or sweep activity — 1 line.
+
+SHADOW DETECTION
+Any evidence of stealth positioning (flat price + high volume)? One sentence.
+
+VERDICT: Smart money lean. Under 100 words. Plain text.`,
 };
 
 function setAgent(type, el){
@@ -2465,7 +2547,8 @@ async function generateAISummary(){
   }
   out.innerHTML='<div class="ai-label">ANALYSING</div><span class="ai-spinner"></span>Generating summary for $'+ticker+'...';
   try{
-    const prompt='Brief 2-sentence institutional summary of '+ticker+' at $'+price.toFixed(2)+'. Include trend, sentiment, and key level. Plain text, no markdown, under 60 words.';
+    const today=new Date().toDateString();
+    const prompt='You are a terse institutional analyst. Write a 3-line briefing for '+ticker+' at $'+price.toFixed(2)+' as of '+today+'. Line 1: price action and trend. Line 2: one key macro or technical driver. Line 3: verdict with bias (BULLISH/BEARISH/NEUTRAL) and one key level. Total under 60 words. Plain text only, no markdown.';
     const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+geminiKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}),
