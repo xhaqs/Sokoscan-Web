@@ -829,12 +829,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           <button class="btn btn-primary" onclick="testAllConnections()" style="width:100%;font-size:10px;letter-spacing:2px;padding:10px;">⚡ TEST ALL CONNECTIONS</button>
           <div id="connectionStatus" style="margin-top:10px;font-size:10px;line-height:2.2;color:var(--text2);"></div>
         </div>
-        <div style="margin-top:16px;">
-          <button class="btn btn-primary" onclick="testAllConnections()" style="width:100%;font-size:10px;letter-spacing:2px;padding:10px;">
-            ⚡ TEST ALL CONNECTIONS
-          </button>
-          <div id="connectionStatus" style="margin-top:10px;font-size:10px;line-height:2;color:var(--text2);"></div>
-        </div>
       </div>
     </div>
     <div class="card accent-gold">
@@ -1941,64 +1935,6 @@ function testAllConnections(){
   })();
 }
 
-async function testAllConnections(){
-  const status=document.getElementById('connectionStatus');
-  if(!status)return;
-  status.innerHTML='<span style="color:var(--accent);">Testing connections...</span>';
-  const results=[];
-
-  // Test CFTC (no key)
-  try{
-    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://publicreporting.cftc.gov/resource/jun7-fc8e.json?$limit=1'),{signal:AbortSignal.timeout(8000)});
-    results.push(r.ok?'<span style="color:var(--bull);">&#9679; CFTC (COT)</span> &mdash; Connected, free':'<span style="color:var(--bear);">&#9679; CFTC (COT)</span> &mdash; Unreachable');
-  }catch(e){results.push('<span style="color:var(--warn);">&#9675; CFTC (COT)</span> &mdash; Timeout');}
-
-  // Test FINRA (no key)
-  try{
-    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://cdn.finra.org/equity/regsho/daily/SPYshortdate.txt'),{signal:AbortSignal.timeout(8000)});
-    results.push(r.ok?'<span style="color:var(--bull);">&#9679; FINRA ATS</span> &mdash; Connected, free':'<span style="color:var(--bear);">&#9679; FINRA ATS</span> &mdash; Unreachable');
-  }catch(e){results.push('<span style="color:var(--warn);">&#9675; FINRA ATS</span> &mdash; Timeout');}
-
-  // Test Finnhub
-  const fhKey=STATE.apiKeys['finnhub'];
-  if(fhKey){
-    try{
-      const r=await fetch('https://finnhub.io/api/v1/news?category=general&token='+fhKey,{signal:AbortSignal.timeout(7000)});
-      const d=await r.json();
-      results.push(Array.isArray(d)&&d.length?'<span style="color:var(--bull);">&#9679; Finnhub</span> &mdash; Live &mdash; '+d.length+' headlines':'<span style="color:var(--bear);">&#9679; Finnhub</span> &mdash; Invalid key');
-    }catch(e){results.push('<span style="color:var(--warn);">&#9675; Finnhub</span> &mdash; Timeout');}
-  } else {
-    results.push('<span style="color:var(--dim);">&#9675; Finnhub</span> &mdash; No key saved');
-  }
-
-  // Test Alpha Vantage
-  const avKey=STATE.apiKeys['alphavantage'];
-  if(avKey){
-    try{
-      const r=await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=SPY&apikey='+avKey,{signal:AbortSignal.timeout(9000)});
-      const d=await r.json();
-      const q=d?.['Global Quote'];
-      results.push(q&&q['05. price']?'<span style="color:var(--bull);">&#9679; Alpha Vantage</span> &mdash; Live &mdash; SPY $'+parseFloat(q['05. price']).toFixed(2):'<span style="color:var(--bear);">&#9679; Alpha Vantage</span> &mdash; Invalid key or rate limited');
-    }catch(e){results.push('<span style="color:var(--warn);">&#9675; Alpha Vantage</span> &mdash; Timeout');}
-  } else {
-    results.push('<span style="color:var(--dim);">&#9675; Alpha Vantage</span> &mdash; No key saved');
-  }
-
-  // Test Polygon
-  const polyKey=STATE.apiKeys['polygon'];
-  if(polyKey){
-    try{
-      const r=await fetch('https://api.polygon.io/v2/aggs/ticker/SPY/prev?adjusted=true&apiKey='+polyKey,{signal:AbortSignal.timeout(9000)});
-      const d=await r.json();
-      results.push(d?.resultsCount>0?'<span style="color:var(--bull);">&#9679; Polygon.io</span> &mdash; Live &mdash; SPY prev close $'+d.results[0]?.c?.toFixed(2):'<span style="color:var(--bear);">&#9679; Polygon.io</span> &mdash; Invalid key');
-    }catch(e){results.push('<span style="color:var(--warn);">&#9675; Polygon.io</span> &mdash; Timeout');}
-  } else {
-    results.push('<span style="color:var(--dim);">&#9675; Polygon.io</span> &mdash; No key saved');
-  }
-
-  status.innerHTML=results.join('<br>');
-  toast('Connection test complete');
-}
 
 // ═══════════════════════════ PWA ═════════════════════════════
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -2036,10 +1972,32 @@ window.SS.sanitize=function(s){if(typeof s!=='string')return'';return s.replace(
 const SEED='ss_'+navigator.userAgent.slice(0,14);
 function xor(s){return btoa(s.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^SEED.charCodeAt(i%SEED.length))).join(''));}
 function dexor(s){try{const d=atob(s);return d.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^SEED.charCodeAt(i%SEED.length))).join('');}catch{return '';}}
-window.SS.saveKey=function(p,k){if(!k)return;const m=window.SS.loadKeys();m[p]=xor(k);try{localStorage.setItem('ss_keys_enc',JSON.stringify(m));}catch(e){}};
+window.SS.saveKey=function(p,k){if(!k)return;const m=window.SS.loadKeys();m[p]=xor(k);try{localStorage.setItem('ss_keys_enc',JSON.stringify(m));}catch(e){}// Also sync to STATE so API calls work immediatelyif(typeof STATE!=='undefined'){STATE.apiKeys[p]=k;try{localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));}catch(e){}}};
 window.SS.loadKeys=function(){try{const r=localStorage.getItem('ss_keys_enc');const e=r?JSON.parse(r):{};const o={};Object.entries(e).forEach(([k,v])=>{o[k]=dexor(v);});return o;}catch{return {};}};
-/* Migrate unencrypted keys if present */
-if(localStorage.getItem('ss_keys')){try{const old=JSON.parse(localStorage.getItem('ss_keys')||'{}');Object.entries(old).forEach(([k,v])=>{if(v)window.SS.saveKey(k,v);});localStorage.removeItem('ss_keys');}catch(e){}}
+/* Merge encrypted + plain keys into STATE on boot */
+(function mergeKeys(){
+  const enc=window.SS.loadKeys();
+  const plain=JSON.parse(localStorage.getItem('ss_keys')||'{}');
+  const merged={...plain,...enc};
+  Object.entries(merged).forEach(([k,v])=>{
+    if(!v)return;
+    if(typeof STATE!=='undefined')STATE.apiKeys[k]=v;
+    // Ensure encrypted copy exists
+    if(!enc[k])window.SS.saveKey(k,v);
+  });
+  // Update plain store so STATE.apiKeys stays in sync
+  if(typeof STATE!=='undefined'){
+    try{localStorage.setItem('ss_keys',JSON.stringify(STATE.apiKeys));}catch(e){}
+  }
+  // Restore into input fields
+  const KEY_IDS={finnhub:'keyFinnhub',alphavantage:'keyAlphaVantage',polygon:'keyPolygon',whales:'keyWhales',benzinga:'keyBenzinga'};
+  Object.entries(STATE?.apiKeys||{}).forEach(([k,v])=>{
+    if(!v)return;
+    const inputId=KEY_IDS[k]||('key'+k.charAt(0).toUpperCase()+k.slice(1));
+    const el=document.getElementById(inputId);if(el)el.value=v;
+    const st=document.getElementById('st-'+k);if(st){st.className='api-status api-ok';st.textContent='\u2713 SAVED';}
+  });
+})();
 
 /* 4. CLIENT-SIDE RATE LIMITER */
 const RL={};
