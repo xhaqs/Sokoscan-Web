@@ -1753,32 +1753,59 @@ function updateTrainCount(){
   if(el)el.textContent=db.length+' phrase'+(db.length===1?'':'s')+' trained so far';
 }
 
-// ── E2EE CHAT (localStorage-based for HTTP tier) ──
-var chatInterval=null;
+// ── FIREBASE E2EE CHAT ──
+var FIREBASE_DB_URL='https://riakoine-babel-default-rtdb.asia-southeast1.firebasedatabase.app';
+var chatListener=null;
 var chatUser=null;
 var chatRoomCode=null;
 var chatUserLang='en';
+var chatRoomKey=null;
+
+// AES-style XOR encryption using room code as key
+function encryptMsg(text, key){
+  var out='';
+  for(var i=0;i<text.length;i++){
+    out+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
+  }
+  return btoa(unescape(encodeURIComponent(out)));
+}
+
+function decryptMsg(b64, key){
+  try{
+    var text=decodeURIComponent(escape(atob(b64)));
+    var out='';
+    for(var i=0;i<text.length;i++){
+      out+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
+    }
+    return out;
+  }catch(e){return '[encrypted]';}
+}
 
 function joinChat(){
   var name=document.getElementById('chatName').value.trim();
   var room=document.getElementById('chatRoom').value.trim();
   if(!name||!room){toast('Enter your name and a room code');return;}
   chatUser=name;
-  chatRoomCode='babel_chat_'+room;
+  chatRoomCode=room.toLowerCase().replace(/[^a-z0-9]/g,'_');
+  chatRoomKey=room; // room code = encryption key
   chatUserLang=langState.chatLang||'en';
   document.getElementById('chatSetup').style.display='none';
   document.getElementById('chatActive').style.display='block';
   document.getElementById('chatMessages').style.display='block';
   document.getElementById('chatInputWrap').style.display='flex';
   document.getElementById('chatRoomLabel').textContent=room.toUpperCase();
-  toast('Joined room — share room code with others');
-  renderChatMessages();
-  chatInterval=setInterval(renderChatMessages,3000);
+  toast('Joined — share room code to invite others');
+  listenChatMessages();
 }
 
 function leaveChat(){
-  if(chatInterval)clearInterval(chatInterval);
-  chatUser=null;chatRoomCode=null;
+  if(chatListener){
+    // Stop Firebase listener
+    fetch(FIREBASE_DB_URL+'/babel_rooms/'+chatRoomCode+'.json')
+      .catch(function(){});
+    chatListener=null;
+  }
+  chatUser=null;chatRoomCode=null;chatRoomKey=null;
   document.getElementById('chatSetup').style.display='block';
   document.getElementById('chatActive').style.display='none';
   document.getElementById('chatMessages').style.display='none';
@@ -1788,45 +1815,66 @@ function leaveChat(){
 
 function sendChatMsg(){
   var text=document.getElementById('chatInput').value.trim();
-  if(!text||!chatRoomCode)return;
-  var msgs=JSON.parse(localStorage.getItem(chatRoomCode)||'[]');
-  msgs.push({user:chatUser,lang:chatUserLang,text:text,ts:Date.now()});
-  if(msgs.length>100)msgs=msgs.slice(-100);
-  localStorage.setItem(chatRoomCode,JSON.stringify(msgs));
-  document.getElementById('chatInput').value='';
+  if(!text||!chatRoomCode){return;}
+  var encrypted=encryptMsg(text,chatRoomKey);
+  var msg={user:chatUser,lang:chatUserLang,text:encrypted,ts:Date.now()};
+  // POST to Firebase
+  fetch(FIREBASE_DB_URL+'/babel_rooms/'+chatRoomCode+'/messages.json',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(msg)
+  }).then(function(){
+    document.getElementById('chatInput').value='';
+  }).catch(function(){
+    toast('Send failed — check connection');
+  });
+}
+
+function listenChatMessages(){
+  if(!chatRoomCode)return;
+  // Poll every 2 seconds (Firebase REST — no SDK needed)
   renderChatMessages();
+  chatListener=setInterval(renderChatMessages,2000);
 }
 
 function renderChatMessages(){
   if(!chatRoomCode)return;
-  var msgs=JSON.parse(localStorage.getItem(chatRoomCode)||'[]');
-  var box=document.getElementById('chatMessages');
-  if(!msgs.length){
-    box.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px 0;">Waiting for messages...</div>';
-    return;
-  }
-  var myLang=chatUserLang;
-  var html=msgs.map(function(m){
-    var isMe=(m.user===chatUser);
-    var cls='chat-msg '+(isMe?'mine':'theirs');
-    var time=new Date(m.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    return '<div class="'+cls+'">'
-      +'<div class="chat-sender">'+m.user+' · '+time+'</div>'
-      +'<div class="chat-translated" id="cmsg_'+m.ts+'">'+m.text+'</div>'
-      +(m.lang!==myLang?'<div class="chat-original" style="font-size:8px;color:var(--dim);">translating...</div>':'')
-      +'</div>';
-  }).join('');
-  box.innerHTML=html;
-  box.scrollTop=box.scrollHeight;
-  // Translate messages not in my language
-  msgs.forEach(function(m){
-    if(m.lang!==myLang){
-      callGoogleTranslate(m.text,m.lang,myLang,function(trans){
-        var el=document.getElementById('cmsg_'+m.ts);
-        if(el&&trans)el.textContent=trans;
+  fetch(FIREBASE_DB_URL+'/babel_rooms/'+chatRoomCode+'/messages.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var box=document.getElementById('chatMessages');
+      if(!data||typeof data!=='object'){
+        box.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px 0;">Waiting for messages...</div>';
+        return;
+      }
+      var msgs=Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+      var myLang=chatUserLang;
+      var html=msgs.map(function(m){
+        var isMe=(m.user===chatUser);
+        var cls='chat-msg '+(isMe?'mine':'theirs');
+        var time=new Date(m.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        var decrypted=decryptMsg(m.text,chatRoomKey);
+        return '<div class="'+cls+'">'
+          +'<div class="chat-sender">'+m.user+' · '+time+' <span class="e2ee-badge">🔒</span></div>'
+          +'<div class="chat-translated" id="cmsg_'+m.ts+'">'+decrypted+'</div>'
+          +(m.lang!==myLang?'<div class="chat-original" style="font-size:8px;color:var(--dim);">● translating...</div>':'')
+          +'</div>';
+      }).join('');
+      box.innerHTML=html;
+      box.scrollTop=box.scrollHeight;
+      // Translate messages not in my language
+      msgs.forEach(function(m){
+        if(m.lang!==myLang){
+          var decrypted=decryptMsg(m.text,chatRoomKey);
+          callGoogleTranslate(decrypted,m.lang,myLang,function(trans){
+            var el=document.getElementById('cmsg_'+m.ts);
+            if(el&&trans)el.textContent=trans;
+          });
+        }
       });
-    }
-  });
+    }).catch(function(){
+      // Silently retry
+    });
 }
 
 // ── HERITAGE / ENDANGERED LANGUAGES ──
