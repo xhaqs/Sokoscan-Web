@@ -2168,7 +2168,7 @@ function runTutorAI(prompt, mode){
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
+      model:'llama-3.3-70b-versatile',
       max_tokens:1000,
       system:'You are BABEL AI Tutor — a warm, knowledgeable multilingual language and culture teacher built into the BABEL translation app by RIAKOINE-EMPIRE. You help people understand not just words but the cultures, histories, and communities behind them. You have special knowledge of African languages including Gikuyu, Swahili, Luganda, Yoruba, Hausa and endangered languages. Always be encouraging. Plain text responses only — no markdown, no asterisks, no bullet symbols.',
       messages:[{role:'user',content:prompt}]
@@ -2177,10 +2177,10 @@ function runTutorAI(prompt, mode){
   .then(function(r){return r.json();})
   .then(function(data){
     var text='';
-    if(data.content&&data.content[0]&&data.content[0].text){
-      text=data.content[0].text;
+    if(data.choices&&data.choices[0]&&data.choices[0].message){
+      text=data.choices[0].message.content;
     } else if(data.error){
-      text='Tutor unavailable: '+data.error.message;
+      text='Tutor unavailable: '+(data.error.message||JSON.stringify(data.error));
     }
     // Stream-style reveal
     responseEl.textContent='';
