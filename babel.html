@@ -409,6 +409,7 @@ body::after{
         <div class="output-box" id="outputText"></div>
         <div class="output-actions">
           <button class="btn btn-cyan btn-sm" onclick="speakOutput()">🔊 SPEAK</button>
+          <button class="btn btn-red btn-sm" onclick="stopSpeech()">⏹ STOP</button>
           <button class="btn btn-purple btn-sm" onclick="copyOutput()">📋 COPY</button>
           <button class="btn btn-green btn-sm" onclick="saveToHistory()">💾 SAVE</button>
         </div>
@@ -452,7 +453,9 @@ body::after{
           <div class="speaker-output" id="outputA">Translation will appear here...</div>
           <div class="output-actions" style="margin-top:6px;">
             <button class="btn btn-cyan btn-sm" onclick="speakText('outputA','B')">🔊 PLAY TO B</button>
+            <button class="btn btn-red btn-sm" onclick="stopSpeech()">⏹ STOP</button>
             <button class="btn btn-purple btn-sm" onclick="copyEl('outputA')">📋 COPY</button>
+            <button class="btn btn-gold btn-sm" onclick="editBox('outputA')">✏ EDIT</button>
           </div>
         </div>
 
@@ -475,7 +478,9 @@ body::after{
           <div class="speaker-output" id="outputB">Translation will appear here...</div>
           <div class="output-actions" style="margin-top:6px;">
             <button class="btn btn-gold btn-sm" onclick="speakText('outputB','A')">🔊 PLAY TO A</button>
+            <button class="btn btn-red btn-sm" onclick="stopSpeech()">⏹ STOP</button>
             <button class="btn btn-purple btn-sm" onclick="copyEl('outputB')">📋 COPY</button>
+            <button class="btn btn-gold btn-sm" onclick="editBox('outputB')">✏ EDIT</button>
           </div>
         </div>
       </div>
@@ -532,17 +537,16 @@ body::after{
       <div class="card">
         <div class="card-head">
           <span class="card-title">TRANSLATION HISTORY</span>
-          <button class="btn btn-red btn-sm" onclick="clearHistory()">CLEAR ALL</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-purple btn-sm" onclick="copyHistory()">📋 COPY ALL</button>
+            <button class="btn btn-red btn-sm" onclick="clearHistory()">✕ CLEAR</button>
+          </div>
         </div>
         <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">
-          Saved translations. Tap to restore.
+          Tap entry to restore. Swipe or tap ✕ to delete one.
         </div>
       </div>
-      <div id="historyList">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">
-          No history yet. Translate something and tap SAVE.
-        </div>
-      </div>
+      <div id="historyList"></div>
     </div>
 
     <!-- ── OCR CAMERA PANEL ── -->
@@ -619,13 +623,16 @@ body::after{
           <button class="btn btn-red btn-sm" onclick="clearOCRResult()">✕ CLEAR</button>
         </div>
         <div class="output-box" id="ocrDetected" style="color:var(--text);font-size:11px;min-height:40px;"></div>
+        <div class="output-actions" style="margin-top:6px;">
+          <button class="btn btn-purple btn-sm" onclick="copyEl('ocrDetected')">📋 COPY DETECTED</button>
+        </div>
         <div style="margin:8px 0 4px;">
           <div class="output-label">TRANSLATION</div>
           <div class="output-box" id="ocrTranslated" style="min-height:40px;"></div>
         </div>
         <div class="output-actions">
           <button class="btn btn-cyan btn-sm" onclick="speakOCRResult()">🔊 SPEAK</button>
-          <button class="btn btn-purple btn-sm" onclick="copyEl('ocrTranslated')">📋 COPY</button>
+          <button class="btn btn-purple btn-sm" onclick="copyEl('ocrTranslated')">📋 COPY TRANSLATION</button>
           <button class="btn btn-gold btn-sm" onclick="sendOCRToTranslate()">↗ TRANSLATE TAB</button>
         </div>
       </div>
@@ -915,6 +922,28 @@ function speakText(elId, side){
   speakTTS(text,lang);
 }
 
+function stopSpeech(){
+  if('speechSynthesis' in window){window.speechSynthesis.cancel();}
+  toast('Stopped');
+}
+
+function editBox(elId){
+  var el=document.getElementById(elId);
+  var isEditing=el.getAttribute('contenteditable')==='true';
+  if(isEditing){
+    el.setAttribute('contenteditable','false');
+    el.style.outline='none';
+    el.style.background='';
+    toast('Edit saved');
+  } else {
+    el.setAttribute('contenteditable','true');
+    el.style.outline='1px solid var(--gold)';
+    el.style.background='rgba(201,168,76,0.05)';
+    el.focus();
+    toast('Tap text to edit — tap EDIT again to save');
+  }
+}
+
 function copyOutput(){
   var text=document.getElementById('outputText').textContent;
   copyToClipboard(text);
@@ -1114,19 +1143,49 @@ function saveSentryLink(){
 function renderHistory(){
   var list=document.getElementById('historyList');
   if(!state.history.length){
-    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">No history yet.</div>';
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">No history yet. Translate something and tap SAVE.</div>';
     return;
   }
   list.innerHTML=state.history.map(function(h,i){
     var fl=LANGS.find(function(l){return l.c===h.from;});
     var tl=LANGS.find(function(l){return l.c===h.to;});
-    return '<div class="history-item" onclick="restoreHistory('+i+')">'
+    return '<div class="history-item" style="position:relative;">'
+      +'<div onclick="restoreHistory('+i+')" style="flex:1;cursor:pointer;">'
       +'<div class="history-langs">'+(fl?fl.n:'?')+' \u2192 '+(tl?tl.n:'?')
       +' \u00B7 '+new Date(h.ts).toLocaleTimeString()+'</div>'
       +'<div class="history-orig">'+h.orig+'</div>'
       +'<div class="history-trans">'+h.trans+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:4px;margin-top:6px;">'
+      +'<button class="btn btn-purple btn-sm" style="font-size:9px;padding:4px 8px;" onclick="copyHistoryItem('+i+')">📋 COPY</button>'
+      +'<button class="btn btn-red btn-sm" style="font-size:9px;padding:4px 8px;" onclick="deleteHistoryItem('+i+')">✕ DELETE</button>'
+      +'</div>'
       +'</div>';
   }).join('');
+}
+
+function copyHistoryItem(i){
+  var h=state.history[i];
+  copyToClipboard(h.orig+'\n'+h.trans);
+  toast('Entry copied');
+}
+
+function deleteHistoryItem(i){
+  state.history.splice(i,1);
+  localStorage.setItem('babel_history',JSON.stringify(state.history));
+  renderHistory();
+  toast('Entry deleted');
+}
+
+function copyHistory(){
+  if(!state.history.length){toast('No history to copy');return;}
+  var text=state.history.map(function(h){
+    var fl=LANGS.find(function(l){return l.c===h.from;});
+    var tl=LANGS.find(function(l){return l.c===h.to;});
+    return (fl?fl.n:'?')+' \u2192 '+(tl?tl.n:'?')+'\n'+h.orig+'\n'+h.trans;
+  }).join('\n\n');
+  copyToClipboard(text);
+  toast('All history copied');
 }
 
 function restoreHistory(i){
