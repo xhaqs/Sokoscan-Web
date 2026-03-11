@@ -2892,7 +2892,7 @@ function joinChannelByCode(){
 function loadPublicChannels(){
   var list=document.getElementById('channelBrowseList');
   list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Loading channels...</div>';
-  fetch(CHANNELS_DB+'.json?orderBy="type"&equalTo="public"&limitToLast=20')
+  fetch(CHANNELS_DB+'.json')
     .then(function(r){return r.json();})
     .then(function(data){
       if(!data||typeof data!=='object'){
@@ -2942,7 +2942,7 @@ function openChannel(ch){
 
 function loadChannelPosts(){
   if(!activeChannel)return;
-  fetch(CHANNELS_DB+'/'+activeChannel.code+'/posts.json?limitToLast=30')
+  fetch(CHANNELS_DB+'/'+activeChannel.code+'/posts.json')
     .then(function(r){return r.json();})
     .then(function(data){
       var feed=document.getElementById('chPostsFeed');
