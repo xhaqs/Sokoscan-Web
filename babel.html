@@ -299,6 +299,63 @@ body::after{
   border-radius:50%;background:var(--dim);transition:all 0.2s;}
 .toggle.on::after{left:20px;background:var(--green);}
 
+/* ── LANG SEARCH MODAL ── */
+.lang-btn{
+  background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);
+  color:var(--text);font-family:var(--mono);font-size:10px;padding:10px 8px;
+  border-radius:4px;outline:none;width:100%;cursor:pointer;text-align:left;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.lang-modal{
+  display:none;position:fixed;inset:0;z-index:999;
+  background:rgba(5,3,8,0.92);flex-direction:column;
+}
+.lang-modal.open{display:flex;}
+.lang-modal-inner{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  margin:16px;flex:1;display:flex;flex-direction:column;max-height:90vh;overflow:hidden;
+}
+.lang-modal-head{
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.lang-search-input{
+  flex:1;background:rgba(14,10,24,0.8);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:12px;padding:8px 12px;
+  border-radius:4px;outline:none;
+}
+.lang-search-input::placeholder{color:var(--dim);}
+.lang-modal-list{flex:1;overflow-y:auto;padding:6px;}
+.lang-option{
+  padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text);
+  border-radius:4px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;align-items:center;gap:8px;
+}
+.lang-option:active,.lang-option.selected{background:rgba(124,58,237,0.15);color:var(--purple);}
+.lang-option-tag{font-size:8px;color:var(--dim);margin-left:auto;letter-spacing:1px;}
+.lang-endangered{color:var(--gold);}
+
+/* ── E2EE GROUP CHAT ── */
+.chat-msg{
+  padding:8px 12px;border-radius:6px;margin-bottom:6px;
+  font-family:var(--mono);font-size:11px;line-height:1.5;
+  border:1px solid var(--border);
+}
+.chat-msg.mine{background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.2);text-align:right;}
+.chat-msg.theirs{background:rgba(6,182,212,0.05);border-color:rgba(6,182,212,0.1);}
+.chat-sender{font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;}
+.chat-original{color:var(--dim);font-size:9px;margin-top:3px;}
+.chat-translated{color:var(--cyan);}
+.chat-input-wrap{
+  display:flex;gap:6px;padding:10px;background:var(--card);
+  border:1px solid var(--border);border-radius:0 0 6px 6px;border-top:none;
+}
+.e2ee-badge{
+  background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);
+  color:var(--green);font-family:var(--mono);font-size:7px;padding:2px 6px;
+  border-radius:2px;letter-spacing:1px;
+}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -333,6 +390,17 @@ body::after{
   <button class="countdown-cancel" onclick="cancelSOS()">✕ CANCEL</button>
 </div>
 
+<!-- LANGUAGE SEARCH MODAL -->
+<div class="lang-modal" id="langModal">
+  <div class="lang-modal-inner">
+    <div class="lang-modal-head">
+      <input class="lang-search-input" id="langSearchInput" placeholder="Search language..." oninput="filterLangModal(this.value)" autocomplete="off">
+      <button class="btn btn-red btn-sm" onclick="closeLangModal()">✕</button>
+    </div>
+    <div class="lang-modal-list" id="langModalList"></div>
+  </div>
+</div>
+
 <div id="app">
   <!-- TOPBAR -->
   <div id="topbar">
@@ -363,6 +431,12 @@ body::after{
     <div class="tab" onclick="switchTab('ocr')" id="tab-ocr">
       <span class="tab-icon">📷</span>CAMERA
     </div>
+    <div class="tab" onclick="switchTab('chat')" id="tab-chat">
+      <span class="tab-icon">🔐</span>CHAT
+    </div>
+    <div class="tab" onclick="switchTab('endangered')" id="tab-endangered">
+      <span class="tab-icon">🌿</span>HERITAGE
+    </div>
   </div>
 
   <!-- PANELS -->
@@ -376,9 +450,13 @@ body::after{
           <span class="card-tag" id="detectTag">AUTO-DETECT ON</span>
         </div>
         <div class="lang-grid">
-          <select class="lang-select" id="fromLang" onchange="updateLangPair()"></select>
+          <button class="lang-btn" id="fromLangBtn" onclick="openLangModal('fromLang')">
+            <span id="fromLangLabel">English</span><span style="color:var(--dim);font-size:9px;">▼</span>
+          </button>
           <div class="lang-swap" onclick="swapLangs()">⇄</div>
-          <select class="lang-select" id="toLang" onchange="updateLangPair()"></select>
+          <button class="lang-btn" id="toLangBtn" onclick="openLangModal('toLang')">
+            <span id="toLangLabel">Swahili</span><span style="color:var(--dim);font-size:9px;">▼</span>
+          </button>
         </div>
       </div>
 
@@ -427,9 +505,13 @@ body::after{
           Two people, one phone. Speaker A speaks — hands phone to Speaker B who hears the translation. They reply — you hear it in your language.
         </div>
         <div class="lang-grid">
-          <select class="lang-select" id="interpLangA" onchange="updateInterpPair()"></select>
+          <button class="lang-btn" onclick="openLangModal('interpLangA')">
+            <span id="interpLangALabel">English</span><span style="color:var(--dim);font-size:9px;">▼</span>
+          </button>
           <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;">⇄</div>
-          <select class="lang-select" id="interpLangB" onchange="updateInterpPair()"></select>
+          <button class="lang-btn" onclick="openLangModal('interpLangB')">
+            <span id="interpLangBLabel">Swahili</span><span style="color:var(--dim);font-size:9px;">▼</span>
+          </button>
         </div>
       </div>
 
@@ -560,11 +642,13 @@ body::after{
           Point your camera at any text — menu, sign, document, label — in any language. BABEL reads and translates it instantly.
         </div>
         <div class="lang-grid">
-          <select class="lang-select" id="ocrFromLang">
-            <option value="auto">Auto Detect</option>
-          </select>
+          <button class="lang-btn" onclick="openLangModal('ocrFromLang')">
+            <span id="ocrFromLangLabel">Auto Detect</span><span style="color:var(--dim);font-size:9px;">▼</span>
+          </button>
           <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;">→</div>
-          <select class="lang-select" id="ocrToLang"></select>
+          <button class="lang-btn" onclick="openLangModal('ocrToLang')">
+            <span id="ocrToLangLabel">English</span><span style="color:var(--dim);font-size:9px;">▼</span>
+          </button>
         </div>
       </div>
 
@@ -653,6 +737,97 @@ body::after{
         <div id="ocrFilePreview" style="margin-top:8px;display:none;">
           <img id="ocrPreviewImg" style="width:100%;border-radius:4px;border:1px solid var(--border);">
         </div>
+      </div>
+    </div>
+
+    <!-- ── E2EE GROUP CHAT PANEL ── -->
+    <div class="panel" id="panel-chat">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">ENCRYPTED CHAT</span>
+          <span class="e2ee-badge">🔒 E2EE</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:10px;">
+          Messages encrypted end-to-end. Every member reads in their own language. No server stores your messages.
+        </div>
+        <!-- Room setup -->
+        <div id="chatSetup">
+          <input class="babel-input" id="chatName" placeholder="Your name / callsign" style="height:auto;padding:10px;margin-bottom:8px;">
+          <input class="babel-input" id="chatRoom" placeholder="Room code (share with others)" style="height:auto;padding:10px;margin-bottom:8px;">
+          <button class="lang-btn" style="margin-bottom:8px;" onclick="openLangModal('chatLang')">
+            <span>My language: </span><span id="chatLangLabel">English</span><span style="color:var(--dim);font-size:9px;margin-left:auto;">▼</span>
+          </button>
+          <button class="btn btn-gold btn-full" onclick="joinChat()">🔐 JOIN ROOM</button>
+        </div>
+        <!-- Active chat -->
+        <div id="chatActive" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-family:var(--mono);font-size:9px;color:var(--green);">🔒 ROOM: <span id="chatRoomLabel"></span></span>
+            <button class="btn btn-red btn-sm" onclick="leaveChat()">LEAVE</button>
+          </div>
+        </div>
+      </div>
+      <!-- Messages -->
+      <div id="chatMessages" style="display:none;min-height:200px;max-height:340px;overflow-y:auto;
+        border:1px solid var(--border);border-radius:6px 6px 0 0;padding:10px;background:rgba(5,3,8,0.6);">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px 0;">
+          Waiting for messages...
+        </div>
+      </div>
+      <!-- Input -->
+      <div id="chatInputWrap" style="display:none;" class="chat-input-wrap">
+        <textarea class="babel-input" id="chatInput" placeholder="Type message..." style="height:40px;flex:1;padding:8px;"></textarea>
+        <button class="btn btn-gold btn-sm" onclick="sendChatMsg()" style="padding:8px 14px;">SEND</button>
+        <button class="mic-btn" style="font-size:16px;width:40px;height:40px;" onclick="toggleMic('chat')">🎤</button>
+      </div>
+      <!-- Training notice for unsupported languages -->
+      <div class="card" style="margin-top:12px;">
+        <div class="card-head">
+          <span class="card-title">LANGUAGE TRAINING</span>
+          <span class="card-tag">BETA</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:8px;">
+          If your language is missing or mistranslated (Kikuyu, Ogiek, minority dialects) — train BABEL here. Your corrections teach the resident AI.
+        </div>
+        <input class="babel-input" id="trainOriginal" placeholder="Original phrase in your language" style="height:auto;padding:10px;margin-bottom:6px;">
+        <input class="babel-input" id="trainTranslation" placeholder="Correct translation in English" style="height:auto;padding:10px;margin-bottom:6px;">
+        <button class="lang-btn" style="margin-bottom:8px;" onclick="openLangModal('trainLang')">
+          <span>Language being trained: </span><span id="trainLangLabel">Kikuyu (Gikuyu)</span><span style="color:var(--dim);font-size:9px;margin-left:auto;">▼</span>
+        </button>
+        <button class="btn btn-gold btn-full" onclick="submitTraining()">💾 SUBMIT TRAINING PHRASE</button>
+        <div id="trainCount" style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- ── HERITAGE LANGUAGES PANEL ── -->
+    <div class="panel" id="panel-endangered">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">HERITAGE & ENDANGERED</span>
+          <span class="e2ee-badge" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold);">🌿 ARK</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
+          BABEL is an ark for languages the world is losing. Every phrase saved here is a language kept alive. These are the voices at risk of disappearing.
+        </div>
+      </div>
+
+      <!-- Language cards -->
+      <div id="endangeredList"></div>
+
+      <!-- Contribute -->
+      <div class="card" style="margin-top:4px;">
+        <div class="card-head">
+          <span class="card-title">CONTRIBUTE A PHRASE</span>
+          <span class="card-tag">HELP PRESERVE</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.6;margin-bottom:8px;">
+          Know a phrase in an endangered language? Add it to the BABEL community archive.
+        </div>
+        <input class="babel-input" id="endLangName" placeholder="Language name e.g. Ogiek, Elmolo, Dahalo" style="height:auto;padding:10px;margin-bottom:6px;">
+        <input class="babel-input" id="endPhrase" placeholder="Phrase in the heritage language" style="height:auto;padding:10px;margin-bottom:6px;">
+        <input class="babel-input" id="endMeaning" placeholder="Meaning in English" style="height:auto;padding:10px;margin-bottom:6px;">
+        <input class="babel-input" id="endContext" placeholder="Context / usage (optional)" style="height:auto;padding:10px;margin-bottom:8px;">
+        <button class="btn btn-gold btn-full" onclick="submitEndangered()">🌿 SUBMIT PHRASE</button>
       </div>
     </div>
 
@@ -814,21 +989,121 @@ function switchTab(name){
   document.getElementById('panel-'+name).classList.add('active');
 }
 
-// ── POPULATE LANGUAGE SELECTS ──
+// ── LANG STATE (replaces select elements) ──
+var langState = {
+  fromLang: 'en',
+  toLang: 'sw',
+  interpLangA: 'en',
+  interpLangB: 'sw',
+  ocrFromLang: 'auto',
+  ocrToLang: 'en',
+  chatLang: 'en',
+  trainLang: 'ki',
+};
+var _modalTarget = null;
+
+var LANGS_WITH_AUTO = [{c:'auto',n:'Auto Detect'}].concat(LANGS);
+
+var ENDANGERED_LANGS = [
+  {name:'Ogiek',region:'Kenya — Mau Forest',speakers:'~30,000',status:'Critically Endangered',phrases:[
+    {p:'Oo pa',m:'Hello / Peace be with you'},{p:'Aang meek',m:'I am hungry'},{p:'Toret',m:'Forest / Home'}
+  ]},
+  {name:'Elmolo',region:'Kenya — Lake Turkana',speakers:'~700',status:'Nearly Extinct',phrases:[
+    {p:'Ashe oleng',m:'Thank you very much'},{p:'Nabo',m:'Water'},{p:'Iyiom',m:'Fish'}
+  ]},
+  {name:'Dahalo',region:'Kenya — Tana River',speakers:'~400',status:'Nearly Extinct',phrases:[
+    {p:'Hako',m:'Come here'},{p:'Kala',m:'Food / Eat'},{p:'Mto',m:'River'}
+  ]},
+  {name:'Omotik',region:'Kenya — Narok',speakers:'~50',status:'Moribund',phrases:[
+    {p:'Sopa',m:'Greeting'},{p:'Apa',m:'Father'},{p:'Enkare',m:'Water'}
+  ]},
+  {name:'Sengwer',region:'Kenya — Cherangany Hills',speakers:'~4,000',status:'Endangered',phrases:[
+    {p:'Chamgei',m:'How are you'},{p:'Somok',m:'Forest'},{p:'Cheseret',m:'River'}
+  ]},
+  {name:'Yaaku (Mukogodo)',region:'Kenya — Laikipia',speakers:'~100',status:'Nearly Extinct',phrases:[
+    {p:'Tuko',m:'We are here / We exist'},{p:'Nkare',m:'Water'},{p:'Mbogo',m:'Buffalo'}
+  ]},
+];
+
+// ── LANG MODAL ──
+function openLangModal(target){
+  _modalTarget=target;
+  var includeAuto=(target==='ocrFromLang');
+  var list=includeAuto?LANGS_WITH_AUTO:LANGS;
+  document.getElementById('langSearchInput').value='';
+  renderLangList(list, target);
+  document.getElementById('langModal').classList.add('open');
+  setTimeout(function(){document.getElementById('langSearchInput').focus();},100);
+}
+
+function closeLangModal(){
+  document.getElementById('langModal').classList.remove('open');
+  _modalTarget=null;
+}
+
+function renderLangList(list, target){
+  var cur=langState[target]||'';
+  var html=list.map(function(l){
+    var isEnd=ENDANGERED_LANGS.some(function(e){return e.name.toLowerCase().includes(l.n.toLowerCase().split(' ')[0]);});
+    var cls='lang-option'+(l.c===cur?' selected':'')+(isEnd?' lang-endangered':'');
+    var tag=l.c==='auto'?'AUTO':(l.c.toUpperCase());
+    return '<div class="'+cls+'" onclick="selectLang(\''+l.c+'\',\''+l.n+'\')">'
+      +(isEnd?'🌿 ':'')+l.n
+      +'<span class="lang-option-tag">'+tag+'</span>'
+      +'</div>';
+  }).join('');
+  document.getElementById('langModalList').innerHTML=html;
+}
+
+function filterLangModal(q){
+  var includeAuto=(_modalTarget==='ocrFromLang');
+  var base=includeAuto?LANGS_WITH_AUTO:LANGS;
+  var filtered=q?base.filter(function(l){return l.n.toLowerCase().includes(q.toLowerCase())||l.c.toLowerCase().includes(q.toLowerCase());}):base;
+  renderLangList(filtered, _modalTarget);
+}
+
+function selectLang(code, name){
+  if(!_modalTarget)return;
+  langState[_modalTarget]=code;
+  // Update label
+  var labelId=_modalTarget+'Label';
+  var el=document.getElementById(labelId);
+  if(el)el.textContent=name;
+  closeLangModal();
+  // Trigger updates
+  if(_modalTarget==='fromLang'||_modalTarget==='toLang') updateLangPairNew();
+  if(_modalTarget==='interpLangA'||_modalTarget==='interpLangB') updateInterpPairNew();
+  if(_modalTarget==='trainLang'){/* label already set */}
+}
+
+function updateLangPairNew(){
+  state.fromLang=langState.fromLang;
+  state.toLang=langState.toLang;
+  var fl=LANGS.find(function(l){return l.c===state.fromLang;});
+  var tl=LANGS.find(function(l){return l.c===state.toLang;});
+  document.getElementById('langPair').textContent=(fl?fl.n.substring(0,3).toUpperCase():'?')+' \u2192 '+(tl?tl.n.substring(0,3).toUpperCase():'?');
+}
+
+function updateInterpPairNew(){
+  state.interpA=langState.interpLangA;
+  state.interpB=langState.interpLangB;
+  var la=LANGS.find(function(l){return l.c===state.interpA;});
+  var lb=LANGS.find(function(l){return l.c===state.interpB;});
+  if(document.getElementById('labelA'))document.getElementById('labelA').textContent=la?la.n:'?';
+  if(document.getElementById('labelA2'))document.getElementById('labelA2').textContent=lb?lb.n:'?';
+  if(document.getElementById('labelB'))document.getElementById('labelB').textContent=lb?lb.n:'?';
+  if(document.getElementById('labelB2'))document.getElementById('labelB2').textContent=la?la.n:'?';
+}
+
 function populateLangs(){
-  var selects=['fromLang','toLang','interpLangA','interpLangB'];
-  selects.forEach(function(id){
-    var sel=document.getElementById(id);
-    LANGS.forEach(function(l){
-      var opt=document.createElement('option');
-      opt.value=l.c;opt.textContent=l.n;
-      sel.appendChild(opt);
-    });
-  });
-  document.getElementById('fromLang').value='en';
-  document.getElementById('toLang').value='sw';
-  document.getElementById('interpLangA').value='en';
-  document.getElementById('interpLangB').value='sw';
+  // No selects to populate — using modal system
+  // Just init state
+  updateLangPairNew();
+  updateInterpPairNew();
+  document.getElementById('ocrToLangLabel').textContent='English';
+  document.getElementById('ocrFromLangLabel').textContent='Auto Detect';
+  document.getElementById('trainLangLabel').textContent='Kikuyu (Gikuyu)';
+  document.getElementById('chatLangLabel').textContent='English';
 }
 
 function updateLangPair(){
@@ -851,11 +1126,15 @@ function updateInterpPair(){
 }
 
 function swapLangs(){
-  var f=document.getElementById('fromLang').value;
-  var t=document.getElementById('toLang').value;
-  document.getElementById('fromLang').value=t;
-  document.getElementById('toLang').value=f;
-  updateLangPair();
+  var f=langState.fromLang;
+  var t=langState.toLang;
+  var fl=LANGS.find(function(l){return l.c===f;});
+  var tl=LANGS.find(function(l){return l.c===t;});
+  langState.fromLang=t;
+  langState.toLang=f;
+  document.getElementById('fromLangLabel').textContent=tl?tl.n:'?';
+  document.getElementById('toLangLabel').textContent=fl?fl.n:'?';
+  updateLangPairNew();
   toast('Languages swapped');
 }
 
@@ -863,11 +1142,18 @@ function swapLangs(){
 function translateText(){
   var text=document.getElementById('inputText').value.trim();
   if(!text){toast('Enter text to translate');return;}
-  var from=document.getElementById('fromLang').value;
-  var to=document.getElementById('toLang').value;
+  var from=langState.fromLang||'auto';
+  var to=langState.toLang||'en';
+  // Check user training DB first
+  var trained=getTrainedPhrase(text,from);
   var outBox=document.getElementById('outputText');
   outBox.innerHTML='<span class="spinner"></span>';
   document.getElementById('outputCard').style.display='block';
+  if(trained){
+    outBox.textContent=trained+' [trained]';
+    state.lastTranslation={orig:text,trans:trained,from:from,to:to,ts:Date.now()};
+    return;
+  }
   callGoogleTranslate(text,from,to,function(result){
     if(result){
       outBox.textContent=result;
@@ -900,8 +1186,7 @@ function clearTranslate(){
 
 function speakOutput(){
   var text=document.getElementById('outputText').textContent;
-  var lang=document.getElementById('toLang').value;
-  speakTTS(text,lang);
+  speakTTS(text,langState.toLang||'en');
 }
 
 function speakTTS(text,lang){
@@ -1308,7 +1593,7 @@ function runOCR(imageData){
   document.getElementById('ocrResultCard').style.display='block';
   document.getElementById('ocrDetected').innerHTML='<span class="spinner"></span> Reading text...';
   document.getElementById('ocrTranslated').innerHTML='<span class="spinner"></span>';
-  var toLang=document.getElementById('ocrToLang').value;
+  var toLang=langState.ocrToLang||'en';
 
   // Use Tesseract.js via CDN for OCR
   if(typeof Tesseract==='undefined'){
@@ -1327,7 +1612,7 @@ function runOCR(imageData){
 }
 
 function doTesseract(imageData,toLang){
-  var fromLang=document.getElementById('ocrFromLang').value;
+  var fromLang=langState.ocrFromLang||'auto';
   var tessLang=fromLang==='auto'?'eng':getTessLang(fromLang);
   document.getElementById('ocrStatus').textContent='READING TEXT...';
   Tesseract.recognize(imageData,tessLang,{
@@ -1421,8 +1706,7 @@ function toggleOCRFlash(){
 
 function speakOCRResult(){
   var text=document.getElementById('ocrTranslated').textContent;
-  var lang=document.getElementById('ocrToLang').value;
-  speakTTS(text,lang);
+  speakTTS(text,langState.ocrToLang||'en');
 }
 
 function sendOCRToTranslate(){
@@ -1434,13 +1718,170 @@ function sendOCRToTranslate(){
   }
 }
 
-populateOCRLangs();
+// ── USER LANGUAGE TRAINING ──
+function getTrainingDB(){
+  return JSON.parse(localStorage.getItem('babel_training')||'[]');
+}
+
+function getTrainedPhrase(text, lang){
+  var db=getTrainingDB();
+  var match=db.find(function(e){
+    return e.lang===lang&&e.original.toLowerCase()===text.toLowerCase();
+  });
+  return match?match.translation:null;
+}
+
+function submitTraining(){
+  var orig=document.getElementById('trainOriginal').value.trim();
+  var trans=document.getElementById('trainTranslation').value.trim();
+  var lang=langState.trainLang||'ki';
+  if(!orig||!trans){toast('Fill in both fields');return;}
+  var db=getTrainingDB();
+  var existing=db.findIndex(function(e){return e.lang===lang&&e.original.toLowerCase()===orig.toLowerCase();});
+  var entry={lang:lang,original:orig,translation:trans,ts:Date.now()};
+  if(existing>=0){db[existing]=entry;}else{db.push(entry);}
+  localStorage.setItem('babel_training',JSON.stringify(db));
+  document.getElementById('trainOriginal').value='';
+  document.getElementById('trainTranslation').value='';
+  updateTrainCount();
+  toast('Phrase saved — BABEL learned it');
+}
+
+function updateTrainCount(){
+  var db=getTrainingDB();
+  var el=document.getElementById('trainCount');
+  if(el)el.textContent=db.length+' phrase'+(db.length===1?'':'s')+' trained so far';
+}
+
+// ── E2EE CHAT (localStorage-based for HTTP tier) ──
+var chatInterval=null;
+var chatUser=null;
+var chatRoomCode=null;
+var chatUserLang='en';
+
+function joinChat(){
+  var name=document.getElementById('chatName').value.trim();
+  var room=document.getElementById('chatRoom').value.trim();
+  if(!name||!room){toast('Enter your name and a room code');return;}
+  chatUser=name;
+  chatRoomCode='babel_chat_'+room;
+  chatUserLang=langState.chatLang||'en';
+  document.getElementById('chatSetup').style.display='none';
+  document.getElementById('chatActive').style.display='block';
+  document.getElementById('chatMessages').style.display='block';
+  document.getElementById('chatInputWrap').style.display='flex';
+  document.getElementById('chatRoomLabel').textContent=room.toUpperCase();
+  toast('Joined room — share room code with others');
+  renderChatMessages();
+  chatInterval=setInterval(renderChatMessages,3000);
+}
+
+function leaveChat(){
+  if(chatInterval)clearInterval(chatInterval);
+  chatUser=null;chatRoomCode=null;
+  document.getElementById('chatSetup').style.display='block';
+  document.getElementById('chatActive').style.display='none';
+  document.getElementById('chatMessages').style.display='none';
+  document.getElementById('chatInputWrap').style.display='none';
+  toast('Left room');
+}
+
+function sendChatMsg(){
+  var text=document.getElementById('chatInput').value.trim();
+  if(!text||!chatRoomCode)return;
+  var msgs=JSON.parse(localStorage.getItem(chatRoomCode)||'[]');
+  msgs.push({user:chatUser,lang:chatUserLang,text:text,ts:Date.now()});
+  if(msgs.length>100)msgs=msgs.slice(-100);
+  localStorage.setItem(chatRoomCode,JSON.stringify(msgs));
+  document.getElementById('chatInput').value='';
+  renderChatMessages();
+}
+
+function renderChatMessages(){
+  if(!chatRoomCode)return;
+  var msgs=JSON.parse(localStorage.getItem(chatRoomCode)||'[]');
+  var box=document.getElementById('chatMessages');
+  if(!msgs.length){
+    box.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px 0;">Waiting for messages...</div>';
+    return;
+  }
+  var myLang=chatUserLang;
+  var html=msgs.map(function(m){
+    var isMe=(m.user===chatUser);
+    var cls='chat-msg '+(isMe?'mine':'theirs');
+    var time=new Date(m.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="'+cls+'">'
+      +'<div class="chat-sender">'+m.user+' · '+time+'</div>'
+      +'<div class="chat-translated" id="cmsg_'+m.ts+'">'+m.text+'</div>'
+      +(m.lang!==myLang?'<div class="chat-original" style="font-size:8px;color:var(--dim);">translating...</div>':'')
+      +'</div>';
+  }).join('');
+  box.innerHTML=html;
+  box.scrollTop=box.scrollHeight;
+  // Translate messages not in my language
+  msgs.forEach(function(m){
+    if(m.lang!==myLang){
+      callGoogleTranslate(m.text,m.lang,myLang,function(trans){
+        var el=document.getElementById('cmsg_'+m.ts);
+        if(el&&trans)el.textContent=trans;
+      });
+    }
+  });
+}
+
+// ── HERITAGE / ENDANGERED LANGUAGES ──
+function renderEndangered(){
+  var list=document.getElementById('endangeredList');
+  var userPhrases=JSON.parse(localStorage.getItem('babel_endangered')||'[]');
+  var all=ENDANGERED_LANGS.concat(
+    userPhrases.reduce(function(acc,p){
+      var existing=acc.find(function(e){return e.name.toLowerCase()===p.lang.toLowerCase();});
+      if(existing){existing.phrases.push({p:p.phrase,m:p.meaning,context:p.context});}
+      else{acc.push({name:p.lang,region:'Community contributed',speakers:'Unknown',status:'Documented by community',phrases:[{p:p.phrase,m:p.meaning,context:p.context}]});}
+      return acc;
+    },[])
+  );
+  list.innerHTML=all.map(function(lang){
+    var statusColor=lang.status.includes('Extinct')?'var(--red)':lang.status.includes('Endangered')||lang.status.includes('Moribund')?'var(--gold)':'var(--green)';
+    return '<div class="card" style="margin-bottom:8px;">'
+      +'<div class="card-head">'
+      +'<span class="card-title" style="color:var(--gold);">🌿 '+lang.name+'</span>'
+      +'<span style="font-family:var(--mono);font-size:7px;color:'+statusColor+';letter-spacing:1px;">'+lang.status+'</span>'
+      +'</div>'
+      +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">'+lang.region+' · ~'+lang.speakers+' speakers</div>'
+      +lang.phrases.map(function(ph){
+        return '<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+          +'<div style="font-family:var(--mono);font-size:11px;color:var(--gold);flex:1;">'+ph.p+'</div>'
+          +'<div style="font-family:var(--mono);font-size:10px;color:var(--text2);flex:1;">'+ph.m+'</div>'
+          +'<button class="btn btn-cyan btn-sm" style="font-size:9px;padding:3px 8px;" onclick="speakTTS(\''+ph.p+'\',\'en\')">🔊</button>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }).join('');
+}
+
+function submitEndangered(){
+  var lang=document.getElementById('endLangName').value.trim();
+  var phrase=document.getElementById('endPhrase').value.trim();
+  var meaning=document.getElementById('endMeaning').value.trim();
+  var context=document.getElementById('endContext').value.trim();
+  if(!lang||!phrase||!meaning){toast('Fill in language, phrase and meaning');return;}
+  var db=JSON.parse(localStorage.getItem('babel_endangered')||'[]');
+  db.push({lang:lang,phrase:phrase,meaning:meaning,context:context,ts:Date.now()});
+  localStorage.setItem('babel_endangered',JSON.stringify(db));
+  document.getElementById('endLangName').value='';
+  document.getElementById('endPhrase').value='';
+  document.getElementById('endMeaning').value='';
+  document.getElementById('endContext').value='';
+  renderEndangered();
+  toast('Phrase preserved — thank you');
+}
 
 populateLangs();
-updateLangPair();
-updateInterpPair();
 renderHistory();
 renderKeywords();
+renderEndangered();
+updateTrainCount();
 
 // Restore sentry link fields
 if(localStorage.getItem('babel_sentry_callsign'))
