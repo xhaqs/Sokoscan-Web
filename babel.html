@@ -476,7 +476,7 @@ body::after{
         </div>
         <div style="display:flex;gap:8px;margin-top:4px;">
           <button class="btn btn-gold btn-full" onclick="translateText()">
-            🌐 TRANSLATE
+            🌐 TRANSLATE → <span id="translateToLabel">Swahili</span>
           </button>
           <button class="btn btn-purple btn-sm" onclick="clearTranslate()">CLR</button>
         </div>
@@ -1082,6 +1082,8 @@ function updateLangPairNew(){
   var fl=LANGS.find(function(l){return l.c===state.fromLang;});
   var tl=LANGS.find(function(l){return l.c===state.toLang;});
   document.getElementById('langPair').textContent=(fl?fl.n.substring(0,3).toUpperCase():'?')+' \u2192 '+(tl?tl.n.substring(0,3).toUpperCase():'?');
+  var tlBtn=document.getElementById('translateToLabel');
+  if(tlBtn)tlBtn.textContent=tl?tl.n:'?';
 }
 
 function updateInterpPairNew(){
@@ -1191,14 +1193,47 @@ function speakOutput(){
 
 function speakTTS(text,lang){
   if(!text||text.trim()==='')return;
-  if('speechSynthesis' in window){
-    var u=new SpeechSynthesisUtterance(text);
-    u.lang=lang;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  } else {
-    toast('TTS not supported on this browser');
+  if(!('speechSynthesis' in window)){toast('TTS not supported on this browser');return;}
+  // Map language codes to BCP-47 tags supported by speech synthesis
+  var ttsMap={
+    'af':'af-ZA','sq':'sq-AL','am':'am-ET','ar':'ar-SA','hy':'hy-AM',
+    'az':'az-AZ','eu':'eu-ES','be':'be-BY','bn':'bn-BD','bs':'bs-BA',
+    'bg':'bg-BG','ca':'ca-ES','ceb':'fil-PH','ny':'ny','zh':'zh-CN',
+    'zh-TW':'zh-TW','co':'it-IT','hr':'hr-HR','cs':'cs-CZ','da':'da-DK',
+    'nl':'nl-NL','en':'en-US','eo':'eo','et':'et-EE','tl':'fil-PH',
+    'fi':'fi-FI','fr':'fr-FR','fy':'nl-NL','gl':'gl-ES','ka':'ka-GE',
+    'de':'de-DE','el':'el-GR','gu':'gu-IN','ht':'fr-HT','ha':'ha',
+    'haw':'en-US','iw':'he-IL','hi':'hi-IN','hmn':'hmn','hu':'hu-HU',
+    'is':'is-IS','ig':'ig','id':'id-ID','ga':'ga-IE','it':'it-IT',
+    'ja':'ja-JP','jw':'id-ID','kn':'kn-IN','kk':'kk-KZ','km':'km-KH',
+    'ko':'ko-KR','ku':'ku','ky':'ky-KG','lo':'lo-LA','la':'la',
+    'lv':'lv-LV','lt':'lt-LT','lb':'lb','mk':'mk-MK','mg':'mg',
+    'ms':'ms-MY','ml':'ml-IN','mt':'mt-MT','mi':'mi-NZ','mr':'mr-IN',
+    'mn':'mn-MN','my':'my-MM','ne':'ne-NP','no':'nb-NO','or':'or-IN',
+    'ps':'ps-AF','fa':'fa-IR','pl':'pl-PL','pt':'pt-PT','pa':'pa-IN',
+    'ro':'ro-RO','ru':'ru-RU','sm':'sm','gd':'gd','sr':'sr-RS',
+    'st':'st','sn':'sn','sd':'ur-PK','si':'si-LK','sk':'sk-SK',
+    'sl':'sl-SI','so':'so-SO','es':'es-ES','su':'su','sw':'sw-KE',
+    'sv':'sv-SE','tg':'tg-TJ','ta':'ta-IN','te':'te-IN','th':'th-TH',
+    'tr':'tr-TR','uk':'uk-UA','ur':'ur-PK','ug':'ug','uz':'uz-UZ',
+    'vi':'vi-VN','cy':'cy-GB','xh':'xh-ZA','yi':'yi','yo':'yo-NG',
+    'zu':'zu-ZA','ki':'sw-KE','lg':'lg','rw':'rw-RW','ln':'fr-CD',
+    'om':'om-ET','ti':'ti-ET','wo':'wo','bm':'fr-ML','ak':'ak',
+    'ee':'ee','tw':'ak',
+  };
+  var bcp=ttsMap[lang]||lang;
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=bcp;
+  // Check if voice available for this language
+  var voices=window.speechSynthesis.getVoices();
+  var match=voices.find(function(v){return v.lang.startsWith(bcp.split('-')[0]);});
+  if(!match&&voices.length>0){
+    // Fallback — use default voice but notify
+    toast('No voice for this language — playing default');
+    u.lang='en-US';
   }
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
 }
 
 function speakText(elId, side){
