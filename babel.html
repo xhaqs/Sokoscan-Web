@@ -5,6 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050308">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BABEL">
+<link rel="manifest" href="data:application/json,{
+  &quot;name&quot;:&quot;BABEL — RIAKOINE-EMPIRE&quot;,
+  &quot;short_name&quot;:&quot;BABEL&quot;,
+  &quot;description&quot;:&quot;Break every language barrier. Zack in Tongues.&quot;,
+  &quot;start_url&quot;:&quot;/babel/&quot;,
+  &quot;display&quot;:&quot;standalone&quot;,
+  &quot;background_color&quot;:&quot;#050308&quot;,
+  &quot;theme_color&quot;:&quot;#050308&quot;,
+  &quot;orientation&quot;:&quot;portrait&quot;,
+  &quot;icons&quot;:[
+    {&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23050308'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23C9A84C' font-family='serif' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;},
+    {&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23050308'/%3E%3Ctext x='256' y='350' font-size='280' text-anchor='middle' fill='%23C9A84C' font-family='serif' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}
+  ]
+}">
 <title>BABEL — RIAKOINE-EMPIRE</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -424,6 +441,7 @@ body::after{
     <div class="top-right">
       <div id="sosIndicator"><span class="sos-dot"></span>SOS ACTIVE</div>
       <div id="langPair">EN → SW</div>
+      <button id="pwaInstallBtn" style="display:none;font-family:var(--mono);font-size:8px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 8px;border-radius:4px;cursor:pointer;" onclick="installPWA()">📲 INSTALL</button>
     </div>
   </div>
 
@@ -2246,7 +2264,62 @@ function submitEndangered(){
   toast('Phrase preserved — thank you');
 }
 
-// ── QUIZ SYSTEM ──
+// ── PWA INSTALL ──
+var _pwaPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  _pwaPrompt=e;
+  var btn=document.getElementById('pwaInstallBtn');
+  if(btn)btn.style.display='block';
+  setTimeout(function(){
+    if(_pwaPrompt){
+      toast('📱 Install BABEL — tap INSTALL button top right');
+    }
+  },3000);
+});
+
+function installPWA(){
+  if(_pwaPrompt){
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(function(result){
+      if(result.outcome==='accepted'){
+        toast('BABEL installed! 👑');
+        document.getElementById('pwaInstallBtn').style.display='none';
+      }
+      _pwaPrompt=null;
+    });
+  } else {
+    toast('Tap ⋮ → Add to Home Screen to install');
+  }
+}
+
+// Register service worker for offline support
+if('serviceWorker' in navigator){
+  var swCode=`
+self.addEventListener('install',function(e){self.skipWaiting();});
+self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});
+self.addEventListener('fetch',function(e){
+  if(e.request.method!=='GET')return;
+  e.respondWith(
+    caches.open('babel-v2').then(function(cache){
+      return fetch(e.request).then(function(response){
+        if(response&&response.status===200){
+          cache.put(e.request,response.clone());
+        }
+        return response;
+      }).catch(function(){
+        return caches.match(e.request);
+      });
+    })
+  );
+});
+`;
+  var blob=new Blob([swCode],{type:'application/javascript'});
+  var swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl,{scope:'/babel/'})
+    .then(function(){console.log('BABEL SW registered');})
+    .catch(function(e){console.log('SW registration failed:',e.message);});
+}
 var quizState={active:false,questions:[],current:0,score:0,total:0};
 var quizScores=JSON.parse(localStorage.getItem('babel_quiz_scores')||'{"total":0,"correct":0,"streak":0,"lastDay":""}');
 
