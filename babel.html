@@ -5,23 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050308">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BABEL">
-<link rel="manifest" href="data:application/json,{
-  &quot;name&quot;:&quot;BABEL — RIAKOINE-EMPIRE&quot;,
-  &quot;short_name&quot;:&quot;BABEL&quot;,
-  &quot;description&quot;:&quot;Break every language barrier. Zack in Tongues.&quot;,
-  &quot;start_url&quot;:&quot;/babel/&quot;,
-  &quot;display&quot;:&quot;standalone&quot;,
-  &quot;background_color&quot;:&quot;#050308&quot;,
-  &quot;theme_color&quot;:&quot;#050308&quot;,
-  &quot;orientation&quot;:&quot;portrait&quot;,
-  &quot;icons&quot;:[
-    {&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23050308'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23C9A84C' font-family='serif' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;},
-    {&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23050308'/%3E%3Ctext x='256' y='350' font-size='280' text-anchor='middle' fill='%23C9A84C' font-family='serif' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}
-  ]
-}">
 <title>BABEL — RIAKOINE-EMPIRE</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -316,74 +299,6 @@ body::after{
   border-radius:50%;background:var(--dim);transition:all 0.2s;}
 .toggle.on::after{left:20px;background:var(--green);}
 
-/* ── LANG SEARCH MODAL ── */
-.lang-btn{
-  background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);
-  color:var(--text);font-family:var(--mono);font-size:10px;padding:10px 8px;
-  border-radius:4px;outline:none;width:100%;cursor:pointer;text-align:left;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.lang-modal{
-  display:none;position:fixed;inset:0;z-index:999;
-  background:rgba(5,3,8,0.92);flex-direction:column;
-}
-.lang-modal.open{display:flex;}
-.lang-modal-inner{
-  background:var(--card);border:1px solid var(--border);border-radius:8px;
-  margin:16px;flex:1;display:flex;flex-direction:column;max-height:90vh;overflow:hidden;
-}
-.lang-modal-head{
-  padding:12px 14px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;
-}
-.lang-search-input{
-  flex:1;background:rgba(14,10,24,0.8);border:1px solid var(--border);
-  color:var(--text);font-family:var(--mono);font-size:12px;padding:8px 12px;
-  border-radius:4px;outline:none;
-}
-.lang-search-input::placeholder{color:var(--dim);}
-.lang-modal-list{flex:1;overflow-y:auto;padding:6px;}
-.lang-option{
-  padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text);
-  border-radius:4px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);
-  display:flex;align-items:center;gap:8px;
-}
-.lang-option:active,.lang-option.selected{background:rgba(124,58,237,0.15);color:var(--purple);}
-.lang-option-tag{font-size:8px;color:var(--dim);margin-left:auto;letter-spacing:1px;}
-.lang-endangered{color:var(--gold);}
-
-/* ── E2EE GROUP CHAT ── */
-.chat-msg{
-  padding:8px 12px;border-radius:6px;margin-bottom:6px;
-  font-family:var(--mono);font-size:11px;line-height:1.5;
-  border:1px solid var(--border);
-}
-.chat-msg.mine{background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.2);text-align:right;}
-.chat-msg.theirs{background:rgba(6,182,212,0.05);border-color:rgba(6,182,212,0.1);}
-.chat-sender{font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;}
-.chat-original{color:var(--dim);font-size:9px;margin-top:3px;}
-.chat-translated{color:var(--cyan);}
-.chat-input-wrap{
-  display:flex;gap:6px;padding:10px;background:var(--card);
-  border:1px solid var(--border);border-radius:0 0 6px 6px;border-top:none;
-}
-.e2ee-badge{
-  background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);
-  color:var(--green);font-family:var(--mono);font-size:7px;padding:2px 6px;
-  border-radius:2px;letter-spacing:1px;
-}
-
-/* ── AI TUTOR ── */
-.tutor-streaming{
-  font-family:var(--mono);font-size:11px;color:var(--text);
-  line-height:1.8;white-space:pre-wrap;
-}
-.tutor-cursor{
-  display:inline-block;width:8px;height:13px;
-  background:var(--gold);animation:blink 1s step-end infinite;vertical-align:middle;
-}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
-
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -402,7 +317,6 @@ body::after{
   <div class="pk-logo">BABEL</div>
   <div class="pk-sub">BY RIAKOINE-EMPIRE</div>
   <div class="pk-tagline">Breaking every language barrier.<br>Speaking every human tongue.</div>
-  <div style="font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:0.15em;margin-bottom:16px;opacity:0.8;">✦ ZACK IN TONGUES ✦</div>
   <div class="pk-label">ENTER ACCESS CODE</div>
   <input id="pkInput" type="password" maxlength="32"
     placeholder="· · · · · · · ·"
@@ -419,29 +333,16 @@ body::after{
   <button class="countdown-cancel" onclick="cancelSOS()">✕ CANCEL</button>
 </div>
 
-<!-- LANGUAGE SEARCH MODAL -->
-<div class="lang-modal" id="langModal">
-  <div class="lang-modal-inner">
-    <div class="lang-modal-head">
-      <input class="lang-search-input" id="langSearchInput" placeholder="Search language..." oninput="filterLangModal(this.value)" autocomplete="off">
-      <button class="btn btn-red btn-sm" onclick="closeLangModal()">✕</button>
-    </div>
-    <div class="lang-modal-list" id="langModalList"></div>
-  </div>
-</div>
-
 <div id="app">
   <!-- TOPBAR -->
   <div id="topbar">
     <div class="logo-wrap">
       <div class="logo">BABEL</div>
       <div class="empire">RIAKOINE-EMPIRE</div>
-      <div style="font-family:var(--mono);font-size:7px;color:var(--gold);letter-spacing:0.1em;opacity:0.7;">✦ ZACK IN TONGUES</div>
     </div>
     <div class="top-right">
       <div id="sosIndicator"><span class="sos-dot"></span>SOS ACTIVE</div>
       <div id="langPair">EN → SW</div>
-      <button id="pwaInstallBtn" style="display:none;font-family:var(--mono);font-size:8px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 8px;border-radius:4px;cursor:pointer;" onclick="installPWA()">📲 INSTALL</button>
     </div>
   </div>
 
@@ -462,15 +363,6 @@ body::after{
     <div class="tab" onclick="switchTab('ocr')" id="tab-ocr">
       <span class="tab-icon">📷</span>CAMERA
     </div>
-    <div class="tab" onclick="switchTab('chat')" id="tab-chat">
-      <span class="tab-icon">🔐</span>CHAT
-    </div>
-    <div class="tab" onclick="switchTab('endangered')" id="tab-endangered">
-      <span class="tab-icon">🌿</span>HERITAGE
-    </div>
-    <div class="tab" onclick="switchTab('tutor')" id="tab-tutor">
-      <span class="tab-icon">🧠</span>TUTOR
-    </div>
   </div>
 
   <!-- PANELS -->
@@ -484,13 +376,9 @@ body::after{
           <span class="card-tag" id="detectTag">AUTO-DETECT ON</span>
         </div>
         <div class="lang-grid">
-          <button class="lang-btn" id="fromLangBtn" onclick="openLangModal('fromLang')">
-            <span id="fromLangLabel">English</span><span style="color:var(--dim);font-size:9px;">▼</span>
-          </button>
+          <select class="lang-select" id="fromLang" onchange="updateLangPair()"></select>
           <div class="lang-swap" onclick="swapLangs()">⇄</div>
-          <button class="lang-btn" id="toLangBtn" onclick="openLangModal('toLang')">
-            <span id="toLangLabel">Swahili</span><span style="color:var(--dim);font-size:9px;">▼</span>
-          </button>
+          <select class="lang-select" id="toLang" onchange="updateLangPair()"></select>
         </div>
       </div>
 
@@ -510,7 +398,7 @@ body::after{
         </div>
         <div style="display:flex;gap:8px;margin-top:4px;">
           <button class="btn btn-gold btn-full" onclick="translateText()">
-            🌐 TRANSLATE → <span id="translateToLabel">Swahili</span>
+            🌐 TRANSLATE
           </button>
           <button class="btn btn-purple btn-sm" onclick="clearTranslate()">CLR</button>
         </div>
@@ -524,8 +412,6 @@ body::after{
           <button class="btn btn-red btn-sm" onclick="stopSpeech()">⏹ STOP</button>
           <button class="btn btn-purple btn-sm" onclick="copyOutput()">📋 COPY</button>
           <button class="btn btn-green btn-sm" onclick="saveToHistory()">💾 SAVE</button>
-          <button class="btn btn-gold btn-sm" onclick="sendToTutor()">🧠 TUTOR</button>
-          <button class="btn btn-cyan btn-sm" onclick="shareTranslation()">↗ SHARE</button>
         </div>
       </div>
     </div>
@@ -541,13 +427,9 @@ body::after{
           Two people, one phone. Speaker A speaks — hands phone to Speaker B who hears the translation. They reply — you hear it in your language.
         </div>
         <div class="lang-grid">
-          <button class="lang-btn" onclick="openLangModal('interpLangA')">
-            <span id="interpLangALabel">English</span><span style="color:var(--dim);font-size:9px;">▼</span>
-          </button>
+          <select class="lang-select" id="interpLangA" onchange="updateInterpPair()"></select>
           <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;">⇄</div>
-          <button class="lang-btn" onclick="openLangModal('interpLangB')">
-            <span id="interpLangBLabel">Swahili</span><span style="color:var(--dim);font-size:9px;">▼</span>
-          </button>
+          <select class="lang-select" id="interpLangB" onchange="updateInterpPair()"></select>
         </div>
       </div>
 
@@ -566,7 +448,7 @@ body::after{
             </div>
           </div>
           <button class="btn btn-gold btn-full" onclick="interpretA()">
-            🎙 INTERPRET → <span id="labelA2">Swahili</span>
+            🌐 TRANSLATE → <span id="labelA2">SWAHILI</span>
           </button>
           <div class="speaker-output" id="outputA">Translation will appear here...</div>
           <div class="output-actions" style="margin-top:6px;">
@@ -591,7 +473,7 @@ body::after{
             </div>
           </div>
           <button class="btn btn-cyan btn-full" onclick="interpretB()">
-            🎙 INTERPRET → <span id="labelB2">English</span>
+            🌐 TRANSLATE → <span id="labelB2">ENGLISH</span>
           </button>
           <div class="speaker-output" id="outputB">Translation will appear here...</div>
           <div class="output-actions" style="margin-top:6px;">
@@ -622,10 +504,10 @@ body::after{
       <div class="card">
         <div class="card-head">
           <span class="card-title">SENTRY LINK</span>
-          <span class="e2ee-badge" id="sentryStatusBadge" style="background:rgba(255,59,48,0.1);border-color:rgba(255,59,48,0.2);color:#ff3b30;">⚫ NOT LINKED</span>
+          <span class="card-tag">OPTIONAL</span>
         </div>
         <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;line-height:1.6;">
-          Connect BABEL SOS to your SENTRY account for full GPS + contact alerts. When SOS fires here — SENTRY notifies your emergency contacts instantly.
+          Connect BABEL SOS to your SENTRY account for full GPS + contact alerts.
         </div>
         <input id="sentryCallsign" type="text" class="babel-input"
           style="height:auto;padding:10px;"
@@ -633,15 +515,9 @@ body::after{
         <input id="sentryToken" type="password" class="babel-input"
           style="height:auto;padding:10px;margin-top:6px;"
           placeholder="SENTRY passkey">
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn btn-purple btn-full" onclick="saveSentryLink()">
-            🔗 LINK TO SENTRY
-          </button>
-          <button class="btn btn-cyan btn-sm" onclick="openSentry()">
-            ↗ OPEN
-          </button>
-        </div>
-        <div id="sentryLinkStatus" style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:6px;"></div>
+        <button class="btn btn-purple btn-full" style="margin-top:8px;" onclick="saveSentryLink()">
+          🔗 LINK TO SENTRY
+        </button>
       </div>
 
       <div class="card">
@@ -669,12 +545,6 @@ body::after{
         <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">
           Tap entry to restore. Swipe or tap ✕ to delete one.
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-family:var(--mono);font-size:8px;color:var(--dim);">📦 OFFLINE CACHE</span>
-          <button class="btn btn-gold btn-sm" style="font-size:8px;" onclick="showOfflineStats()">
-            <span id="offlineCacheCount">0</span> phrases stored
-          </button>
-        </div>
       </div>
       <div id="historyList"></div>
     </div>
@@ -690,13 +560,11 @@ body::after{
           Point your camera at any text — menu, sign, document, label — in any language. BABEL reads and translates it instantly.
         </div>
         <div class="lang-grid">
-          <button class="lang-btn" onclick="openLangModal('ocrFromLang')">
-            <span id="ocrFromLangLabel">Auto Detect</span><span style="color:var(--dim);font-size:9px;">▼</span>
-          </button>
+          <select class="lang-select" id="ocrFromLang">
+            <option value="auto">Auto Detect</option>
+          </select>
           <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;">→</div>
-          <button class="lang-btn" onclick="openLangModal('ocrToLang')">
-            <span id="ocrToLangLabel">English</span><span style="color:var(--dim);font-size:9px;">▼</span>
-          </button>
+          <select class="lang-select" id="ocrToLang"></select>
         </div>
       </div>
 
@@ -784,227 +652,6 @@ body::after{
         </button>
         <div id="ocrFilePreview" style="margin-top:8px;display:none;">
           <img id="ocrPreviewImg" style="width:100%;border-radius:4px;border:1px solid var(--border);">
-        </div>
-      </div>
-    </div>
-
-    <!-- ── E2EE GROUP CHAT PANEL ── -->
-    <div class="panel" id="panel-chat">
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">ENCRYPTED CHAT</span>
-          <span class="e2ee-badge">🔒 E2EE</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:10px;">
-          Messages encrypted end-to-end. Every member reads in their own language. No server stores your messages.
-        </div>
-        <!-- Room setup -->
-        <div id="chatSetup">
-          <input class="babel-input" id="chatName" placeholder="Your name / callsign" style="height:auto;padding:10px;margin-bottom:8px;">
-          <input class="babel-input" id="chatRoom" placeholder="Room code (share with others)" style="height:auto;padding:10px;margin-bottom:8px;">
-          <button class="lang-btn" style="margin-bottom:8px;" onclick="openLangModal('chatLang')">
-            <span>My language: </span><span id="chatLangLabel">English</span><span style="color:var(--dim);font-size:9px;margin-left:auto;">▼</span>
-          </button>
-          <button class="btn btn-gold btn-full" onclick="joinChat()">🔐 JOIN ROOM</button>
-        </div>
-        <!-- Active chat -->
-        <div id="chatActive" style="display:none;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-family:var(--mono);font-size:9px;color:var(--green);">🔒 ROOM: <span id="chatRoomLabel"></span></span>
-            <button class="btn btn-red btn-sm" onclick="leaveChat()">LEAVE</button>
-          </div>
-        </div>
-      </div>
-      <!-- Messages -->
-      <div id="chatMessages" style="display:none;min-height:200px;max-height:340px;overflow-y:auto;
-        border:1px solid var(--border);border-radius:6px 6px 0 0;padding:10px;background:rgba(5,3,8,0.6);">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px 0;">
-          Waiting for messages...
-        </div>
-      </div>
-      <!-- Input -->
-      <div id="chatInputWrap" style="display:none;" class="chat-input-wrap">
-        <textarea class="babel-input" id="chatInput" placeholder="Type message..." style="height:40px;flex:1;padding:8px;"></textarea>
-        <button class="btn btn-gold btn-sm" onclick="sendChatMsg()" style="padding:8px 14px;">SEND</button>
-        <button class="mic-btn" style="font-size:16px;width:40px;height:40px;" onclick="toggleMic('chat')">🎤</button>
-      </div>
-      <!-- Training notice for unsupported languages -->
-      <div class="card" style="margin-top:12px;">
-        <div class="card-head">
-          <span class="card-title">LANGUAGE TRAINING</span>
-          <span class="card-tag">BETA</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:8px;">
-          If your language is missing or mistranslated (Kikuyu, Ogiek, minority dialects) — train BABEL here. Your corrections teach the resident AI.
-        </div>
-        <input class="babel-input" id="trainOriginal" placeholder="Original phrase in your language" style="height:auto;padding:10px;margin-bottom:6px;">
-        <input class="babel-input" id="trainTranslation" placeholder="Correct translation in English" style="height:auto;padding:10px;margin-bottom:6px;">
-        <button class="lang-btn" style="margin-bottom:8px;" onclick="openLangModal('trainLang')">
-          <span>Language being trained: </span><span id="trainLangLabel">Kikuyu (Gikuyu)</span><span style="color:var(--dim);font-size:9px;margin-left:auto;">▼</span>
-        </button>
-        <button class="btn btn-gold btn-full" onclick="submitTraining()">💾 SUBMIT TRAINING PHRASE</button>
-        <div id="trainCount" style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:6px;text-align:center;"></div>
-      </div>
-    </div>
-
-    <!-- ── HERITAGE LANGUAGES PANEL ── -->
-    <div class="panel" id="panel-endangered">
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">HERITAGE & ENDANGERED</span>
-          <span class="e2ee-badge" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold);">🌿 ARK</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
-          BABEL is an ark for languages the world is losing. Every phrase saved here is a language kept alive. These are the voices at risk of disappearing.
-        </div>
-      </div>
-
-      <!-- Language cards -->
-      <div id="endangeredList"></div>
-
-      <!-- Contribute -->
-      <div class="card" style="margin-top:4px;">
-        <div class="card-head">
-          <span class="card-title">CONTRIBUTE A PHRASE</span>
-          <span class="card-tag">HELP PRESERVE</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.6;margin-bottom:8px;">
-          Know a phrase in an endangered language? Add it to the BABEL community archive.
-        </div>
-        <input class="babel-input" id="endLangName" placeholder="Language name e.g. Ogiek, Elmolo, Dahalo" style="height:auto;padding:10px;margin-bottom:6px;">
-        <input class="babel-input" id="endPhrase" placeholder="Phrase in the heritage language" style="height:auto;padding:10px;margin-bottom:6px;">
-        <input class="babel-input" id="endMeaning" placeholder="Meaning in English" style="height:auto;padding:10px;margin-bottom:6px;">
-        <input class="babel-input" id="endContext" placeholder="Context / usage (optional)" style="height:auto;padding:10px;margin-bottom:8px;">
-        <button class="btn btn-gold btn-full" onclick="submitEndangered()">🌿 SUBMIT PHRASE</button>
-      </div>
-    </div>
-
-    <!-- ── AI TUTOR PANEL ── -->
-    <div class="panel" id="panel-tutor">
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">AI LANGUAGE TUTOR</span>
-          <span class="e2ee-badge" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold);">🧠 POWERED BY CLAUDE</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
-          Your personal language tutor. Learn the culture behind words, discover related phrases, get quizzed on what you've translated — in any language.
-        </div>
-      </div>
-
-      <!-- LAST TRANSLATION CONTEXT -->
-      <div class="card" id="tutorContextCard">
-        <div class="card-head">
-          <span class="card-title">CURRENT LESSON</span>
-          <span class="card-tag" id="tutorLangTag">—</span>
-        </div>
-        <div id="tutorOriginal" style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:4px;">Translate something first — then tap 🧠 TUTOR</div>
-        <div id="tutorTranslated" style="font-family:var(--mono);font-size:11px;color:var(--cyan);"></div>
-      </div>
-
-      <!-- TUTOR MODES -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">WHAT WOULD YOU LIKE TO LEARN?</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <button class="btn btn-gold btn-full" onclick="askTutor('explain')">
-            📖 EXPLAIN — Culture & context behind this phrase
-          </button>
-          <button class="btn btn-cyan btn-full" onclick="askTutor('related')">
-            🔗 RELATED — Teach me similar phrases
-          </button>
-          <button class="btn btn-purple btn-full" onclick="startQuiz()">
-            ⚡ QUIZ — Test my knowledge
-          </button>
-          <button class="btn btn-green btn-full" onclick="askTutor('pronounce')">
-            🗣 PRONOUNCE — How to say this correctly
-          </button>
-          <button class="btn btn-gold btn-full" onclick="askTutor('endangered')">
-            🌿 HERITAGE — Is this phrase endangered or rare?
-          </button>
-          <button class="btn btn-cyan btn-full" onclick="askTutor('dialect')">
-            🗺 DIALECT — Regional variants & differences
-          </button>
-        </div>
-      </div>
-
-      <!-- QUIZ SCORING -->
-      <div class="card" id="quizCard" style="display:none;">
-        <div class="card-head">
-          <span class="card-title">⚡ QUIZ TIME</span>
-          <span class="card-tag" id="quizScoreTag">0 / 0</span>
-        </div>
-        <div id="quizQuestion" style="font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.8;margin-bottom:12px;"></div>
-        <textarea class="babel-input" id="quizAnswer" placeholder="Type your answer here..." style="height:60px;margin-bottom:8px;"></textarea>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-gold btn-full" onclick="submitQuizAnswer()">✓ SUBMIT</button>
-          <button class="btn btn-purple btn-sm" onclick="skipQuiz()">SKIP</button>
-          <button class="btn btn-red btn-sm" onclick="endQuiz()">END</button>
-        </div>
-        <div id="quizFeedback" style="font-family:var(--mono);font-size:10px;margin-top:8px;line-height:1.6;"></div>
-      </div>
-
-      <!-- DAILY LESSON -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">📅 DAILY LESSON</span>
-          <span class="card-tag" id="dailyLessonDate">—</span>
-        </div>
-        <div id="dailyLessonContent" style="font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.8;">
-          Loading today's lesson...
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn btn-gold btn-full" onclick="loadDailyLesson()">🔄 NEW LESSON</button>
-          <button class="btn btn-cyan btn-sm" onclick="speakDailyLesson()">🔊</button>
-        </div>
-      </div>
-
-      <!-- CUSTOM QUESTION -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">ASK ANYTHING</span>
-          <span class="card-tag">FREE MODE</span>
-        </div>
-        <textarea class="babel-input" id="tutorQuestion"
-          placeholder="Ask the tutor anything... e.g. 'How do I greet an elder in Kikuyu?' or 'What does this gesture mean in Arabic culture?'"
-          style="height:70px;"></textarea>
-        <button class="btn btn-gold btn-full" style="margin-top:8px;" onclick="askTutorCustom()">
-          🧠 ASK TUTOR
-        </button>
-      </div>
-
-      <!-- TUTOR RESPONSE -->
-      <div class="card" id="tutorResponseCard" style="display:none;">
-        <div class="card-head">
-          <span class="card-title">TUTOR SAYS</span>
-          <div style="display:flex;gap:6px;">
-            <button class="btn btn-cyan btn-sm" onclick="speakTutorResponse()">🔊 SPEAK</button>
-            <button class="btn btn-purple btn-sm" onclick="copyEl('tutorResponse')">📋 COPY</button>
-          </div>
-        </div>
-        <div id="tutorResponse" style="font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.8;white-space:pre-wrap;"></div>
-      </div>
-
-      <!-- LEARNING PROGRESS -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">YOUR PROGRESS</span>
-          <button class="btn btn-red btn-sm" onclick="clearTutorHistory()">✕ RESET</button>
-        </div>
-        <div id="tutorStats" style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:2;"></div>
-        <div style="margin-top:8px;display:flex;gap:6px;">
-          <div style="flex:1;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:8px;text-align:center;">
-            <div style="font-family:var(--mono);font-size:18px;color:var(--gold);" id="quizTotalScore">0</div>
-            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">QUIZ SCORE</div>
-          </div>
-          <div style="flex:1;background:rgba(100,210,255,0.1);border:1px solid rgba(100,210,255,0.2);border-radius:6px;padding:8px;text-align:center;">
-            <div style="font-family:var(--mono);font-size:18px;color:var(--cyan);" id="quizStreak">0</div>
-            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">DAY STREAK</div>
-          </div>
-          <div style="flex:1;background:rgba(48,209,88,0.1);border:1px solid rgba(48,209,88,0.2);border-radius:6px;padding:8px;text-align:center;">
-            <div style="font-family:var(--mono);font-size:18px;color:#30d158;" id="totalLessons">0</div>
-            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">LESSONS</div>
-          </div>
         </div>
       </div>
     </div>
@@ -1167,130 +814,21 @@ function switchTab(name){
   document.getElementById('panel-'+name).classList.add('active');
 }
 
-// ── LANG STATE (replaces select elements) ──
-var langState = {
-  fromLang: 'en',
-  toLang: 'sw',
-  interpLangA: 'en',
-  interpLangB: 'sw',
-  ocrFromLang: 'auto',
-  ocrToLang: 'en',
-  chatLang: 'en',
-  trainLang: 'ki',
-};
-var _modalTarget = null;
-
-var LANGS_WITH_AUTO = [{c:'auto',n:'Auto Detect'}].concat(LANGS);
-
-var ENDANGERED_LANGS = [
-  {name:'Ogiek',region:'Kenya — Mau Forest',speakers:'~30,000',status:'Critically Endangered',phrases:[
-    {p:'Oo pa',m:'Hello / Peace be with you'},{p:'Aang meek',m:'I am hungry'},{p:'Toret',m:'Forest / Home'}
-  ]},
-  {name:'Elmolo',region:'Kenya — Lake Turkana',speakers:'~700',status:'Nearly Extinct',phrases:[
-    {p:'Ashe oleng',m:'Thank you very much'},{p:'Nabo',m:'Water'},{p:'Iyiom',m:'Fish'}
-  ]},
-  {name:'Dahalo',region:'Kenya — Tana River',speakers:'~400',status:'Nearly Extinct',phrases:[
-    {p:'Hako',m:'Come here'},{p:'Kala',m:'Food / Eat'},{p:'Mto',m:'River'}
-  ]},
-  {name:'Omotik',region:'Kenya — Narok',speakers:'~50',status:'Moribund',phrases:[
-    {p:'Sopa',m:'Greeting'},{p:'Apa',m:'Father'},{p:'Enkare',m:'Water'}
-  ]},
-  {name:'Sengwer',region:'Kenya — Cherangany Hills',speakers:'~4,000',status:'Endangered',phrases:[
-    {p:'Chamgei',m:'How are you'},{p:'Somok',m:'Forest'},{p:'Cheseret',m:'River'}
-  ]},
-  {name:'Yaaku (Mukogodo)',region:'Kenya — Laikipia',speakers:'~100',status:'Nearly Extinct',phrases:[
-    {p:'Tuko',m:'We are here / We exist'},{p:'Nkare',m:'Water'},{p:'Mbogo',m:'Buffalo'}
-  ]},
-];
-
-// ── LANG MODAL ──
-function openLangModal(target){
-  _modalTarget=target;
-  var includeAuto=(target==='ocrFromLang');
-  var list=includeAuto?LANGS_WITH_AUTO:LANGS;
-  document.getElementById('langSearchInput').value='';
-  renderLangList(list, target);
-  document.getElementById('langModal').classList.add('open');
-  setTimeout(function(){document.getElementById('langSearchInput').focus();},100);
-}
-
-function closeLangModal(){
-  document.getElementById('langModal').classList.remove('open');
-  _modalTarget=null;
-}
-
-function renderLangList(list, target){
-  var cur=langState[target]||'';
-  var html=list.map(function(l){
-    var isEnd=ENDANGERED_LANGS.some(function(e){return e.name.toLowerCase().includes(l.n.toLowerCase().split(' ')[0]);});
-    var cls='lang-option'+(l.c===cur?' selected':'')+(isEnd?' lang-endangered':'');
-    var tag=l.c==='auto'?'AUTO':(l.c.toUpperCase());
-    return '<div class="'+cls+'" onclick="selectLang(\''+l.c+'\',\''+l.n+'\')">'
-      +(isEnd?'🌿 ':'')+l.n
-      +'<span class="lang-option-tag">'+tag+'</span>'
-      +'</div>';
-  }).join('');
-  document.getElementById('langModalList').innerHTML=html;
-}
-
-function filterLangModal(q){
-  var includeAuto=(_modalTarget==='ocrFromLang');
-  var base=includeAuto?LANGS_WITH_AUTO:LANGS;
-  var filtered=q?base.filter(function(l){return l.n.toLowerCase().includes(q.toLowerCase())||l.c.toLowerCase().includes(q.toLowerCase());}):base;
-  renderLangList(filtered, _modalTarget);
-}
-
-function selectLang(code, name){
-  if(!_modalTarget)return;
-  langState[_modalTarget]=code;
-  // Update label
-  var labelId=_modalTarget+'Label';
-  var el=document.getElementById(labelId);
-  if(el)el.textContent=name;
-  closeLangModal();
-  // Trigger updates
-  if(_modalTarget==='fromLang'||_modalTarget==='toLang') updateLangPairNew();
-  if(_modalTarget==='interpLangA'||_modalTarget==='interpLangB') updateInterpPairNew();
-  if(_modalTarget==='trainLang'){/* label already set */}
-}
-
-function updateLangPairNew(){
-  state.fromLang=langState.fromLang;
-  state.toLang=langState.toLang;
-  var fl=LANGS.find(function(l){return l.c===state.fromLang;});
-  var tl=LANGS.find(function(l){return l.c===state.toLang;});
-  document.getElementById('langPair').textContent=(fl?fl.n.substring(0,3).toUpperCase():'?')+' \u2192 '+(tl?tl.n.substring(0,3).toUpperCase():'?');
-  var tlBtn=document.getElementById('translateToLabel');
-  if(tlBtn)tlBtn.textContent=tl?tl.n:'?';
-}
-
-function updateInterpPairNew(){
-  state.interpA=langState.interpLangA||'en';
-  state.interpB=langState.interpLangB||'sw';
-  var la=LANGS.find(function(l){return l.c===state.interpA;});
-  var lb=LANGS.find(function(l){return l.c===state.interpB;});
-  // Speaker A header label
-  if(document.getElementById('labelA'))document.getElementById('labelA').textContent=la?la.n:'?';
-  // Speaker A button — interprets TO B's language
-  if(document.getElementById('labelA2'))document.getElementById('labelA2').textContent=lb?lb.n:'?';
-  // Speaker B header label
-  if(document.getElementById('labelB'))document.getElementById('labelB').textContent=lb?lb.n:'?';
-  // Speaker B button — interprets TO A's language
-  if(document.getElementById('labelB2'))document.getElementById('labelB2').textContent=la?la.n:'?';
-  // Also update the lang picker button labels
-  if(document.getElementById('interpLangALabel'))document.getElementById('interpLangALabel').textContent=la?la.n:'?';
-  if(document.getElementById('interpLangBLabel'))document.getElementById('interpLangBLabel').textContent=lb?lb.n:'?';
-}
-
+// ── POPULATE LANGUAGE SELECTS ──
 function populateLangs(){
-  // No selects to populate — using modal system
-  // Just init state
-  updateLangPairNew();
-  updateInterpPairNew();
-  document.getElementById('ocrToLangLabel').textContent='English';
-  document.getElementById('ocrFromLangLabel').textContent='Auto Detect';
-  document.getElementById('trainLangLabel').textContent='Kikuyu (Gikuyu)';
-  document.getElementById('chatLangLabel').textContent='English';
+  var selects=['fromLang','toLang','interpLangA','interpLangB'];
+  selects.forEach(function(id){
+    var sel=document.getElementById(id);
+    LANGS.forEach(function(l){
+      var opt=document.createElement('option');
+      opt.value=l.c;opt.textContent=l.n;
+      sel.appendChild(opt);
+    });
+  });
+  document.getElementById('fromLang').value='en';
+  document.getElementById('toLang').value='sw';
+  document.getElementById('interpLangA').value='en';
+  document.getElementById('interpLangB').value='sw';
 }
 
 function updateLangPair(){
@@ -1313,58 +851,28 @@ function updateInterpPair(){
 }
 
 function swapLangs(){
-  var f=langState.fromLang;
-  var t=langState.toLang;
-  var fl=LANGS.find(function(l){return l.c===f;});
-  var tl=LANGS.find(function(l){return l.c===t;});
-  langState.fromLang=t;
-  langState.toLang=f;
-  document.getElementById('fromLangLabel').textContent=tl?tl.n:'?';
-  document.getElementById('toLangLabel').textContent=fl?fl.n:'?';
-  updateLangPairNew();
+  var f=document.getElementById('fromLang').value;
+  var t=document.getElementById('toLang').value;
+  document.getElementById('fromLang').value=t;
+  document.getElementById('toLang').value=f;
+  updateLangPair();
   toast('Languages swapped');
 }
-
-// ── OFFLINE TRANSLATION CACHE ──
-var offlineCache=(function(){
-  var CACHE_KEY='babel_offline_cache';
-  var MAX=200;
-  var cache=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}');
-  function key(text,from,to){return from+'|'+to+'|'+text.substring(0,100);}
-  function get(text,from,to){return cache[key(text,from,to)]||null;}
-  function set(text,from,to,result){
-    cache[key(text,from,to)]=result;
-    var keys=Object.keys(cache);
-    if(keys.length>MAX){delete cache[keys[0]];}
-    try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){}
-  }
-  function size(){return Object.keys(cache).length;}
-  return {get:get,set:set,size:size};
-})();
 
 // ── TRANSLATE ──
 function translateText(){
   var text=document.getElementById('inputText').value.trim();
   if(!text){toast('Enter text to translate');return;}
-  var from=langState.fromLang||'auto';
-  var to=langState.toLang||'en';
-  // Check user training DB first
-  var trained=getTrainedPhrase(text,from);
+  var from=document.getElementById('fromLang').value;
+  var to=document.getElementById('toLang').value;
   var outBox=document.getElementById('outputText');
   outBox.innerHTML='<span class="spinner"></span>';
   document.getElementById('outputCard').style.display='block';
-  if(trained){
-    outBox.textContent=trained+' [trained]';
-    state.lastTranslation={orig:text,trans:trained,from:from,to:to,ts:Date.now()};
-    return;
-  }
   callGoogleTranslate(text,from,to,function(result){
     if(result){
       outBox.textContent=result;
       state.lastTranslation={orig:text,trans:result,from:from,to:to,ts:Date.now()};
       checkForSOS(text);
-      var el=document.getElementById('offlineCacheCount');
-      if(el)el.textContent=offlineCache.size();
     } else {
       outBox.textContent='Translation failed. Check connection.';
     }
@@ -1372,9 +880,6 @@ function translateText(){
 }
 
 function callGoogleTranslate(text, from, to, cb){
-  // Check offline cache first
-  var cached=offlineCache.get(text,from,to);
-  if(cached){cb(cached);return;}
   var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+
     (from==='auto'?'auto':from)+'&tl='+to+'&dt=t&q='+encodeURIComponent(text);
   fetch(url)
@@ -1382,20 +887,9 @@ function callGoogleTranslate(text, from, to, cb){
     .then(function(d){
       var result='';
       if(d&&d[0]){d[0].forEach(function(s){if(s[0])result+=s[0];});}
-      if(result){offlineCache.set(text,from,to,result);}
       cb(result||null);
     })
-    .catch(function(){
-      // Network failed — try cache one more time with fuzzy match
-      var cached2=offlineCache.get(text,from,to);
-      if(cached2){
-        toast('Offline — showing cached translation');
-        cb(cached2);
-      } else {
-        toast('No connection & no cache for this phrase');
-        cb(null);
-      }
-    });
+    .catch(function(){cb(null);});
 }
 
 function clearTranslate(){
@@ -1406,103 +900,30 @@ function clearTranslate(){
 
 function speakOutput(){
   var text=document.getElementById('outputText').textContent;
-  speakTTS(text,langState.toLang||'en');
+  var lang=document.getElementById('toLang').value;
+  speakTTS(text,lang);
 }
-
-// Cache voices once loaded
-var _cachedVoices=[];
-if('speechSynthesis' in window){
-  window.speechSynthesis.onvoiceschanged=function(){
-    _cachedVoices=window.speechSynthesis.getVoices();
-  };
-  // Load immediately in case already available
-  _cachedVoices=window.speechSynthesis.getVoices();
-}
-var _currentAudio=null;
 
 function speakTTS(text,lang){
   if(!text||text.trim()==='')return;
-  var ttsMap={
-    'af':'af-ZA','sq':'sq-AL','am':'am-ET','ar':'ar-SA','hy':'hy-AM',
-    'az':'az-AZ','eu':'eu-ES','be':'be-BY','bn':'bn-BD','bs':'bs-BA',
-    'bg':'bg-BG','ca':'ca-ES','ceb':'fil-PH','ny':'ny','zh':'zh-CN',
-    'zh-TW':'zh-TW','co':'it-IT','hr':'hr-HR','cs':'cs-CZ','da':'da-DK',
-    'nl':'nl-NL','en':'en-US','eo':'eo','et':'et-EE','tl':'fil-PH',
-    'fi':'fi-FI','fr':'fr-FR','fy':'nl-NL','gl':'gl-ES','ka':'ka-GE',
-    'de':'de-DE','el':'el-GR','gu':'gu-IN','ht':'fr-HT','ha':'ha',
-    'haw':'en-US','iw':'he-IL','hi':'hi-IN','hmn':'hmn','hu':'hu-HU',
-    'is':'is-IS','ig':'ig','id':'id-ID','ga':'ga-IE','it':'it-IT',
-    'ja':'ja-JP','jw':'id-ID','kn':'kn-IN','kk':'kk-KZ','km':'km-KH',
-    'ko':'ko-KR','ku':'ku','ky':'ky-KG','lo':'lo-LA','la':'la',
-    'lv':'lv-LV','lt':'lt-LT','lb':'lb','mk':'mk-MK','mg':'mg',
-    'ms':'ms-MY','ml':'ml-IN','mt':'mt-MT','mi':'mi-NZ','mr':'mr-IN',
-    'mn':'mn-MN','my':'my-MM','ne':'ne-NP','no':'nb-NO','or':'or-IN',
-    'ps':'ps-AF','fa':'fa-IR','pl':'pl-PL','pt':'pt-PT','pa':'pa-IN',
-    'ro':'ro-RO','ru':'ru-RU','sm':'sm','gd':'gd','sr':'sr-RS',
-    'st':'st','sn':'sn','sd':'ur-PK','si':'si-LK','sk':'sk-SK',
-    'sl':'sl-SI','so':'so-SO','es':'es-ES','su':'su','sw':'sw-KE',
-    'sv':'sv-SE','tg':'tg-TJ','ta':'ta-IN','te':'te-IN','th':'th-TH',
-    'tr':'tr-TR','uk':'uk-UA','ur':'ur-PK','ug':'ug','uz':'uz-UZ',
-    'vi':'vi-VN','cy':'cy-GB','xh':'xh-ZA','yi':'yi','yo':'yo-NG',
-    'zu':'zu-ZA','ki':'sw-KE','lg':'lg','rw':'rw-RW','ln':'fr-CD',
-    'om':'om-ET','ti':'ti-ET','wo':'wo','bm':'fr-ML','ak':'ak',
-    'ee':'ee','tw':'ak',
-  };
-  var bcp=ttsMap[lang]||lang;
-  var rootLang=bcp.split('-')[0];
-  // Use cached voices — avoids race condition on first load
-  var voices=_cachedVoices.length?_cachedVoices:
-    ('speechSynthesis' in window?window.speechSynthesis.getVoices():[]);
-  var match=voices.find(function(v){
-    return v.lang.toLowerCase().startsWith(rootLang.toLowerCase());
-  });
-  if(match&&'speechSynthesis' in window){
-    // Device has a voice for this language
-    window.speechSynthesis.cancel();
-    if(_currentAudio){_currentAudio.pause();_currentAudio=null;}
+  if('speechSynthesis' in window){
     var u=new SpeechSynthesisUtterance(text);
-    u.lang=bcp;
-    u.voice=match;
+    u.lang=lang;
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   } else {
-    // No device voice — Google TTS fallback (Arabic, Hindi, etc.)
-    speakGoogleTTS(text,lang);
+    toast('TTS not supported on this browser');
   }
 }
 
-function speakGoogleTTS(text,lang){
-  if(_currentAudio){_currentAudio.pause();_currentAudio=null;}
-  if('speechSynthesis' in window)window.speechSynthesis.cancel();
-  var url='https://translate.googleapis.com/translate_tts?ie=UTF-8&q='
-    +encodeURIComponent(text.substring(0,200))+'&tl='+lang+'&client=gtx';
-  _currentAudio=new Audio(url);
-  _currentAudio.play().catch(function(){
-    // No Google TTS either — invite to train
-    var langName=LANGS.find(function(l){return l.c===lang;});
-    toast('No voice for '+(langName?langName.n:lang)+' — help train it in CHAT tab');
-    setTimeout(function(){
-      switchTab('chat');
-      // Pre-fill the training language
-      langState.trainLang=lang;
-      var lbl=document.getElementById('trainLangLabel');
-      if(lbl&&langName)lbl.textContent=langName.n;
-      document.getElementById('trainOriginal').focus();
-    },1800);
-  });
-}
-
-// speakText used by PLAY TO A / PLAY TO B in interpret tab
 function speakText(elId, side){
   var text=document.getElementById(elId).textContent;
-  if(!text||text==='Translation will appear here...')return;
-  // Use langState directly — side A plays in A's language, side B plays in B's language
-  var lang=side==='A'?langState.interpLangA:langState.interpLangB;
+  var lang=side==='A'?state.interpA:state.interpB;
   speakTTS(text,lang);
 }
 
 function stopSpeech(){
-  if('speechSynthesis' in window)window.speechSynthesis.cancel();
-  if(_currentAudio){_currentAudio.pause();_currentAudio=null;}
+  if('speechSynthesis' in window){window.speechSynthesis.cancel();}
   toast('Stopped');
 }
 
@@ -1557,26 +978,22 @@ function saveToHistory(){
 function interpretA(){
   var text=document.getElementById('textA').value.trim();
   if(!text){toast('Speaker A: enter text first');return;}
-  var from=langState.interpLangA||'en';
-  var to=langState.interpLangB||'sw';
   var out=document.getElementById('outputA');
   out.innerHTML='<span class="spinner"></span>';
-  callGoogleTranslate(text,from,to,function(result){
+  callGoogleTranslate(text,state.interpA,state.interpB,function(result){
     out.textContent=result||'Translation failed.';
-    // No auto-speak — user taps PLAY TO B when ready
+    if(result)speakTTS(result,state.interpB);
   });
 }
 
 function interpretB(){
   var text=document.getElementById('textB').value.trim();
   if(!text){toast('Speaker B: enter text first');return;}
-  var from=langState.interpLangB||'sw';
-  var to=langState.interpLangA||'en';
   var out=document.getElementById('outputB');
   out.innerHTML='<span class="spinner"></span>';
-  callGoogleTranslate(text,from,to,function(result){
+  callGoogleTranslate(text,state.interpB,state.interpA,function(result){
     out.textContent=result||'Translation failed.';
-    // No auto-speak — user taps PLAY TO A when ready
+    if(result)speakTTS(result,state.interpA);
   });
 }
 
@@ -1719,48 +1136,7 @@ function saveSentryLink(){
   if(!c||!t){toast('Enter callsign and passkey');return;}
   localStorage.setItem('babel_sentry_callsign',c);
   localStorage.setItem('babel_sentry_token',t);
-  // Test connection
-  var statusEl=document.getElementById('sentryLinkStatus');
-  if(statusEl)statusEl.textContent='Testing connection...';
-  fetch('http://5.180.181.125/sentry/health',{
-    headers:{'x-sentry-token':t}
-  }).then(function(r){return r.json();})
-  .then(function(d){
-    if(d.status==='ok'){
-      updateSentryStatus(true,c);
-      toast('✅ SENTRY linked — '+c);
-      if(statusEl)statusEl.textContent='Connected · GPS alerts active · '+new Date().toLocaleTimeString();
-    } else {
-      updateSentryStatus(false);
-      toast('Check callsign and passkey');
-      if(statusEl)statusEl.textContent='Connection failed — check credentials';
-    }
-  }).catch(function(){
-    // Save anyway even if health check fails
-    updateSentryStatus(true,c);
-    toast('SENTRY link saved — '+c);
-    if(statusEl)statusEl.textContent='Saved · will connect when SENTRY is online';
-  });
-}
-
-function openSentry(){
-  window.open('http://5.180.181.125/sentry/','_blank');
-}
-
-function updateSentryStatus(linked, callsign){
-  var badge=document.getElementById('sentryStatusBadge');
-  if(!badge)return;
-  if(linked){
-    badge.style.background='rgba(48,209,88,0.1)';
-    badge.style.borderColor='rgba(48,209,88,0.2)';
-    badge.style.color='#30d158';
-    badge.textContent='🟢 LINKED'+(callsign?' · '+callsign:'');
-  } else {
-    badge.style.background='rgba(255,59,48,0.1)';
-    badge.style.borderColor='rgba(255,59,48,0.2)';
-    badge.style.color='#ff3b30';
-    badge.textContent='⚫ NOT LINKED';
-  }
+  toast('SENTRY link saved');
 }
 
 // ── HISTORY ──
@@ -1932,7 +1308,7 @@ function runOCR(imageData){
   document.getElementById('ocrResultCard').style.display='block';
   document.getElementById('ocrDetected').innerHTML='<span class="spinner"></span> Reading text...';
   document.getElementById('ocrTranslated').innerHTML='<span class="spinner"></span>';
-  var toLang=langState.ocrToLang||'en';
+  var toLang=document.getElementById('ocrToLang').value;
 
   // Use Tesseract.js via CDN for OCR
   if(typeof Tesseract==='undefined'){
@@ -1951,7 +1327,7 @@ function runOCR(imageData){
 }
 
 function doTesseract(imageData,toLang){
-  var fromLang=langState.ocrFromLang||'auto';
+  var fromLang=document.getElementById('ocrFromLang').value;
   var tessLang=fromLang==='auto'?'eng':getTessLang(fromLang);
   document.getElementById('ocrStatus').textContent='READING TEXT...';
   Tesseract.recognize(imageData,tessLang,{
@@ -2045,7 +1421,8 @@ function toggleOCRFlash(){
 
 function speakOCRResult(){
   var text=document.getElementById('ocrTranslated').textContent;
-  speakTTS(text,langState.ocrToLang||'en');
+  var lang=document.getElementById('ocrToLang').value;
+  speakTTS(text,lang);
 }
 
 function sendOCRToTranslate(){
@@ -2057,607 +1434,19 @@ function sendOCRToTranslate(){
   }
 }
 
-// ── USER LANGUAGE TRAINING ──
-function getTrainingDB(){
-  return JSON.parse(localStorage.getItem('babel_training')||'[]');
-}
+populateOCRLangs();
 
-function getTrainedPhrase(text, lang){
-  var db=getTrainingDB();
-  var match=db.find(function(e){
-    return e.lang===lang&&e.original.toLowerCase()===text.toLowerCase();
-  });
-  return match?match.translation:null;
-}
-
-function submitTraining(){
-  var orig=document.getElementById('trainOriginal').value.trim();
-  var trans=document.getElementById('trainTranslation').value.trim();
-  var lang=langState.trainLang||'ki';
-  if(!orig||!trans){toast('Fill in both fields');return;}
-  var db=getTrainingDB();
-  var existing=db.findIndex(function(e){return e.lang===lang&&e.original.toLowerCase()===orig.toLowerCase();});
-  var entry={lang:lang,original:orig,translation:trans,ts:Date.now()};
-  if(existing>=0){db[existing]=entry;}else{db.push(entry);}
-  localStorage.setItem('babel_training',JSON.stringify(db));
-  document.getElementById('trainOriginal').value='';
-  document.getElementById('trainTranslation').value='';
-  updateTrainCount();
-  toast('Phrase saved — BABEL learned it');
-}
-
-function updateTrainCount(){
-  var db=getTrainingDB();
-  var el=document.getElementById('trainCount');
-  if(el)el.textContent=db.length+' phrase'+(db.length===1?'':'s')+' trained so far';
-}
-
-// ── FIREBASE E2EE CHAT ──
-var FIREBASE_DB_URL='https://riakoine-babel-default-rtdb.asia-southeast1.firebasedatabase.app';
-var chatListener=null;
-var chatUser=null;
-var chatRoomCode=null;
-var chatUserLang='en';
-var chatRoomKey=null;
-
-// AES-style XOR encryption using room code as key
-function encryptMsg(text, key){
-  var out='';
-  for(var i=0;i<text.length;i++){
-    out+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
-  }
-  return btoa(unescape(encodeURIComponent(out)));
-}
-
-function decryptMsg(b64, key){
-  try{
-    var text=decodeURIComponent(escape(atob(b64)));
-    var out='';
-    for(var i=0;i<text.length;i++){
-      out+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
-    }
-    return out;
-  }catch(e){return '[encrypted]';}
-}
-
-function joinChat(){
-  var name=document.getElementById('chatName').value.trim();
-  var room=document.getElementById('chatRoom').value.trim();
-  if(!name||!room){toast('Enter your name and a room code');return;}
-  chatUser=name;
-  chatRoomCode=room.toLowerCase().replace(/[^a-z0-9]/g,'_');
-  chatRoomKey=room; // room code = encryption key
-  chatUserLang=langState.chatLang||'en';
-  document.getElementById('chatSetup').style.display='none';
-  document.getElementById('chatActive').style.display='block';
-  document.getElementById('chatMessages').style.display='block';
-  document.getElementById('chatInputWrap').style.display='flex';
-  document.getElementById('chatRoomLabel').textContent=room.toUpperCase();
-  toast('Joined — share room code to invite others');
-  listenChatMessages();
-}
-
-function leaveChat(){
-  if(chatListener){
-    // Stop Firebase listener
-    fetch(FIREBASE_DB_URL+'/babel_rooms/'+chatRoomCode+'.json')
-      .catch(function(){});
-    chatListener=null;
-  }
-  chatUser=null;chatRoomCode=null;chatRoomKey=null;
-  document.getElementById('chatSetup').style.display='block';
-  document.getElementById('chatActive').style.display='none';
-  document.getElementById('chatMessages').style.display='none';
-  document.getElementById('chatInputWrap').style.display='none';
-  toast('Left room');
-}
-
-function sendChatMsg(){
-  var text=document.getElementById('chatInput').value.trim();
-  if(!text||!chatRoomCode){return;}
-  var encrypted=encryptMsg(text,chatRoomKey);
-  var msg={user:chatUser,lang:chatUserLang,text:encrypted,ts:Date.now()};
-  // POST to Firebase
-  fetch(FIREBASE_DB_URL+'/babel_rooms/'+chatRoomCode+'/messages.json',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(msg)
-  }).then(function(){
-    document.getElementById('chatInput').value='';
-  }).catch(function(){
-    toast('Send failed — check connection');
-  });
-}
-
-function listenChatMessages(){
-  if(!chatRoomCode)return;
-  // Poll every 2 seconds (Firebase REST — no SDK needed)
-  renderChatMessages();
-  chatListener=setInterval(renderChatMessages,2000);
-}
-
-function renderChatMessages(){
-  if(!chatRoomCode)return;
-  fetch(FIREBASE_DB_URL+'/babel_rooms/'+chatRoomCode+'/messages.json')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var box=document.getElementById('chatMessages');
-      if(!data||typeof data!=='object'){
-        box.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px 0;">Waiting for messages...</div>';
-        return;
-      }
-      var msgs=Object.values(data).sort(function(a,b){return a.ts-b.ts;});
-      var myLang=chatUserLang;
-      var html=msgs.map(function(m){
-        var isMe=(m.user===chatUser);
-        var cls='chat-msg '+(isMe?'mine':'theirs');
-        var time=new Date(m.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-        var decrypted=decryptMsg(m.text,chatRoomKey);
-        return '<div class="'+cls+'">'
-          +'<div class="chat-sender">'+m.user+' · '+time+' <span class="e2ee-badge">🔒</span></div>'
-          +'<div class="chat-translated" id="cmsg_'+m.ts+'">'+decrypted+'</div>'
-          +(m.lang!==myLang?'<div class="chat-original" style="font-size:8px;color:var(--dim);">● translating...</div>':'')
-          +'</div>';
-      }).join('');
-      box.innerHTML=html;
-      box.scrollTop=box.scrollHeight;
-      // Translate messages not in my language
-      msgs.forEach(function(m){
-        if(m.lang!==myLang){
-          var decrypted=decryptMsg(m.text,chatRoomKey);
-          callGoogleTranslate(decrypted,m.lang,myLang,function(trans){
-            var el=document.getElementById('cmsg_'+m.ts);
-            if(el&&trans)el.textContent=trans;
-          });
-        }
-      });
-    }).catch(function(){
-      // Silently retry
-    });
-}
-
-// ── HERITAGE / ENDANGERED LANGUAGES ──
-function renderEndangered(){
-  var list=document.getElementById('endangeredList');
-  var userPhrases=JSON.parse(localStorage.getItem('babel_endangered')||'[]');
-  var all=ENDANGERED_LANGS.concat(
-    userPhrases.reduce(function(acc,p){
-      var existing=acc.find(function(e){return e.name.toLowerCase()===p.lang.toLowerCase();});
-      if(existing){existing.phrases.push({p:p.phrase,m:p.meaning,context:p.context});}
-      else{acc.push({name:p.lang,region:'Community contributed',speakers:'Unknown',status:'Documented by community',phrases:[{p:p.phrase,m:p.meaning,context:p.context}]});}
-      return acc;
-    },[])
-  );
-  list.innerHTML=all.map(function(lang){
-    var statusColor=lang.status.includes('Extinct')?'var(--red)':lang.status.includes('Endangered')||lang.status.includes('Moribund')?'var(--gold)':'var(--green)';
-    return '<div class="card" style="margin-bottom:8px;">'
-      +'<div class="card-head">'
-      +'<span class="card-title" style="color:var(--gold);">🌿 '+lang.name+'</span>'
-      +'<span style="font-family:var(--mono);font-size:7px;color:'+statusColor+';letter-spacing:1px;">'+lang.status+'</span>'
-      +'</div>'
-      +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">'+lang.region+' · ~'+lang.speakers+' speakers</div>'
-      +lang.phrases.map(function(ph){
-        return '<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
-          +'<div style="font-family:var(--mono);font-size:11px;color:var(--gold);flex:1;">'+ph.p+'</div>'
-          +'<div style="font-family:var(--mono);font-size:10px;color:var(--text2);flex:1;">'+ph.m+'</div>'
-          +'<button class="btn btn-cyan btn-sm" style="font-size:9px;padding:3px 8px;" onclick="speakTTS(\''+ph.p+'\',\'en\')">🔊</button>'
-          +'</div>';
-      }).join('')
-      +'</div>';
-  }).join('');
-}
-
-function submitEndangered(){
-  var lang=document.getElementById('endLangName').value.trim();
-  var phrase=document.getElementById('endPhrase').value.trim();
-  var meaning=document.getElementById('endMeaning').value.trim();
-  var context=document.getElementById('endContext').value.trim();
-  if(!lang||!phrase||!meaning){toast('Fill in language, phrase and meaning');return;}
-  var db=JSON.parse(localStorage.getItem('babel_endangered')||'[]');
-  db.push({lang:lang,phrase:phrase,meaning:meaning,context:context,ts:Date.now()});
-  localStorage.setItem('babel_endangered',JSON.stringify(db));
-  document.getElementById('endLangName').value='';
-  document.getElementById('endPhrase').value='';
-  document.getElementById('endMeaning').value='';
-  document.getElementById('endContext').value='';
-  renderEndangered();
-  toast('Phrase preserved — thank you');
-}
-
-// ── PWA INSTALL ──
-var _pwaPrompt=null;
-window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault();
-  _pwaPrompt=e;
-  var btn=document.getElementById('pwaInstallBtn');
-  if(btn)btn.style.display='block';
-  setTimeout(function(){
-    if(_pwaPrompt){
-      toast('📱 Install BABEL — tap INSTALL button top right');
-    }
-  },3000);
-});
-
-function installPWA(){
-  if(_pwaPrompt){
-    _pwaPrompt.prompt();
-    _pwaPrompt.userChoice.then(function(result){
-      if(result.outcome==='accepted'){
-        toast('BABEL installed! 👑');
-        document.getElementById('pwaInstallBtn').style.display='none';
-      }
-      _pwaPrompt=null;
-    });
-  } else {
-    toast('Tap ⋮ → Add to Home Screen to install');
-  }
-}
-
-// Register service worker for offline support
-if('serviceWorker' in navigator){
-  var swCode=`
-self.addEventListener('install',function(e){self.skipWaiting();});
-self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});
-self.addEventListener('fetch',function(e){
-  if(e.request.method!=='GET')return;
-  e.respondWith(
-    caches.open('babel-v2').then(function(cache){
-      return fetch(e.request).then(function(response){
-        if(response&&response.status===200){
-          cache.put(e.request,response.clone());
-        }
-        return response;
-      }).catch(function(){
-        return caches.match(e.request);
-      });
-    })
-  );
-});
-`;
-  var blob=new Blob([swCode],{type:'application/javascript'});
-  var swUrl=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl,{scope:'/babel/'})
-    .then(function(){console.log('BABEL SW registered');})
-    .catch(function(e){console.log('SW registration failed:',e.message);});
-}
-var quizState={active:false,questions:[],current:0,score:0,total:0};
-var quizScores=JSON.parse(localStorage.getItem('babel_quiz_scores')||'{"total":0,"correct":0,"streak":0,"lastDay":""}');
-
-function startQuiz(){
-  if(!tutorContext.orig){toast('Translate something first — then start quiz');return;}
-  document.getElementById('quizCard').style.display='block';
-  document.getElementById('quizCard').scrollIntoView({behavior:'smooth'});
-  quizState={active:true,questions:[],current:0,score:0,total:0};
-  document.getElementById('quizFeedback').textContent='';
-  document.getElementById('quizAnswer').value='';
-  // Generate quiz via AI
-  var fl=LANGS.find(function(l){return l.c===tutorContext.fromLang;});
-  var tl=LANGS.find(function(l){return l.c===tutorContext.toLang;});
-  var prompt='Create exactly 3 quiz questions about "'+tutorContext.orig+'" ('+( fl?fl.n:'?')+') = "'+tutorContext.trans+'" ('+(tl?tl.n:'?')+').\nFormat EXACTLY like this — no extra text:\nQ1: [question]\nA1: [answer]\nQ2: [question]\nA2: [answer]\nQ3: [question]\nA3: [answer]';
-  document.getElementById('quizQuestion').textContent='Generating quiz...';
-  document.getElementById('quizScoreTag').textContent='Loading...';
-  runTutorAISilent(prompt, function(text){
-    // Parse Q&A pairs
-    var qs=[];
-    var lines=text.split('\n');
-    for(var i=0;i<lines.length;i++){
-      var qm=lines[i].match(/^Q\d+:\s*(.+)/);
-      var am=lines[i+1]&&lines[i+1].match(/^A\d+:\s*(.+)/);
-      if(qm&&am){qs.push({q:qm[1].trim(),a:am[1].trim()});i++;}
-    }
-    if(!qs.length){toast('Could not generate quiz — try again');return;}
-    quizState.questions=qs;
-    quizState.total=qs.length;
-    showQuizQuestion();
-  });
-}
-
-function showQuizQuestion(){
-  var q=quizState.questions[quizState.current];
-  if(!q){endQuiz();return;}
-  document.getElementById('quizQuestion').textContent='Q'+(quizState.current+1)+' of '+quizState.total+': '+q.q;
-  document.getElementById('quizScoreTag').textContent=quizState.score+' / '+quizState.current;
-  document.getElementById('quizAnswer').value='';
-  document.getElementById('quizFeedback').textContent='';
-  document.getElementById('quizAnswer').focus();
-}
-
-function submitQuizAnswer(){
-  var answer=document.getElementById('quizAnswer').value.trim();
-  if(!answer){toast('Type your answer first');return;}
-  var q=quizState.questions[quizState.current];
-  var correct=q.a.toLowerCase();
-  var given=answer.toLowerCase();
-  var isCorrect=correct.includes(given)||given.includes(correct.split(' ')[0]);
-  var fb=document.getElementById('quizFeedback');
-  if(isCorrect){
-    quizState.score++;
-    fb.style.color='#30d158';
-    fb.textContent='✅ Correct! '+q.a;
-  } else {
-    fb.style.color='#ff3b30';
-    fb.textContent='✗ The answer was: '+q.a;
-  }
-  quizState.current++;
-  document.getElementById('quizScoreTag').textContent=quizState.score+' / '+quizState.current;
-  setTimeout(function(){
-    if(quizState.current<quizState.total){
-      showQuizQuestion();
-    } else {
-      endQuiz();
-    }
-  },1800);
-}
-
-function skipQuiz(){
-  quizState.current++;
-  if(quizState.current<quizState.total){showQuizQuestion();}
-  else{endQuiz();}
-}
-
-function endQuiz(){
-  quizState.active=false;
-  var pct=quizState.total?Math.round((quizState.score/quizState.total)*100):0;
-  document.getElementById('quizQuestion').textContent='Quiz complete! Score: '+quizState.score+'/'+quizState.total+' ('+pct+'%)';
-  document.getElementById('quizFeedback').style.color='var(--gold)';
-  document.getElementById('quizFeedback').textContent=pct>=70?'Excellent work! Keep learning.':pct>=40?'Good effort! Review and try again.':'Keep practicing — every lesson counts.';
-  // Save scores
-  quizScores.total+=quizState.total;
-  quizScores.correct+=quizState.score;
-  var today=new Date().toDateString();
-  if(quizScores.lastDay!==today){quizScores.streak++;quizScores.lastDay=today;}
-  localStorage.setItem('babel_quiz_scores',JSON.stringify(quizScores));
-  updateProgressDisplay();
-}
-
-// Silent AI call — no streaming, just callback
-function runTutorAISilent(prompt, cb){
-  fetch('/api/tutor',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      max_tokens:500,
-      system:'You are a language quiz generator. Respond only in the exact format requested. No extra commentary.',
-      messages:[{role:'user',content:prompt}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var text='';
-    if(data.choices&&data.choices[0])text=data.choices[0].message.content;
-    cb(text);
-  })
-  .catch(function(){cb('');});
-}
-
-// ── DAILY LESSON ──
-var dailyLesson=JSON.parse(localStorage.getItem('babel_daily_lesson')||'null');
-
-function loadDailyLesson(){
-  var today=new Date().toDateString();
-  // Use cached lesson if from today
-  if(dailyLesson&&dailyLesson.date===today&&!event){
-    renderDailyLesson(dailyLesson);
-    return;
-  }
-  var el=document.getElementById('dailyLessonContent');
-  el.textContent='Fetching today\'s lesson...';
-  document.getElementById('dailyLessonDate').textContent=today;
-  // Pick a random language from history or default to Swahili
-  var recentLangs=tutorLog.length?[...new Set(tutorLog.map(function(e){return e.to;}))].slice(0,3):['sw'];
-  var targetLang=recentLangs[Math.floor(Math.random()*recentLangs.length)]||'sw';
-  var tl=LANGS.find(function(l){return l.c===targetLang;});
-  var langName=tl?tl.n:'Swahili';
-  var prompt='Give me one beautiful, culturally rich phrase or proverb in '+langName+' for today. Format exactly:\nPHRASE: [the phrase]\nPRONUNCIATION: [how to say it]\nMEANING: [English meaning]\nCULTURE: [1-2 sentences of cultural context]';
-  runTutorAISilent(prompt,function(text){
-    var lesson={date:today,lang:targetLang,langName:langName,raw:text};
-    dailyLesson=lesson;
-    localStorage.setItem('babel_daily_lesson',JSON.stringify(lesson));
-    renderDailyLesson(lesson);
-  });
-}
-
-function renderDailyLesson(lesson){
-  var el=document.getElementById('dailyLessonContent');
-  document.getElementById('dailyLessonDate').textContent=lesson.date;
-  if(!lesson.raw){el.textContent='No lesson available — tap NEW LESSON';return;}
-  // Parse structured response
-  var phrase=lesson.raw.match(/PHRASE:\s*(.+)/);
-  var pronunciation=lesson.raw.match(/PRONUNCIATION:\s*(.+)/);
-  var meaning=lesson.raw.match(/MEANING:\s*(.+)/);
-  var culture=lesson.raw.match(/CULTURE:\s*([\s\S]+?)(?:\n[A-Z]+:|$)/);
-  el.innerHTML=
-    '<div style="color:var(--gold);font-size:13px;margin-bottom:4px;">'+(phrase?phrase[1]:'')+'</div>'+
-    '<div style="color:var(--dim);font-size:9px;margin-bottom:4px;">🗣 '+(pronunciation?pronunciation[1]:'')+'</div>'+
-    '<div style="color:var(--text2);font-size:10px;margin-bottom:6px;">'+(meaning?meaning[1]:'')+'</div>'+
-    '<div style="color:var(--dim);font-size:9px;line-height:1.7;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;">'+(culture?culture[1].trim():'')+'</div>'+
-    '<div style="color:var(--dim);font-size:8px;margin-top:4px;">— '+lesson.langName+'</div>';
-}
-
-function speakDailyLesson(){
-  if(!dailyLesson||!dailyLesson.raw)return;
-  var phrase=dailyLesson.raw.match(/PHRASE:\s*(.+)/);
-  if(phrase)speakTTS(phrase[1],dailyLesson.lang||'sw');
-}
-
-function updateProgressDisplay(){
-  var scoreEl=document.getElementById('quizTotalScore');
-  var streakEl=document.getElementById('quizStreak');
-  var lessonsEl=document.getElementById('totalLessons');
-  if(scoreEl)scoreEl.textContent=quizScores.correct||0;
-  if(streakEl)streakEl.textContent=quizScores.streak||0;
-  if(lessonsEl)lessonsEl.textContent=tutorLog.length||0;
-}
-var tutorContext={orig:'',trans:'',fromLang:'',toLang:''};
-var tutorLog=JSON.parse(localStorage.getItem('babel_tutor_log')||'[]');
-
-function sendToTutor(){
-  var orig=document.getElementById('inputText').value.trim();
-  var trans=document.getElementById('outputText').textContent.trim();
-  var from=langState.fromLang||'en';
-  var to=langState.toLang||'sw';
-  if(!orig||!trans){toast('Translate something first');return;}
-  tutorContext={orig:orig,trans:trans,fromLang:from,toLang:to};
-  // Update tutor context card
-  var fl=LANGS.find(function(l){return l.c===from;});
-  var tl=LANGS.find(function(l){return l.c===to;});
-  document.getElementById('tutorOriginal').textContent=orig;
-  document.getElementById('tutorTranslated').textContent=trans;
-  document.getElementById('tutorLangTag').textContent=(fl?fl.n:'?')+' → '+(tl?tl.n:'?');
-  switchTab('tutor');
-  toast('Ready to learn — choose a mode');
-}
-
-function askTutor(mode){
-  if(!tutorContext.orig){toast('Translate something first — tap 🧠 TUTOR on output');return;}
-  var fl=LANGS.find(function(l){return l.c===tutorContext.fromLang;});
-  var tl=LANGS.find(function(l){return l.c===tutorContext.toLang;});
-  var fromName=fl?fl.n:'the source language';
-  var toName=tl?tl.n:'the target language';
-  var prompts={
-    explain: 'You are a cultural language tutor. The user translated "'+tutorContext.orig+'" from '+fromName+' to '+toName+', result: "'+tutorContext.trans+'". Explain the cultural context, history, and deeper meaning behind this phrase. Mention any idioms, customs, or cultural nuances. Be warm, educational, and concise. Use plain text only.',
-    related: 'You are a language tutor. The user knows "'+tutorContext.orig+'" in '+fromName+' = "'+tutorContext.trans+'" in '+toName+'. Teach them 4-5 closely related phrases or expressions they should also know. Format each as: [original] = [translation] — [brief note]. Be practical and memorable.',
-    quiz: 'You are a language quiz master. Create a short 3-question quiz based on "'+tutorContext.orig+'" ('+fromName+') and "'+tutorContext.trans+'" ('+toName+'). Mix translation questions, fill-in-the-blank, and cultural questions. Number each question. After questions write "---ANSWERS---" then the answers numbered. Keep it fun and encouraging.',
-    pronounce: 'You are a pronunciation coach. The user wants to correctly pronounce "'+tutorContext.trans+'" in '+toName+'. Give a clear pronunciation guide using simple phonetics (no IPA symbols — write it as it sounds in English). Include syllable breaks, stress patterns, and any tricky sounds. Also mention common mistakes speakers of '+fromName+' make.',
-    endangered: 'You are a linguistic heritage expert. Analyze the phrase "'+tutorContext.orig+'" in '+fromName+'. Is this language endangered, at risk, or thriving? What is the current speaker population? Any notable preservation efforts? What would be lost culturally if this language disappeared? Be honest and informative.',
-    dialect: 'You are a dialect and regional linguistics expert. The phrase "'+tutorContext.orig+'" is in '+fromName+'. Explain the regional dialects and variants of this language. How would this phrase differ across regions? What are the major dialect groups? Are there significant differences between urban and rural speakers? Any notable sub-dialects in Kenya, East Africa, or the diaspora if relevant?'
-  };
-  var prompt=prompts[mode];
-  runTutorAI(prompt, mode);
-}
-
-function askTutorCustom(){
-  var q=document.getElementById('tutorQuestion').value.trim();
-  if(!q){toast('Type a question first');return;}
-  var context=tutorContext.orig?
-    'Context: user recently translated "'+tutorContext.orig+'" to "'+tutorContext.trans+'". ':'';
-  var prompt='You are BABEL AI Tutor by RIAKOINE-EMPIRE, created by Zack. You are a warm, sharp multilingual language and culture expert. '+context+'User asks: '+q+'. If this is about language, culture, translation, heritage or linguistics — answer brilliantly. If off-topic (news, politics, locations of people), warmly redirect them to language learning instead. Plain text only.';
-  document.getElementById('tutorQuestion').value='';
-  runTutorAI(prompt,'custom');
-}
-
-function runTutorAI(prompt, mode){
-  document.getElementById('tutorResponseCard').style.display='block';
-  var responseEl=document.getElementById('tutorResponse');
-  responseEl.innerHTML='<span class="spinner"></span> Thinking...';
-  // Scroll to response
-  setTimeout(function(){responseEl.scrollIntoView({behavior:'smooth',block:'start'});},100);
-
-  fetch('/api/tutor',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      max_tokens:1000,
-      system:'You are BABEL AI Tutor — built by RIAKOINE-EMPIRE, created by Zack. You are warm, sharp, and deeply knowledgeable about languages and cultures worldwide, especially African languages including Gikuyu, Swahili, Luganda, Yoruba, Hausa and endangered languages. Your job is language learning, cultural context, pronunciation, dialects, and heritage preservation. If someone asks something off-topic like news, politics, or current events, kindly redirect them: tell them BABEL is your language and culture companion, not a news feed — then offer to teach them something fascinating about a language instead. Never be robotic. Always be human and encouraging. Plain text only — no markdown, no asterisks, no bullet symbols.',
-      messages:[{role:'user',content:prompt}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var text='';
-    if(data.choices&&data.choices[0]&&data.choices[0].message){
-      text=data.choices[0].message.content;
-    } else if(data.error){
-      text='Tutor unavailable: '+(data.error.message||JSON.stringify(data.error));
-    }
-    // Stream-style reveal
-    responseEl.textContent='';
-    var i=0;
-    var cursor=document.createElement('span');
-    cursor.className='tutor-cursor';
-    responseEl.appendChild(cursor);
-    var interval=setInterval(function(){
-      if(i<text.length){
-        responseEl.insertBefore(document.createTextNode(text[i]),cursor);
-        i++;
-        // Auto scroll
-        responseEl.parentElement.scrollTop=responseEl.parentElement.scrollHeight;
-      } else {
-        clearInterval(interval);
-        cursor.remove();
-        // Log to progress
-        tutorLog.push({mode:mode,orig:tutorContext.orig,to:tutorContext.toLang,ts:Date.now()});
-        if(tutorLog.length>200)tutorLog=tutorLog.slice(-200);
-        localStorage.setItem('babel_tutor_log',JSON.stringify(tutorLog));
-        updateTutorStats();
-      }
-    },12);
-  })
-  .catch(function(e){
-    responseEl.textContent='Could not reach AI tutor. Check connection and try again.';
-  });
-}
-
-function shareTranslation(){
-  var orig=document.getElementById('inputText').value.trim();
-  var trans=document.getElementById('outputText').textContent.trim();
-  if(!orig||!trans){toast('Nothing to share');return;}
-  var fl=LANGS.find(function(l){return l.c===(langState.fromLang||'auto');});
-  var tl=LANGS.find(function(l){return l.c===langState.toLang;});
-  var fromName=fl?fl.n:'Auto';
-  var toName=tl?tl.n:'?';
-  var shareText=fromName+' \u2192 '+toName+'\n\n'+orig+'\n\n'+trans+'\n\n— BABEL by RIAKOINE-EMPIRE\n'+window.location.href;
-  if(navigator.share){
-    navigator.share({title:'BABEL Translation',text:shareText})
-      .catch(function(){copyToClipboard(shareText);toast('Copied — paste to share');});
-  } else {
-    copyToClipboard(shareText);
-    toast('Translation copied — paste to share');
-  }
-}
-
-function showOfflineStats(){
-  toast('Offline cache: '+offlineCache.size()+' phrases stored');
-}
-
-function speakTutorResponse(){
-  var text=document.getElementById('tutorResponse').textContent;
-  speakTTS(text,'en');
-}
-
-function updateTutorStats(){
-  var el=document.getElementById('tutorStats');
-  if(!el)return;
-  var total=tutorLog.length;
-  var langs={};
-  tutorLog.forEach(function(e){langs[e.to]=(langs[e.to]||0)+1;});
-  var topLangs=Object.keys(langs).sort(function(a,b){return langs[b]-langs[a];}).slice(0,3).map(function(c){
-    var l=LANGS.find(function(x){return x.c===c;});
-    return (l?l.n:c)+' ('+langs[c]+')';
-  });
-  var modes={explain:0,related:0,quiz:0,pronounce:0,endangered:0,custom:0};
-  tutorLog.forEach(function(e){if(modes[e.mode]!==undefined)modes[e.mode]++;});
-  el.textContent=
-    'Total lessons: '+total+'\n'+
-    'Top languages: '+(topLangs.join(', ')||'none yet')+'\n'+
-    'Explains: '+modes.explain+' · Related: '+modes.related+' · Quizzes: '+modes.quiz+'\n'+
-    'Pronunciation: '+modes.pronounce+' · Heritage: '+modes.endangered+' · Custom: '+modes.custom;
-}
-
-function clearTutorHistory(){
-  tutorLog=[];
-  localStorage.removeItem('babel_tutor_log');
-  updateTutorStats();
-  toast('Progress reset');
-}
+populateLangs();
+updateLangPair();
+updateInterpPair();
+renderHistory();
+renderKeywords();
 
 // Restore sentry link fields
 if(localStorage.getItem('babel_sentry_callsign'))
   document.getElementById('sentryCallsign').value=localStorage.getItem('babel_sentry_callsign');
 if(localStorage.getItem('babel_sentry_token'))
   document.getElementById('sentryToken').value=localStorage.getItem('babel_sentry_token');
-// Update SENTRY status badge on load
-updateSentryStatus(
-  !!(localStorage.getItem('babel_sentry_callsign')&&localStorage.getItem('babel_sentry_token')),
-  localStorage.getItem('babel_sentry_callsign')
-);
-updateTutorStats();
-updateProgressDisplay();
-loadDailyLesson();
-var _ocEl=document.getElementById('offlineCacheCount');
-if(_ocEl)_ocEl.textContent=offlineCache.size();
 </script>
 </body>
 </html>

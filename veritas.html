@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050308">
+<title>VERITAS — RIAKOINE-EMPIRE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050308;--bg2:#08040e;--card:#0d0818;
+  --border:rgba(180,100,255,0.12);
+  --gold:#C9A84C;--purple:#b464ff;--red:#ff3b30;
+  --green:#30d158;--cyan:#64d2ff;
+  --dim:#4a3a6a;--text:#d8c8f0;--text2:#8a7aaf;
+  --mono:'Share Tech Mono',monospace;
+  --display:'Cinzel',serif;
+  --body:'Barlow Condensed',sans-serif;
+  --glow:0 0 24px rgba(180,100,255,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);height:100dvh;display:flex;flex-direction:column;overflow:hidden;background-image:radial-gradient(ellipse at 50% 0%,rgba(180,100,255,0.06) 0%,transparent 60%);}
+#pkScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:40px 24px;background-image:radial-gradient(ellipse at 50% 0%,rgba(180,100,255,0.1) 0%,transparent 60%);}
+.pk-logo{font-family:var(--display);font-size:48px;font-weight:900;letter-spacing:0.2em;color:var(--purple);text-shadow:0 0 40px rgba(180,100,255,0.5);margin-bottom:4px;}
+.pk-sub{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.3em;margin-bottom:4px;}
+.pk-zack{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:0.15em;margin-bottom:16px;opacity:0.8;}
+.pk-tagline{font-family:var(--mono);font-size:9px;color:var(--text2);text-align:center;line-height:1.9;margin-bottom:28px;letter-spacing:0.04em;}
+.pk-label{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.2em;margin-bottom:8px;}
+#pkInput{background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:16px;padding:14px 16px;border-radius:8px;width:100%;max-width:300px;text-align:center;letter-spacing:0.3em;margin-bottom:8px;outline:none;}
+#pkInput:focus{border-color:rgba(180,100,255,0.4);}
+#pkError{font-family:var(--mono);font-size:8px;color:var(--red);min-height:16px;margin-bottom:8px;letter-spacing:0.1em;}
+#pkBtn{background:linear-gradient(135deg,rgba(180,100,255,0.2),rgba(180,100,255,0.1));border:1px solid rgba(180,100,255,0.3);color:var(--purple);font-family:var(--mono);font-size:11px;letter-spacing:0.2em;padding:12px 40px;border-radius:6px;cursor:pointer;}
+#pkBtn:active{transform:scale(0.97);}
+.pk-foot{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.15em;margin-top:24px;text-align:center;}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+.v-logo{font-family:var(--display);font-size:22px;font-weight:700;color:var(--purple);letter-spacing:0.2em;text-shadow:0 0 20px rgba(180,100,255,0.4);}
+.v-sub{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.2em;}
+.v-zack{font-family:var(--mono);font-size:7px;color:var(--gold);letter-spacing:0.1em;opacity:0.7;}
+.threat-level{font-family:var(--mono);font-size:8px;padding:4px 10px;border-radius:4px;border:1px solid;letter-spacing:0.1em;}
+.threat-low{color:var(--green);border-color:rgba(48,209,88,0.3);background:rgba(48,209,88,0.08);}
+.threat-med{color:var(--gold);border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.08);}
+.threat-high{color:var(--red);border-color:rgba(255,59,48,0.3);background:rgba(255,59,48,0.08);}
+#tabBar{display:flex;padding:8px 16px;gap:6px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+#tabBar::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;font-family:var(--mono);font-size:8px;padding:6px 12px;border-radius:4px;border:1px solid var(--border);color:var(--dim);cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;}
+.tab.active{background:rgba(180,100,255,0.12);border-color:rgba(180,100,255,0.3);color:var(--purple);}
+.tab:active{transform:scale(0.95);}
+#panels{flex:1;overflow:hidden;position:relative;}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:none;flex-direction:column;gap:10px;}
+.panel.active{display:flex;}
+.panel::-webkit-scrollbar{width:2px;}
+.panel::-webkit-scrollbar-thumb{background:var(--dim);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:var(--glow);}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.card-title{font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:0.2em;}
+.card-tag{font-family:var(--mono);font-size:7px;padding:3px 8px;border-radius:3px;background:rgba(180,100,255,0.1);border:1px solid rgba(180,100,255,0.2);color:var(--purple);letter-spacing:0.1em;}
+.v-input{width:100%;background:rgba(180,100,255,0.05);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:10px 12px;border-radius:6px;outline:none;resize:none;}
+.v-input:focus{border-color:rgba(180,100,255,0.3);}
+.v-input::placeholder{color:var(--dim);}
+.btn{font-family:var(--mono);font-size:9px;padding:10px 14px;border-radius:6px;cursor:pointer;letter-spacing:0.1em;border:1px solid;transition:all 0.15s;text-align:center;}
+.btn:active{transform:scale(0.96);}
+.btn-full{width:100%;}
+.btn-purple{background:rgba(180,100,255,0.12);border-color:rgba(180,100,255,0.3);color:var(--purple);}
+.btn-red{background:rgba(255,59,48,0.1);border-color:rgba(255,59,48,0.25);color:var(--red);}
+.btn-green{background:rgba(48,209,88,0.1);border-color:rgba(48,209,88,0.25);color:var(--green);}
+.btn-gold{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.25);color:var(--gold);}
+.btn-sm{padding:5px 10px;font-size:8px;}
+.btn-row{display:flex;gap:6px;}
+.result-safe{border-color:rgba(48,209,88,0.3);background:rgba(48,209,88,0.05);}
+.result-warn{border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.05);}
+.result-danger{border-color:rgba(255,59,48,0.3);background:rgba(255,59,48,0.05);}
+.result-icon{font-size:32px;text-align:center;margin-bottom:8px;}
+.result-verdict{font-family:var(--display);font-size:16px;text-align:center;letter-spacing:0.1em;margin-bottom:6px;}
+.result-score{font-family:var(--mono);font-size:8px;text-align:center;color:var(--dim);margin-bottom:10px;}
+.result-detail{font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.8;}
+.result-detail div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.result-detail div:last-child{border:none;}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.history-item:last-child{border:none;}
+.h-icon{font-size:16px;flex-shrink:0;}
+.h-url{font-family:var(--mono);font-size:9px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.h-badge{font-family:var(--mono);font-size:7px;padding:2px 6px;border-radius:3px;flex-shrink:0;}
+.h-safe{background:rgba(48,209,88,0.1);color:var(--green);}
+.h-warn{background:rgba(201,168,76,0.1);color:var(--gold);}
+.h-danger{background:rgba(255,59,48,0.1);color:var(--red);}
+.verdict-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.05);margin:8px 0;overflow:hidden;}
+.verdict-fill{height:100%;border-radius:3px;}
+.scanning{display:flex;flex-direction:column;align-items:center;padding:24px;}
+.scan-ring{width:48px;height:48px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.2em;animation:scanPulse 1s ease-in-out infinite;}
+@keyframes scanPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
+#empireNav{display:flex;justify-content:space-around;padding:8px 16px 12px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg2);}
+.empire-btn{display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--mono);font-size:7px;color:var(--dim);cursor:pointer;padding:4px 8px;border-radius:6px;transition:all 0.2s;text-decoration:none;}
+.empire-btn.active{color:var(--purple);}
+.empire-icon{font-size:16px;}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(13,8,24,0.95);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10px;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div id="pkScreen">
+  <div class="pk-logo">VERITAS</div>
+  <div class="pk-sub">BY RIAKOINE-EMPIRE</div>
+  <div class="pk-zack">✦ ZACK IN TONGUES ✦</div>
+  <div class="pk-tagline">Truth is not a luxury.<br>It is infrastructure.<br>Scan links. Verify claims. Expose lies.</div>
+  <div class="pk-label">ENTER ACCESS CODE</div>
+  <input id="pkInput" type="password" maxlength="32" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')checkPK();">
+  <div id="pkError"></div>
+  <button id="pkBtn" onclick="checkPK()">ENTER</button>
+  <div class="pk-foot">TRUTH INTELLIGENCE · RIAKOINE-EMPIRE</div>
+</div>
+
+<div id="app" style="display:none;flex-direction:column;height:100dvh;">
+  <div id="topbar">
+    <div>
+      <div class="v-logo">VERITAS</div>
+      <div class="v-sub">TRUTH INTELLIGENCE</div>
+      <div class="v-zack">✦ ZACK IN TONGUES</div>
+    </div>
+    <div id="threatLevel" class="threat-level threat-low">● CLEAR</div>
+  </div>
+
+  <div id="tabBar">
+    <div class="tab active" onclick="showTab('link')" id="tab-link">🔗 LINK SCAN</div>
+    <div class="tab" onclick="showTab('claim')" id="tab-claim">📰 CLAIM CHECK</div>
+    <div class="tab" onclick="showTab('image')" id="tab-image">🎭 IMAGE CHECK</div>
+    <div class="tab" onclick="showTab('history')" id="tab-history">📋 HISTORY</div>
+    <div class="tab" onclick="showTab('about')" id="tab-about">ℹ ABOUT</div>
+  </div>
+
+  <div id="panels">
+
+    <!-- LINK SCANNER -->
+    <div class="panel active" id="panel-link">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">LINK / URL SCANNER</span>
+          <span class="card-tag">MALWARE · PHISHING</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
+          Paste any link from WhatsApp, SMS, email, or BABEL chat. VERITAS checks for malware, phishing, and scam indicators before you open it.
+        </div>
+        <input class="v-input" id="linkInput" type="url" placeholder="https://paste-any-link-here.com" style="height:auto;padding:12px;margin-bottom:8px;">
+        <div class="btn-row">
+          <button class="btn btn-purple btn-full" onclick="scanLink()">🔍 SCAN LINK</button>
+          <button class="btn btn-gold btn-sm" onclick="pasteLink()">📋 PASTE</button>
+        </div>
+      </div>
+      <div class="card" id="linkResult" style="display:none;"></div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">WHAT WE CHECK</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:2.1;">
+          <div>🔴 Known malware domains</div>
+          <div>🔴 Phishing URL patterns</div>
+          <div>🔴 IP-based URLs (no domain name)</div>
+          <div>🔴 Typosquatting (paypa1, g0ogle)</div>
+          <div>🟡 URL shorteners (bit.ly, tinyurl)</div>
+          <div>🟡 Suspicious TLDs (.tk .ml .xyz)</div>
+          <div>🟡 No HTTPS encryption</div>
+          <div>🟢 AI deep analysis of URL structure</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLAIM CHECKER -->
+    <div class="panel" id="panel-claim">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">CLAIM VERIFICATION</span>
+          <span class="card-tag">FACT CHECK</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
+          Paste a headline, WhatsApp forward, or viral claim. VERITAS analyzes for misinformation, missing context, and manipulation tactics.
+        </div>
+        <textarea class="v-input" id="claimInput" rows="4" placeholder="Paste any claim, headline, or viral message here..."></textarea>
+        <button class="btn btn-purple btn-full" style="margin-top:8px;" onclick="checkClaim()">🔍 VERIFY CLAIM</button>
+      </div>
+      <div class="card" id="claimResult" style="display:none;"></div>
+    </div>
+
+    <!-- IMAGE CHECK -->
+    <div class="panel" id="panel-image">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">IMAGE ANALYSIS</span>
+          <span class="card-tag">AI · DEEPFAKE · EDITED</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:12px;">
+          Upload an image to check for AI generation, deepfakes, or manipulation.
+        </div>
+        <input type="file" id="imgFileInput" accept="image/*" style="display:none;" onchange="analyzeImage(this)">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-purple btn-full" onclick="document.getElementById('imgFileInput').click()">📁 UPLOAD IMAGE</button>
+          <button class="btn btn-gold btn-full" onclick="captureImage()">📷 USE CAMERA</button>
+        </div>
+        <div id="imgPreview" style="display:none;margin-top:10px;text-align:center;">
+          <img id="imgPreviewEl" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid var(--border);">
+        </div>
+      </div>
+      <div class="card" id="imageResult" style="display:none;"></div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">WHAT WE DETECT</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:2.1;">
+          <div>🎭 AI-generated faces (GAN artifacts)</div>
+          <div>✂️ Copy-paste manipulation</div>
+          <div>🔢 Metadata inconsistencies</div>
+          <div>🌈 Lighting and shadow anomalies</div>
+          <div>📱 Screenshot vs original photo</div>
+          <div>🔤 AI-generated text in images</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel" id="panel-history">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">SCAN HISTORY</span>
+          <button class="btn btn-red btn-sm" onclick="clearHistory()">✕ CLEAR</button>
+        </div>
+        <div id="historyList"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">THREAT SUMMARY</span></div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:1;background:rgba(48,209,88,0.08);border:1px solid rgba(48,209,88,0.2);border-radius:6px;padding:8px;text-align:center;">
+            <div style="font-size:20px;color:var(--green);" id="safeCount">0</div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">SAFE</div>
+          </div>
+          <div style="flex:1;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:8px;text-align:center;">
+            <div style="font-size:20px;color:var(--gold);" id="warnCount">0</div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">WARNING</div>
+          </div>
+          <div style="flex:1;background:rgba(255,59,48,0.08);border:1px solid rgba(255,59,48,0.2);border-radius:6px;padding:8px;text-align:center;">
+            <div style="font-size:20px;color:var(--red);" id="dangerCount">0</div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">DANGER</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="panel" id="panel-about">
+      <div class="card">
+        <div class="card-head"><span class="card-title">WHAT IS VERITAS?</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:2.1;">
+          VERITAS is the truth intelligence arm of RIAKOINE-EMPIRE. In a world flooded with scam links, viral misinformation, and AI fakes — VERITAS gives ordinary people tools to fight back.
+          <br><br>Built for communities in Kenya and East Africa where WhatsApp forwards, SMS phishing, and social media manipulation cause real harm every day.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">THE EMPIRE</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="/babel/" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:8px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;">
+            <span style="font-size:20px;">🌐</span>
+            <div><div style="font-family:var(--mono);font-size:9px;color:var(--gold);">BABEL</div><div style="font-family:var(--mono);font-size:8px;color:var(--dim);">Translation · AI Tutor · E2EE Chat</div></div>
+          </a>
+          <a href="/sentry/" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:8px;background:rgba(255,59,48,0.06);border:1px solid rgba(255,59,48,0.15);border-radius:6px;">
+            <span style="font-size:20px;">🚨</span>
+            <div><div style="font-family:var(--mono);font-size:9px;color:var(--red);">SENTRY</div><div style="font-family:var(--mono);font-size:8px;color:var(--dim);">Safety · SOS · GPS Tracking</div></div>
+          </a>
+          <a href="/lumen/" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:8px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.15);border-radius:6px;">
+            <span style="font-size:20px;">💡</span>
+            <div><div style="font-family:var(--mono);font-size:9px;color:#4a9eff;">LUMEN</div><div style="font-family:var(--mono);font-size:8px;color:var(--dim);">Personal AI · Empire Intelligence</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);text-align:center;line-height:2;">
+          VERITAS v1 · RIAKOINE-EMPIRE<br>✦ ZACK IN TONGUES ✦<br>Truth is not a luxury. It is infrastructure.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="empireNav">
+    <a class="empire-btn" href="/babel/"><span class="empire-icon">🌐</span>BABEL</a>
+    <a class="empire-btn" href="/sentry/"><span class="empire-icon">🚨</span>SENTRY</a>
+    <a class="empire-btn" href="/lumen/"><span class="empire-icon">💡</span>LUMEN</a>
+    <a class="empire-btn active" href="/veritas/"><span class="empire-icon">🔍</span>VERITAS</a>
+    <a class="empire-btn" href="/"><span class="empire-icon">📊</span>SOKOSCAN</a>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ── PASSKEY ──
+(function(){
+  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
+  var HASH=hc('Zack_Lingua');
+  var SK='veritas_sk1';
+  window.checkPK=function(){
+    var v=document.getElementById('pkInput').value.trim();
+    if(!v){document.getElementById('pkError').textContent='ACCESS CODE REQUIRED';return;}
+    if(hc(v)===HASH){
+      sessionStorage.setItem(SK,'1');
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      initVeritas();
+    } else {
+      document.getElementById('pkError').textContent='INVALID CODE';
+      document.getElementById('pkInput').value='';
+    }
+  };
+  if(sessionStorage.getItem(SK)){
+    document.getElementById('pkScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+  }
+})();
+
+// ── STATE ──
+var scanHistory=JSON.parse(localStorage.getItem('veritas_history')||'[]');
+
+// ── THREAT DATA ──
+var SHORTENERS=['bit.ly','tinyurl.com','t.co','goo.gl','ow.ly','buff.ly','rb.gy','cutt.ly','is.gd','tiny.cc'];
+var SUSPICIOUS_TLDS=['.tk','.ml','.ga','.cf','.gq','.xyz','.top','.click','.download','.zip'];
+var PHISHING_PATTERNS=[
+  /paypa[l1]/i,/g[o0]{2}g[l1]e/i,/amaz[o0]n/i,/micr[o0]s[o0]ft/i,
+  /app[l1]e/i,/faceb[o0]{2}k/i,/verify.*account/i,/confirm.*password/i,
+  /urgent.*action/i,/suspend.*account/i,/win.*prize/i,/free.*money/i
+];
+
+// ── INIT ──
+function initVeritas(){
+  renderHistory();
+  updateThreatSummary();
+}
+
+// ── TABS ──
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+// ── LINK SCANNER ──
+function pasteLink(){
+  if(navigator.clipboard){
+    navigator.clipboard.readText().then(function(t){
+      document.getElementById('linkInput').value=t;
+      toast('Pasted');
+    }).catch(function(){toast('Tap field and paste manually');});
+  }
+}
+
+function scanLink(){
+  var url=document.getElementById('linkInput').value.trim();
+  if(!url){toast('Paste a link first');return;}
+  if(!url.startsWith('http'))url='https://'+url;
+  var el=document.getElementById('linkResult');
+  el.style.display='block';
+  el.className='card';
+  el.innerHTML='<div class="scanning"><div class="scan-ring"></div><div class="scan-text">SCANNING LINK...</div></div>';
+  el.scrollIntoView({behavior:'smooth'});
+  var local=localLinkCheck(url);
+  aiLinkAnalysis(url,function(ai){
+    var final=mergeResults(local,ai);
+    renderLinkResult(final,url);
+    saveToHistory('link',url,final.verdict);
+    updateThreatLevel(final.verdict);
+    updateThreatSummary();
+  });
+}
+
+function localLinkCheck(url){
+  var flags=[];var warnings=[];var score=0;
+  try{
+    var u=new URL(url);
+    var host=u.hostname.toLowerCase();
+    if(/^\d+\.\d+\.\d+\.\d+$/.test(host)){flags.push('IP-based URL — no domain name');score+=40;}
+    if(u.protocol!=='https:'){warnings.push('No HTTPS encryption');score+=15;}
+    if(SHORTENERS.some(function(s){return host===s||host.endsWith('.'+s);})){warnings.push('URL shortener — destination hidden');score+=20;}
+    if(SUSPICIOUS_TLDS.some(function(t){return host.endsWith(t);})){warnings.push('Suspicious domain extension');score+=20;}
+    if(host.split('.').length>4){flags.push('Excessive subdomains — common phishing trick');score+=25;}
+    PHISHING_PATTERNS.forEach(function(p){if(p.test(url.toLowerCase())){flags.push('Phishing keyword pattern in URL');score+=30;}});
+    if(url.length>200){warnings.push('Unusually long URL');score+=10;}
+    if((url.match(/[@%=&?]/g)||[]).length>8){warnings.push('Many special characters — possible obfuscation');score+=10;}
+  }catch(e){flags.push('Invalid or malformed URL');score+=30;}
+  var verdict='safe';
+  if(score>=50)verdict='danger';
+  else if(score>=20)verdict='warning';
+  return{score:score,flags:flags,warnings:warnings,verdict:verdict};
+}
+
+function aiLinkAnalysis(url,cb){
+  var prompt='Analyze this URL for safety: '+url+'\n\nCheck for phishing, malware, scam indicators.\n\nRespond EXACTLY:\nVERDICT: SAFE or WARNING or DANGER\nSUMMARY: [one sentence]\nDETAILS: [2 observations]\nADVICE: [what user should do]';
+  fetch('/api/tutor',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:250,system:'You are a cybersecurity analyst. Be precise. Plain text only.',messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(d){
+    var t='';if(d.choices&&d.choices[0])t=d.choices[0].message.content;
+    cb({text:t});
+  }).catch(function(){cb({text:''}); });
+}
+
+function mergeResults(local,ai){
+  var aiVerdict='';var aiSummary='';var aiDetails='';var aiAdvice='';
+  if(ai.text){
+    var vm=ai.text.match(/VERDICT:\s*(SAFE|WARNING|DANGER)/i);
+    var sm=ai.text.match(/SUMMARY:\s*(.+)/i);
+    var dm=ai.text.match(/DETAILS:\s*([\s\S]+?)(?:ADVICE:|$)/i);
+    var am=ai.text.match(/ADVICE:\s*(.+)/i);
+    if(vm)aiVerdict=vm[1].toLowerCase();
+    if(sm)aiSummary=sm[1].trim();
+    if(dm)aiDetails=dm[1].trim();
+    if(am)aiAdvice=am[1].trim();
+  }
+  var verdict=local.verdict;
+  if(aiVerdict==='danger')verdict='danger';
+  else if(aiVerdict==='warning'&&verdict==='safe')verdict='warning';
+  return{verdict:verdict,score:local.score,flags:local.flags,warnings:local.warnings,aiSummary:aiSummary,aiDetails:aiDetails,aiAdvice:aiAdvice};
+}
+
+function renderLinkResult(r,url){
+  var el=document.getElementById('linkResult');
+  var icon=r.verdict==='safe'?'✅':r.verdict==='warning'?'⚠️':'🚨';
+  var label=r.verdict==='safe'?'SAFE':r.verdict==='warning'?'CAUTION':'DANGER';
+  var cls='result-'+(r.verdict==='warning'?'warn':r.verdict);
+  var color=r.verdict==='safe'?'var(--green)':r.verdict==='warning'?'var(--gold)':'var(--red)';
+  var details='';
+  r.flags.forEach(function(f){details+='<div>🔴 '+f+'</div>';});
+  r.warnings.forEach(function(w){details+='<div>🟡 '+w+'</div>';});
+  if(r.aiDetails)details+='<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);">🤖 '+r.aiDetails+'</div>';
+  if(!details)details='<div>🟢 No threats detected in URL structure</div>';
+  var advice=r.aiAdvice||(r.verdict==='safe'?'Link appears safe. Stay alert.':r.verdict==='warning'?'Proceed with caution. Do not enter personal info.':'Do NOT open this link. Block the sender.');
+  el.className='card '+cls;
+  el.innerHTML=
+    '<div class="result-icon">'+icon+'</div>'+
+    '<div class="result-verdict" style="color:'+color+';">'+label+'</div>'+
+    '<div class="result-score">'+url.substring(0,55)+(url.length>55?'...':'')+'</div>'+
+    (r.aiSummary?'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);text-align:center;margin-bottom:10px;">'+r.aiSummary+'</div>':'')+
+    '<div class="result-detail">'+details+'</div>'+
+    '<div style="margin-top:10px;padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;font-family:var(--mono);font-size:9px;color:'+color+';line-height:1.7;">💡 '+advice+'</div>';
+}
+
+// ── CLAIM CHECKER ──
+function checkClaim(){
+  var claim=document.getElementById('claimInput').value.trim();
+  if(!claim){toast('Enter a claim to check');return;}
+  var el=document.getElementById('claimResult');
+  el.style.display='block';
+  el.className='card';
+  el.innerHTML='<div class="scanning"><div class="scan-ring"></div><div class="scan-text">ANALYZING CLAIM...</div></div>';
+  el.scrollIntoView({behavior:'smooth'});
+  var prompt='Fact-check this claim:\n\n"'+claim+'"\n\nRespond EXACTLY:\nVERDICT: TRUE or MISLEADING or FALSE or UNVERIFIABLE\nCONFIDENCE: [0-100]%\nEXPLANATION: [2-3 sentences]\nRED FLAGS: [manipulation tactics, emotional language, missing context]\nCONTEXT: [what additional info is needed]';
+  fetch('/api/tutor',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:400,system:'You are an expert fact-checker. Be precise, neutral, evidence-based. Plain text only.',messages:[{role:'user',content:prompt}]})
+  }).then(function(r){return r.json();}).then(function(d){
+    var t='';if(d.choices&&d.choices[0])t=d.choices[0].message.content;
+    renderClaimResult(t,claim);
+  }).catch(function(){
+    el.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--red);">Connection error. Try again.</div>';
+  });
+}
+
+function renderClaimResult(text,claim){
+  var el=document.getElementById('claimResult');
+  var vm=text.match(/VERDICT:\s*(TRUE|MISLEADING|FALSE|UNVERIFIABLE)/i);
+  var cm=text.match(/CONFIDENCE:\s*(\d+)/i);
+  var em=text.match(/EXPLANATION:\s*([\s\S]+?)(?:RED FLAGS:|$)/i);
+  var rm=text.match(/RED FLAGS:\s*([\s\S]+?)(?:CONTEXT:|$)/i);
+  var ctx=text.match(/CONTEXT:\s*([\s\S]+?)$/i);
+  var verdict=vm?vm[1].toUpperCase():'UNVERIFIABLE';
+  var confidence=cm?parseInt(cm[1]):50;
+  var explanation=em?em[1].trim():'Analysis complete.';
+  var redFlags=rm?rm[1].trim():'';
+  var context=ctx?ctx[1].trim():'';
+  var icon=verdict==='TRUE'?'✅':verdict==='FALSE'?'❌':verdict==='MISLEADING'?'⚠️':'❓';
+  var color=verdict==='TRUE'?'var(--green)':verdict==='FALSE'?'var(--red)':verdict==='MISLEADING'?'var(--gold)':'var(--cyan)';
+  var cls=verdict==='TRUE'?'result-safe':verdict==='FALSE'?'result-danger':'result-warn';
+  el.className='card '+cls;
+  el.innerHTML=
+    '<div class="result-icon">'+icon+'</div>'+
+    '<div class="result-verdict" style="color:'+color+';">'+verdict+'</div>'+
+    '<div class="result-score">Confidence: '+confidence+'%</div>'+
+    '<div class="verdict-bar"><div class="verdict-fill" style="width:'+confidence+'%;background:'+color+';"></div></div>'+
+    '<div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.8;margin-bottom:8px;">'+explanation+'</div>'+
+    (redFlags?'<div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-bottom:6px;">⚠ '+redFlags+'</div>':'')+
+    (context?'<div style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.7;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;">ℹ '+context+'</div>':'');
+  saveToHistory('claim',claim.substring(0,60),verdict==='TRUE'?'safe':verdict==='FALSE'?'danger':'warning');
+  updateThreatSummary();
+}
+
+// ── IMAGE ANALYSIS ──
+function analyzeImage(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var dataUrl=e.target.result;
+    document.getElementById('imgPreview').style.display='block';
+    document.getElementById('imgPreviewEl').src=dataUrl;
+    var el=document.getElementById('imageResult');
+    el.style.display='block';el.className='card';
+    el.innerHTML='<div class="scanning"><div class="scan-ring"></div><div class="scan-text">ANALYZING IMAGE...</div></div>';
+    var base64=dataUrl.split(',')[1];
+    var mediaType=file.type||'image/jpeg';
+    fetch('/api/tutor',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',max_tokens:350,
+        system:'You are an expert in detecting AI-generated images and deepfakes. Plain text only.',
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+          {type:'text',text:'Analyze this image for AI generation, deepfake manipulation, or editing.\n\nFormat EXACTLY:\nVERDICT: AUTHENTIC or SUSPICIOUS or AI-GENERATED\nCONFIDENCE: [0-100]%\nFINDINGS: [2-3 observations]\nADVICE: [what to do]'}
+        ]}]
+      })
+    }).then(function(r){return r.json();}).then(function(d){
+      var t='';if(d.choices&&d.choices[0])t=d.choices[0].message.content;
+      if(!t||t.includes('cannot'))t='VERDICT: SUSPICIOUS\nCONFIDENCE: 40%\nFINDINGS: Text AI model — cannot fully analyze images. File: '+file.name+'. For full deepfake detection use fotoforensics.com or hivemoderation.com.\nADVICE: Use a specialist image forensics tool for definitive results.';
+      renderImageResult(t,file.name);
+    }).catch(function(){
+      renderImageResult('VERDICT: SUSPICIOUS\nCONFIDENCE: 40%\nFINDINGS: Connection error during analysis. File received: '+file.name+'.\nADVICE: Try again or use fotoforensics.com for analysis.',file.name);
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function captureImage(){
+  var input=document.getElementById('imgFileInput');
+  input.setAttribute('capture','camera');input.click();
+}
+
+function renderImageResult(text,filename){
+  var el=document.getElementById('imageResult');
+  var vm=text.match(/VERDICT:\s*(AUTHENTIC|SUSPICIOUS|AI-GENERATED)/i);
+  var cm=text.match(/CONFIDENCE:\s*(\d+)/i);
+  var fm=text.match(/FINDINGS:\s*([\s\S]+?)(?:ADVICE:|$)/i);
+  var am=text.match(/ADVICE:\s*([\s\S]+?)$/i);
+  var verdict=vm?vm[1].toUpperCase():'SUSPICIOUS';
+  var confidence=cm?parseInt(cm[1]):50;
+  var findings=fm?fm[1].trim():'Analysis complete.';
+  var advice=am?am[1].trim():'Exercise caution with this image.';
+  var icon=verdict==='AUTHENTIC'?'✅':verdict==='AI-GENERATED'?'🤖':'⚠️';
+  var color=verdict==='AUTHENTIC'?'var(--green)':verdict==='AI-GENERATED'?'var(--red)':'var(--gold)';
+  var cls=verdict==='AUTHENTIC'?'result-safe':verdict==='AI-GENERATED'?'result-danger':'result-warn';
+  el.className='card '+cls;
+  el.innerHTML=
+    '<div class="result-icon">'+icon+'</div>'+
+    '<div class="result-verdict" style="color:'+color+';">'+verdict+'</div>'+
+    '<div class="result-score">Confidence: '+confidence+'%</div>'+
+    '<div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.8;margin-bottom:8px;">'+findings+'</div>'+
+    '<div style="font-family:var(--mono);font-size:9px;color:'+color+';line-height:1.7;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;">💡 '+advice+'</div>';
+  saveToHistory('image',filename,verdict==='AUTHENTIC'?'safe':'warning');
+  updateThreatSummary();
+}
+
+// ── HISTORY ──
+function saveToHistory(type,item,verdict){
+  scanHistory.unshift({type:type,item:item,verdict:verdict,time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
+  if(scanHistory.length>50)scanHistory=scanHistory.slice(0,50);
+  localStorage.setItem('veritas_history',JSON.stringify(scanHistory));
+  renderHistory();
+}
+
+function renderHistory(){
+  var list=document.getElementById('historyList');
+  if(!list)return;
+  if(!scanHistory.length){list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">No scans yet</div>';return;}
+  list.innerHTML=scanHistory.slice(0,20).map(function(h){
+    var icon=h.type==='link'?'🔗':h.type==='claim'?'📰':'🖼';
+    var badge=h.verdict==='safe'?'h-safe':h.verdict==='danger'?'h-danger':'h-warn';
+    var label=h.verdict==='safe'?'SAFE':h.verdict==='danger'?'DANGER':'WARNING';
+    return '<div class="history-item"><span class="h-icon">'+icon+'</span><span class="h-url">'+h.item+'</span><span class="h-badge '+badge+'">'+label+'</span></div>';
+  }).join('');
+}
+
+function clearHistory(){
+  scanHistory=[];localStorage.removeItem('veritas_history');
+  renderHistory();updateThreatSummary();toast('History cleared');
+}
+
+function updateThreatSummary(){
+  var safe=scanHistory.filter(function(h){return h.verdict==='safe';}).length;
+  var warn=scanHistory.filter(function(h){return h.verdict==='warning';}).length;
+  var danger=scanHistory.filter(function(h){return h.verdict==='danger';}).length;
+  var sc=document.getElementById('safeCount');var wc=document.getElementById('warnCount');var dc=document.getElementById('dangerCount');
+  if(sc)sc.textContent=safe;if(wc)wc.textContent=warn;if(dc)dc.textContent=danger;
+}
+
+function updateThreatLevel(verdict){
+  var el=document.getElementById('threatLevel');if(!el)return;
+  if(verdict==='danger'){el.className='threat-level threat-high';el.textContent='● THREAT DETECTED';}
+  else if(verdict==='warning'){el.className='threat-level threat-med';el.textContent='● CAUTION';}
+  else{el.className='threat-level threat-low';el.textContent='● CLEAR';}
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+</script>
+</body>
+</html>
