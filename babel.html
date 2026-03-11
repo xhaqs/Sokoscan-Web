@@ -385,6 +385,7 @@ body::after{
   <div class="pk-logo">BABEL</div>
   <div class="pk-sub">BY RIAKOINE-EMPIRE</div>
   <div class="pk-tagline">Breaking every language barrier.<br>Speaking every human tongue.</div>
+  <div style="font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:0.15em;margin-bottom:16px;opacity:0.8;">✦ ZACK IN TONGUES ✦</div>
   <div class="pk-label">ENTER ACCESS CODE</div>
   <input id="pkInput" type="password" maxlength="32"
     placeholder="· · · · · · · ·"
@@ -418,6 +419,7 @@ body::after{
     <div class="logo-wrap">
       <div class="logo">BABEL</div>
       <div class="empire">RIAKOINE-EMPIRE</div>
+      <div style="font-family:var(--mono);font-size:7px;color:var(--gold);letter-spacing:0.1em;opacity:0.7;">✦ ZACK IN TONGUES</div>
     </div>
     <div class="top-right">
       <div id="sosIndicator"><span class="sos-dot"></span>SOS ACTIVE</div>
@@ -602,10 +604,10 @@ body::after{
       <div class="card">
         <div class="card-head">
           <span class="card-title">SENTRY LINK</span>
-          <span class="card-tag">OPTIONAL</span>
+          <span class="e2ee-badge" id="sentryStatusBadge" style="background:rgba(255,59,48,0.1);border-color:rgba(255,59,48,0.2);color:#ff3b30;">⚫ NOT LINKED</span>
         </div>
         <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;line-height:1.6;">
-          Connect BABEL SOS to your SENTRY account for full GPS + contact alerts.
+          Connect BABEL SOS to your SENTRY account for full GPS + contact alerts. When SOS fires here — SENTRY notifies your emergency contacts instantly.
         </div>
         <input id="sentryCallsign" type="text" class="babel-input"
           style="height:auto;padding:10px;"
@@ -613,9 +615,15 @@ body::after{
         <input id="sentryToken" type="password" class="babel-input"
           style="height:auto;padding:10px;margin-top:6px;"
           placeholder="SENTRY passkey">
-        <button class="btn btn-purple btn-full" style="margin-top:8px;" onclick="saveSentryLink()">
-          🔗 LINK TO SENTRY
-        </button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-purple btn-full" onclick="saveSentryLink()">
+            🔗 LINK TO SENTRY
+          </button>
+          <button class="btn btn-cyan btn-sm" onclick="openSentry()">
+            ↗ OPEN
+          </button>
+        </div>
+        <div id="sentryLinkStatus" style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:6px;"></div>
       </div>
 
       <div class="card">
@@ -1645,7 +1653,48 @@ function saveSentryLink(){
   if(!c||!t){toast('Enter callsign and passkey');return;}
   localStorage.setItem('babel_sentry_callsign',c);
   localStorage.setItem('babel_sentry_token',t);
-  toast('SENTRY link saved');
+  // Test connection
+  var statusEl=document.getElementById('sentryLinkStatus');
+  if(statusEl)statusEl.textContent='Testing connection...';
+  fetch('http://5.180.181.125/sentry/health',{
+    headers:{'x-sentry-token':t}
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.status==='ok'){
+      updateSentryStatus(true,c);
+      toast('✅ SENTRY linked — '+c);
+      if(statusEl)statusEl.textContent='Connected · GPS alerts active · '+new Date().toLocaleTimeString();
+    } else {
+      updateSentryStatus(false);
+      toast('Check callsign and passkey');
+      if(statusEl)statusEl.textContent='Connection failed — check credentials';
+    }
+  }).catch(function(){
+    // Save anyway even if health check fails
+    updateSentryStatus(true,c);
+    toast('SENTRY link saved — '+c);
+    if(statusEl)statusEl.textContent='Saved · will connect when SENTRY is online';
+  });
+}
+
+function openSentry(){
+  window.open('http://5.180.181.125/sentry/','_blank');
+}
+
+function updateSentryStatus(linked, callsign){
+  var badge=document.getElementById('sentryStatusBadge');
+  if(!badge)return;
+  if(linked){
+    badge.style.background='rgba(48,209,88,0.1)';
+    badge.style.borderColor='rgba(48,209,88,0.2)';
+    badge.style.color='#30d158';
+    badge.textContent='🟢 LINKED'+(callsign?' · '+callsign:'');
+  } else {
+    badge.style.background='rgba(255,59,48,0.1)';
+    badge.style.borderColor='rgba(255,59,48,0.2)';
+    badge.style.color='#ff3b30';
+    badge.textContent='⚫ NOT LINKED';
+  }
 }
 
 // ── HISTORY ──
@@ -2308,6 +2357,11 @@ if(localStorage.getItem('babel_sentry_callsign'))
   document.getElementById('sentryCallsign').value=localStorage.getItem('babel_sentry_callsign');
 if(localStorage.getItem('babel_sentry_token'))
   document.getElementById('sentryToken').value=localStorage.getItem('babel_sentry_token');
+// Update SENTRY status badge on load
+updateSentryStatus(
+  !!(localStorage.getItem('babel_sentry_callsign')&&localStorage.getItem('babel_sentry_token')),
+  localStorage.getItem('babel_sentry_callsign')
+);
 updateTutorStats();
 var _ocEl=document.getElementById('offlineCacheCount');
 if(_ocEl)_ocEl.textContent=offlineCache.size();
