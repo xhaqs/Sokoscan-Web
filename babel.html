@@ -2164,7 +2164,7 @@ function runTutorAI(prompt, mode){
   // Scroll to response
   setTimeout(function(){responseEl.scrollIntoView({behavior:'smooth',block:'start'});},100);
 
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('/api/tutor',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
