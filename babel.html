@@ -568,6 +568,14 @@ body::after{
       <div class="card" style="padding:0;overflow:hidden;position:relative;">
         <video id="ocrVideo" style="width:100%;display:block;max-height:240px;object-fit:cover;background:#000;" autoplay playsinline></video>
         <canvas id="ocrCanvas" style="display:none;"></canvas>
+        <!-- Exit camera button — top right -->
+        <button onclick="stopOCRCamera()" id="ocrExitBtn"
+          style="display:none;position:absolute;top:8px;right:8px;z-index:10;
+            background:rgba(239,68,68,0.85);border:1px solid rgba(239,68,68,0.6);
+            color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;
+            padding:6px 12px;border-radius:4px;cursor:pointer;letter-spacing:1px;">
+          ✕ EXIT
+        </button>
         <!-- Overlay frame -->
         <div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;">
           <div style="width:80%;height:60%;border:2px solid rgba(201,168,76,0.6);border-radius:4px;
@@ -606,7 +614,10 @@ body::after{
 
       <!-- RESULT -->
       <div class="card" id="ocrResultCard" style="display:none;margin-top:12px;">
-        <div class="output-label">DETECTED TEXT</div>
+        <div class="card-head">
+          <span class="output-label">DETECTED TEXT</span>
+          <button class="btn btn-red btn-sm" onclick="clearOCRResult()">✕ CLEAR</button>
+        </div>
         <div class="output-box" id="ocrDetected" style="color:var(--text);font-size:11px;min-height:40px;"></div>
         <div style="margin:8px 0 4px;">
           <div class="output-label">TRANSLATION</div>
@@ -1188,6 +1199,7 @@ function startOCRCamera(){
     document.getElementById('ocrStartBtn').className='btn btn-red';
     document.getElementById('ocrStatus').textContent='CAMERA ACTIVE — AIM AT TEXT';
     document.getElementById('ocrStatus').style.color='var(--green)';
+    document.getElementById('ocrExitBtn').style.display='block';
   }).catch(function(e){
     toast('Camera access denied — use Upload instead');
     document.getElementById('ocrStatus').textContent='CAMERA DENIED — USE UPLOAD';
@@ -1203,6 +1215,18 @@ function stopOCRCamera(){
   document.getElementById('ocrStartBtn').className='btn btn-gold';
   document.getElementById('ocrStatus').textContent='CAMERA OFF';
   document.getElementById('ocrStatus').style.color='var(--dim)';
+  document.getElementById('ocrExitBtn').style.display='none';
+}
+
+function clearOCRResult(){
+  document.getElementById('ocrDetected').textContent='';
+  document.getElementById('ocrTranslated').textContent='';
+  document.getElementById('ocrResultCard').style.display='none';
+  document.getElementById('ocrFilePreview').style.display='none';
+  document.getElementById('ocrStatus').textContent=ocrActive?'CAMERA ACTIVE — AIM AT TEXT':'CAMERA OFF';
+  window._lastOCRText=null;
+  window._lastOCRTrans=null;
+  toast('Cleared');
 }
 
 function captureOCR(){
@@ -1264,9 +1288,19 @@ function doTesseract(imageData,toLang){
     }
     document.getElementById('ocrDetected').textContent=text;
     document.getElementById('ocrStatus').textContent='TRANSLATING...';
+    // Force translation — always translate to target lang
+    // If from and to are same, translate via intermediate or just show original with note
     callGoogleTranslate(text,'auto',toLang,function(trans){
-      document.getElementById('ocrTranslated').textContent=trans||'Translation failed.';
-      document.getElementById('ocrStatus').textContent='DONE — READY';
+      var isSame = trans && trans.trim().toLowerCase()===text.trim().toLowerCase();
+      if(isSame){
+        // Text is already in target language — show clearly
+        document.getElementById('ocrTranslated').textContent=trans;
+        document.getElementById('ocrStatus').textContent='ALREADY IN TARGET LANGUAGE';
+        toast('Text is already in your target language');
+      } else {
+        document.getElementById('ocrTranslated').textContent=trans||'Translation failed.';
+        document.getElementById('ocrStatus').textContent='DONE — READY';
+      }
       window._lastOCRText=text;
       window._lastOCRTrans=trans;
     });
