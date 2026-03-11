@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050308">
+<title>BABEL — RIAKOINE-EMPIRE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050308;
+  --bg2:#0a0612;
+  --card:#0e0a18;
+  --border:#1e1530;
+  --gold:#c9a84c;
+  --gold2:#f0c866;
+  --purple:#7c3aed;
+  --purple2:#a78bfa;
+  --cyan:#06b6d4;
+  --green:#10b981;
+  --red:#ef4444;
+  --text:#f0e8ff;
+  --dim:#6b5e8a;
+  --mono:'Share Tech Mono',monospace;
+  --cond:'Barlow Condensed',sans-serif;
+  --serif:'Cinzel',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);}
+
+/* ── GRID BACKGROUND ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 20%,rgba(124,58,237,0.12) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(6,182,212,0.08) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── PASSKEY ── */
+#pkScreen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;
+}
+.pk-logo{font-family:var(--serif);font-size:42px;font-weight:900;letter-spacing:10px;
+  color:var(--gold);text-shadow:0 0 30px rgba(201,168,76,0.6);margin-bottom:4px;}
+.pk-sub{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:4px;
+  color:var(--purple2);margin-bottom:8px;}
+.pk-tagline{font-family:var(--mono);font-size:8px;color:var(--dim);
+  letter-spacing:1px;margin-bottom:36px;text-align:center;}
+.pk-label{font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:3px;margin-bottom:10px;}
+#pkInput{
+  background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.3);
+  color:var(--gold);font-family:var(--mono);font-size:18px;letter-spacing:6px;
+  padding:14px 20px;border-radius:4px;outline:none;text-align:center;
+  width:100%;max-width:280px;margin-bottom:10px;transition:border-color 0.3s;
+}
+#pkInput:focus{border-color:rgba(201,168,76,0.5);}
+#pkError{font-family:var(--mono);font-size:9px;color:var(--red);
+  letter-spacing:2px;margin-bottom:10px;min-height:14px;}
+#pkBtn{
+  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);
+  color:var(--gold);font-family:var(--cond);font-size:14px;font-weight:700;
+  letter-spacing:4px;padding:13px 32px;border-radius:4px;cursor:pointer;
+  width:100%;max-width:280px;transition:all 0.2s;
+}
+#pkBtn:active{background:rgba(201,168,76,0.2);}
+.pk-foot{font-family:var(--mono);font-size:7px;color:#1e1530;
+  margin-top:36px;letter-spacing:2px;text-align:center;}
+
+/* ── APP SHELL ── */
+#app{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+
+/* ── TOPBAR ── */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 8px;border-bottom:1px solid var(--border);
+  background:rgba(5,3,8,0.97);flex-shrink:0;
+}
+.logo-wrap{display:flex;flex-direction:column;}
+.logo{font-family:var(--serif);font-size:20px;font-weight:900;letter-spacing:6px;
+  color:var(--gold);text-shadow:0 0 20px rgba(201,168,76,0.5);line-height:1;}
+.empire{font-family:var(--cond);font-size:7px;font-weight:700;letter-spacing:3px;
+  color:var(--purple2);margin-top:2px;}
+.top-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+#sosIndicator{font-family:var(--mono);font-size:8px;letter-spacing:2px;
+  color:var(--green);display:flex;align-items:center;gap:4px;}
+.sos-dot{width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+#langPair{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:1px;}
+
+/* ── TABS ── */
+#tabs{
+  display:flex;border-bottom:1px solid var(--border);
+  background:rgba(5,3,8,0.97);flex-shrink:0;
+}
+.tab{
+  flex:1;padding:10px 4px 8px;font-family:var(--cond);font-size:10px;
+  font-weight:700;letter-spacing:2px;color:var(--dim);text-align:center;
+  cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;
+}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-icon{font-size:13px;display:block;margin-bottom:2px;}
+
+/* ── PANELS ── */
+#panels{flex:1;overflow:hidden;position:relative;}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:14px;display:none;}
+.panel.active{display:block;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:14px;margin-bottom:12px;
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.card-title{font-family:var(--cond);font-size:11px;font-weight:700;
+  letter-spacing:3px;color:var(--purple2);}
+.card-tag{font-family:var(--mono);font-size:8px;color:var(--dim);
+  background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);
+  padding:2px 8px;border-radius:2px;}
+
+/* ── LANGUAGE SELECTOR ── */
+.lang-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px;}
+.lang-select{
+  background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);
+  color:var(--text);font-family:var(--mono);font-size:10px;padding:10px 8px;
+  border-radius:4px;outline:none;width:100%;appearance:none;
+  -webkit-appearance:none;cursor:pointer;
+}
+.lang-swap{
+  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);
+  color:var(--gold);font-size:16px;padding:10px 12px;border-radius:4px;
+  cursor:pointer;text-align:center;transition:all 0.2s;flex-shrink:0;
+}
+.lang-swap:active{background:rgba(201,168,76,0.2);transform:rotate(180deg);}
+
+/* ── TEXT AREA ── */
+.babel-input{
+  width:100%;background:rgba(14,10,24,0.8);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:12px;padding:12px;
+  border-radius:4px;outline:none;resize:none;height:80px;line-height:1.6;
+  transition:border-color 0.2s;
+}
+.babel-input:focus{border-color:rgba(124,58,237,0.4);}
+.babel-input::placeholder{color:var(--dim);}
+
+/* ── OUTPUT BOX ── */
+.output-box{
+  background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.15);
+  border-radius:4px;padding:12px;min-height:60px;margin-top:8px;
+  font-family:var(--mono);font-size:12px;color:var(--cyan);line-height:1.6;
+  position:relative;
+}
+.output-label{font-family:var(--mono);font-size:8px;color:var(--dim);
+  letter-spacing:2px;margin-bottom:6px;}
+.output-actions{display:flex;gap:6px;margin-top:8px;}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:10px 14px;border-radius:4px;font-family:var(--cond);font-size:11px;
+  font-weight:700;letter-spacing:2px;cursor:pointer;border:1px solid;
+  transition:all 0.15s;text-align:center;
+}
+.btn:active{opacity:0.8;transform:scale(0.98);}
+.btn-gold{background:rgba(201,168,76,0.12);border-color:rgba(201,168,76,0.4);color:var(--gold);}
+.btn-purple{background:rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.4);color:var(--purple2);}
+.btn-cyan{background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.3);color:var(--cyan);}
+.btn-green{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:var(--green);}
+.btn-red{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.5);color:var(--red);}
+.btn-full{width:100%;padding:13px;}
+.btn-sm{padding:7px 12px;font-size:10px;}
+
+/* ── MIC BUTTON ── */
+.mic-wrap{display:flex;justify-content:center;margin:10px 0;}
+.mic-btn{
+  width:72px;height:72px;border-radius:50%;border:2px solid rgba(201,168,76,0.4);
+  background:rgba(201,168,76,0.08);color:var(--gold);font-size:28px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;position:relative;
+}
+.mic-btn.listening{
+  border-color:var(--red);background:rgba(239,68,68,0.15);color:var(--red);
+  animation:micPulse 1s infinite;
+}
+@keyframes micPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}
+  50%{box-shadow:0 0 0 16px rgba(239,68,68,0);}
+}
+.mic-hint{font-family:var(--mono);font-size:8px;color:var(--dim);
+  text-align:center;letter-spacing:1px;margin-top:4px;}
+
+/* ── INTERPRETER MODE ── */
+.interpreter-wrap{display:flex;flex-direction:column;gap:10px;}
+.speaker-block{
+  background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;
+}
+.speaker-label{
+  font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:3px;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.speaker-a{color:var(--gold);}
+.speaker-b{color:var(--cyan);}
+.speaker-output{
+  font-family:var(--mono);font-size:12px;line-height:1.7;min-height:44px;
+  padding:10px;border-radius:4px;margin-top:8px;
+}
+.speaker-a .speaker-output{
+  background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);color:var(--gold2);
+}
+.speaker-b .speaker-output{
+  background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.15);color:var(--cyan);
+}
+.active-speaker{border-color:rgba(201,168,76,0.4)!important;}
+.active-speaker-b{border-color:rgba(6,182,212,0.4)!important;}
+
+/* ── SOS PANEL ── */
+.sos-card{
+  background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);
+  border-radius:6px;padding:16px;margin-bottom:12px;
+}
+.sos-title{font-family:var(--cond);font-size:13px;font-weight:900;
+  letter-spacing:4px;color:var(--red);margin-bottom:4px;}
+.sos-sub{font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:1px;margin-bottom:14px;line-height:1.6;}
+.sos-big-btn{
+  width:100%;padding:20px;background:rgba(239,68,68,0.15);
+  border:2px solid rgba(239,68,68,0.6);border-radius:6px;
+  color:var(--red);font-family:var(--cond);font-size:18px;font-weight:900;
+  letter-spacing:4px;cursor:pointer;text-align:center;
+  transition:all 0.2s;margin-bottom:10px;
+}
+.sos-big-btn:active{background:rgba(239,68,68,0.3);}
+.keyword-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;}
+.keyword-chip{
+  background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
+  border-radius:3px;padding:6px 4px;text-align:center;
+  font-family:var(--mono);font-size:8px;color:rgba(239,68,68,0.7);
+}
+.keyword-chip .kw-lang{font-size:7px;color:var(--dim);display:block;margin-bottom:1px;}
+
+/* ── SOS COUNTDOWN ── */
+#sosCountdown{
+  display:none;position:fixed;inset:0;background:rgba(5,3,8,0.95);
+  z-index:1000;flex-direction:column;align-items:center;justify-content:center;
+}
+#sosCountdown.show{display:flex;}
+.countdown-num{font-family:var(--serif);font-size:100px;font-weight:900;
+  color:var(--red);text-shadow:0 0 40px rgba(239,68,68,0.8);line-height:1;}
+.countdown-label{font-family:var(--mono);font-size:10px;letter-spacing:4px;
+  color:var(--dim);margin-top:8px;margin-bottom:32px;}
+.countdown-cancel{
+  background:transparent;border:1px solid rgba(239,68,68,0.4);
+  color:var(--red);font-family:var(--cond);font-size:13px;font-weight:700;
+  letter-spacing:3px;padding:12px 32px;border-radius:4px;cursor:pointer;
+}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:rgba(14,10,24,0.97);border:1px solid var(--border);
+  font-family:var(--mono);font-size:9px;color:var(--text);letter-spacing:1px;
+  padding:8px 16px;border-radius:4px;z-index:500;opacity:0;
+  transition:opacity 0.3s;pointer-events:none;white-space:nowrap;
+}
+#toast.show{opacity:1;}
+
+/* ── HISTORY ── */
+.history-item{
+  background:var(--card);border:1px solid var(--border);border-radius:4px;
+  padding:10px 12px;margin-bottom:8px;
+}
+.history-langs{font-family:var(--mono);font-size:8px;color:var(--dim);
+  letter-spacing:1px;margin-bottom:4px;}
+.history-orig{font-family:var(--mono);font-size:10px;color:var(--text2);margin-bottom:3px;}
+.history-trans{font-family:var(--mono);font-size:10px;color:var(--cyan);}
+
+/* ── SETTINGS ── */
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.setting-label{font-family:var(--mono);font-size:9px;color:var(--text);letter-spacing:1px;}
+.setting-sub{font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px;}
+.toggle{width:40px;height:22px;border-radius:11px;border:1px solid var(--border);
+  background:var(--bg2);cursor:pointer;position:relative;transition:background 0.2s;}
+.toggle.on{background:rgba(16,185,129,0.3);border-color:var(--green);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--dim);transition:all 0.2s;}
+.toggle.on::after{left:20px;background:var(--green);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── LOADING SPINNER ── */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);
+  border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- PASSKEY -->
+<div id="pkScreen">
+  <div class="pk-logo">BABEL</div>
+  <div class="pk-sub">BY RIAKOINE-EMPIRE</div>
+  <div class="pk-tagline">Breaking every language barrier.<br>Speaking every human tongue.</div>
+  <div class="pk-label">ENTER ACCESS CODE</div>
+  <input id="pkInput" type="password" maxlength="32"
+    placeholder="· · · · · · · ·"
+    onkeydown="if(event.key==='Enter')checkPK();">
+  <div id="pkError"></div>
+  <button id="pkBtn" onclick="checkPK()">ENTER</button>
+  <div class="pk-foot">SECURE TRANSLATION SYSTEM · RIAKOINE-EMPIRE</div>
+</div>
+
+<!-- SOS COUNTDOWN -->
+<div id="sosCountdown">
+  <div class="countdown-num" id="countdownNum">5</div>
+  <div class="countdown-label">BROADCASTING SOS IN...</div>
+  <button class="countdown-cancel" onclick="cancelSOS()">✕ CANCEL</button>
+</div>
+
+<div id="app">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="logo-wrap">
+      <div class="logo">BABEL</div>
+      <div class="empire">RIAKOINE-EMPIRE</div>
+    </div>
+    <div class="top-right">
+      <div id="sosIndicator"><span class="sos-dot"></span>SOS ACTIVE</div>
+      <div id="langPair">EN → SW</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div id="tabs">
+    <div class="tab active" onclick="switchTab('translate')" id="tab-translate">
+      <span class="tab-icon">🌐</span>TRANSLATE
+    </div>
+    <div class="tab" onclick="switchTab('interpret')" id="tab-interpret">
+      <span class="tab-icon">🎙</span>INTERPRET
+    </div>
+    <div class="tab" onclick="switchTab('sos')" id="tab-sos">
+      <span class="tab-icon">🚨</span>SOS
+    </div>
+    <div class="tab" onclick="switchTab('history')" id="tab-history">
+      <span class="tab-icon">📋</span>HISTORY
+    </div>
+  </div>
+
+  <!-- PANELS -->
+  <div id="panels">
+
+    <!-- ── TRANSLATE PANEL ── -->
+    <div class="panel active" id="panel-translate">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">LANGUAGE PAIR</span>
+          <span class="card-tag" id="detectTag">AUTO-DETECT ON</span>
+        </div>
+        <div class="lang-grid">
+          <select class="lang-select" id="fromLang" onchange="updateLangPair()"></select>
+          <div class="lang-swap" onclick="swapLangs()">⇄</div>
+          <select class="lang-select" id="toLang" onchange="updateLangPair()"></select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">INPUT</span>
+          <span id="charCount" style="font-family:var(--mono);font-size:8px;color:var(--dim);">0</span>
+        </div>
+        <textarea class="babel-input" id="inputText"
+          placeholder="Type or speak in any language..."
+          oninput="document.getElementById('charCount').textContent=this.value.length"></textarea>
+        <div class="mic-wrap">
+          <div>
+            <button class="mic-btn" id="micBtn" onclick="toggleMic('translate')">🎤</button>
+            <div class="mic-hint" id="micHint">TAP TO SPEAK</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn btn-gold btn-full" onclick="translateText()">
+            🌐 TRANSLATE
+          </button>
+          <button class="btn btn-purple btn-sm" onclick="clearTranslate()">CLR</button>
+        </div>
+      </div>
+
+      <div class="card" id="outputCard" style="display:none;">
+        <div class="output-label">TRANSLATION</div>
+        <div class="output-box" id="outputText"></div>
+        <div class="output-actions">
+          <button class="btn btn-cyan btn-sm" onclick="speakOutput()">🔊 SPEAK</button>
+          <button class="btn btn-purple btn-sm" onclick="copyOutput()">📋 COPY</button>
+          <button class="btn btn-green btn-sm" onclick="saveToHistory()">💾 SAVE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INTERPRET PANEL ── -->
+    <div class="panel" id="panel-interpret">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">LIVE INTERPRETER</span>
+          <span class="card-tag">PASS & SPEAK</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:10px;">
+          Two people, one phone. Speaker A speaks — hands phone to Speaker B who hears the translation. They reply — you hear it in your language.
+        </div>
+        <div class="lang-grid">
+          <select class="lang-select" id="interpLangA" onchange="updateInterpPair()"></select>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;">⇄</div>
+          <select class="lang-select" id="interpLangB" onchange="updateInterpPair()"></select>
+        </div>
+      </div>
+
+      <div class="interpreter-wrap">
+        <!-- Speaker A -->
+        <div class="speaker-block" id="blockA">
+          <div class="speaker-label speaker-a">
+            <span>👤</span>
+            <span>SPEAKER A — <span id="labelA">ENGLISH</span></span>
+          </div>
+          <textarea class="babel-input" id="textA" placeholder="Speaker A types or speaks here..."></textarea>
+          <div class="mic-wrap" style="margin:8px 0 6px;">
+            <div>
+              <button class="mic-btn" id="micA" onclick="toggleMic('A')">🎤</button>
+              <div class="mic-hint">SPEAKER A MIC</div>
+            </div>
+          </div>
+          <button class="btn btn-gold btn-full" onclick="interpretA()">
+            🌐 TRANSLATE → <span id="labelA2">SWAHILI</span>
+          </button>
+          <div class="speaker-output" id="outputA">Translation will appear here...</div>
+          <div class="output-actions" style="margin-top:6px;">
+            <button class="btn btn-cyan btn-sm" onclick="speakText('outputA','B')">🔊 PLAY TO B</button>
+            <button class="btn btn-purple btn-sm" onclick="copyEl('outputA')">📋 COPY</button>
+          </div>
+        </div>
+
+        <!-- Speaker B -->
+        <div class="speaker-block" id="blockB">
+          <div class="speaker-label speaker-b">
+            <span>👥</span>
+            <span>SPEAKER B — <span id="labelB">SWAHILI</span></span>
+          </div>
+          <textarea class="babel-input" id="textB" placeholder="Speaker B types or speaks here..."></textarea>
+          <div class="mic-wrap" style="margin:8px 0 6px;">
+            <div>
+              <button class="mic-btn" id="micB" onclick="toggleMic('B')">🎤</button>
+              <div class="mic-hint">SPEAKER B MIC</div>
+            </div>
+          </div>
+          <button class="btn btn-cyan btn-full" onclick="interpretB()">
+            🌐 TRANSLATE → <span id="labelB2">ENGLISH</span>
+          </button>
+          <div class="speaker-output" id="outputB">Translation will appear here...</div>
+          <div class="output-actions" style="margin-top:6px;">
+            <button class="btn btn-gold btn-sm" onclick="speakText('outputB','A')">🔊 PLAY TO A</button>
+            <button class="btn btn-purple btn-sm" onclick="copyEl('outputB')">📋 COPY</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SOS PANEL ── -->
+    <div class="panel" id="panel-sos">
+      <div class="sos-card">
+        <div class="sos-title">⚠ GLOBAL SOS</div>
+        <div class="sos-sub">
+          Emergency detection in 130+ languages. Press the button or speak any distress word — BABEL detects it automatically and fires an alert to your SENTRY contacts.
+        </div>
+        <button class="sos-big-btn" onclick="triggerSOS()">
+          🚨 BROADCAST SOS 🚨
+        </button>
+        <button class="btn btn-cyan btn-full" onclick="toggleSOSListen()" id="sosListenBtn">
+          🎤 START SOS LISTENING
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">SENTRY LINK</span>
+          <span class="card-tag">OPTIONAL</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;line-height:1.6;">
+          Connect BABEL SOS to your SENTRY account for full GPS + contact alerts.
+        </div>
+        <input id="sentryCallsign" type="text" class="babel-input"
+          style="height:auto;padding:10px;"
+          placeholder="Your SENTRY callsign e.g. ZACK-KE">
+        <input id="sentryToken" type="password" class="babel-input"
+          style="height:auto;padding:10px;margin-top:6px;"
+          placeholder="SENTRY passkey">
+        <button class="btn btn-purple btn-full" style="margin-top:8px;" onclick="saveSentryLink()">
+          🔗 LINK TO SENTRY
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">DISTRESS KEYWORDS</span>
+          <span class="card-tag">130+ LANGUAGES</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">
+          Any of these words spoken or typed triggers immediate SOS:
+        </div>
+        <div class="keyword-grid" id="keywordGrid"></div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY PANEL ── -->
+    <div class="panel" id="panel-history">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">TRANSLATION HISTORY</span>
+          <button class="btn btn-red btn-sm" onclick="clearHistory()">CLEAR ALL</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">
+          Saved translations. Tap to restore.
+        </div>
+      </div>
+      <div id="historyList">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">
+          No history yet. Translate something and tap SAVE.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panels -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ── PASSKEY ──
+(function(){
+  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
+  var HASH=hc('SOKOSCAN2025');
+  var SK='babel_sk1';
+  window.checkPK=function(){
+    var v=document.getElementById('pkInput').value.trim();
+    if(!v){document.getElementById('pkError').textContent='ACCESS CODE REQUIRED';return;}
+    if(hc(v)===HASH){
+      try{sessionStorage.setItem(SK,'1');}catch(e){}
+      document.getElementById('pkScreen').style.display='none';
+    } else {
+      document.getElementById('pkError').textContent='INVALID CODE';
+      document.getElementById('pkInput').value='';
+      var el=document.getElementById('pkInput');
+      el.style.borderColor='rgba(239,68,68,0.6)';
+      setTimeout(function(){el.style.borderColor='rgba(124,58,237,0.3)';},1200);
+    }
+  };
+  try{if(sessionStorage.getItem(SK)==='1'){document.getElementById('pkScreen').style.display='none';}}catch(e){}
+  window.addEventListener('load',function(){
+    var sc=document.getElementById('pkScreen');
+    if(sc&&sc.style.display!=='none'){setTimeout(function(){var i=document.getElementById('pkInput');if(i)i.focus();},300);}
+  });
+})();
+
+// ── LANGUAGES ──
+var LANGS = [
+  {c:'af',n:'Afrikaans'},{c:'sq',n:'Albanian'},{c:'am',n:'Amharic'},
+  {c:'ar',n:'Arabic'},{c:'hy',n:'Armenian'},{c:'az',n:'Azerbaijani'},
+  {c:'eu',n:'Basque'},{c:'be',n:'Belarusian'},{c:'bn',n:'Bengali'},
+  {c:'bs',n:'Bosnian'},{c:'bg',n:'Bulgarian'},{c:'ca',n:'Catalan'},
+  {c:'ceb',n:'Cebuano'},{c:'ny',n:'Chichewa'},{c:'zh',n:'Chinese (Simplified)'},
+  {c:'zh-TW',n:'Chinese (Traditional)'},{c:'co',n:'Corsican'},{c:'hr',n:'Croatian'},
+  {c:'cs',n:'Czech'},{c:'da',n:'Danish'},{c:'nl',n:'Dutch'},
+  {c:'en',n:'English'},{c:'eo',n:'Esperanto'},{c:'et',n:'Estonian'},
+  {c:'tl',n:'Filipino'},{c:'fi',n:'Finnish'},{c:'fr',n:'French'},
+  {c:'fy',n:'Frisian'},{c:'gl',n:'Galician'},{c:'ka',n:'Georgian'},
+  {c:'de',n:'German'},{c:'el',n:'Greek'},{c:'gu',n:'Gujarati'},
+  {c:'ht',n:'Haitian Creole'},{c:'ha',n:'Hausa'},{c:'haw',n:'Hawaiian'},
+  {c:'iw',n:'Hebrew'},{c:'hi',n:'Hindi'},{c:'hmn',n:'Hmong'},
+  {c:'hu',n:'Hungarian'},{c:'is',n:'Icelandic'},{c:'ig',n:'Igbo'},
+  {c:'id',n:'Indonesian'},{c:'ga',n:'Irish'},{c:'it',n:'Italian'},
+  {c:'ja',n:'Japanese'},{c:'jw',n:'Javanese'},{c:'kn',n:'Kannada'},
+  {c:'kk',n:'Kazakh'},{c:'km',n:'Khmer'},{c:'ko',n:'Korean'},
+  {c:'ku',n:'Kurdish'},{c:'ky',n:'Kyrgyz'},{c:'lo',n:'Lao'},
+  {c:'la',n:'Latin'},{c:'lv',n:'Latvian'},{c:'lt',n:'Lithuanian'},
+  {c:'lb',n:'Luxembourgish'},{c:'mk',n:'Macedonian'},{c:'mg',n:'Malagasy'},
+  {c:'ms',n:'Malay'},{c:'ml',n:'Malayalam'},{c:'mt',n:'Maltese'},
+  {c:'mi',n:'Maori'},{c:'mr',n:'Marathi'},{c:'mn',n:'Mongolian'},
+  {c:'my',n:'Myanmar (Burmese)'},{c:'ne',n:'Nepali'},{c:'no',n:'Norwegian'},
+  {c:'or',n:'Odia'},{c:'ps',n:'Pashto'},{c:'fa',n:'Persian'},
+  {c:'pl',n:'Polish'},{c:'pt',n:'Portuguese'},{c:'pa',n:'Punjabi'},
+  {c:'ro',n:'Romanian'},{c:'ru',n:'Russian'},{c:'sm',n:'Samoan'},
+  {c:'gd',n:'Scots Gaelic'},{c:'sr',n:'Serbian'},{c:'st',n:'Sesotho'},
+  {c:'sn',n:'Shona'},{c:'sd',n:'Sindhi'},{c:'si',n:'Sinhala'},
+  {c:'sk',n:'Slovak'},{c:'sl',n:'Slovenian'},{c:'so',n:'Somali'},
+  {c:'es',n:'Spanish'},{c:'su',n:'Sundanese'},{c:'sw',n:'Swahili'},
+  {c:'sv',n:'Swedish'},{c:'tg',n:'Tajik'},{c:'ta',n:'Tamil'},
+  {c:'te',n:'Telugu'},{c:'th',n:'Thai'},{c:'tr',n:'Turkish'},
+  {c:'uk',n:'Ukrainian'},{c:'ur',n:'Urdu'},{c:'ug',n:'Uyghur'},
+  {c:'uz',n:'Uzbek'},{c:'vi',n:'Vietnamese'},{c:'cy',n:'Welsh'},
+  {c:'xh',n:'Xhosa'},{c:'yi',n:'Yiddish'},{c:'yo',n:'Yoruba'},
+  {c:'zu',n:'Zulu'},
+  // African languages
+  {c:'ki',n:'Kikuyu (Gikuyu)'},{c:'lg',n:'Luganda'},{c:'rw',n:'Kinyarwanda'},
+  {c:'ln',n:'Lingala'},{c:'om',n:'Oromo'},{c:'ti',n:'Tigrinya'},
+  {c:'wo',n:'Wolof'},{c:'bm',n:'Bambara'},{c:'ak',n:'Akan'},
+  {c:'ee',n:'Ewe'},{c:'tw',n:'Twi'},
+];
+
+// ── SOS KEYWORDS — multilingual ──
+var SOS_KEYWORDS = [
+  // English
+  {w:'help',l:'English'},{w:'emergency',l:'English'},{w:'danger',l:'English'},
+  {w:'sos',l:'Universal'},{w:'mayday',l:'Universal'},
+  // Swahili
+  {w:'saidia',l:'Swahili'},{w:'msaada',l:'Swahili'},{w:'hatari',l:'Swahili'},
+  {w:'polisi',l:'Swahili'},{w:'dharura',l:'Swahili'},
+  // Gikuyu
+  {w:'ndiîthia',l:'Gikuyu'},{w:'thabari',l:'Gikuyu'},
+  // Arabic
+  {w:'tawari',l:'Arabic'},{w:'musaada',l:'Arabic'},{w:'najda',l:'Arabic'},
+  {w:'khatar',l:'Arabic'},{w:'shorta',l:'Arabic'},
+  // Spanish
+  {w:'ayuda',l:'Spanish'},{w:'socorro',l:'Spanish'},{w:'auxilio',l:'Spanish'},
+  {w:'peligro',l:'Spanish'},
+  // French
+  {w:'au secours',l:'French'},{w:'aidez-moi',l:'French'},{w:'danger',l:'French'},
+  // Portuguese
+  {w:'socorro',l:'Portuguese'},{w:'ajuda',l:'Portuguese'},{w:'perigo',l:'Portuguese'},
+  // Hindi
+  {w:'bachao',l:'Hindi'},{w:'madad karo',l:'Hindi'},{w:'khatra',l:'Hindi'},
+  // Filipino/Tagalog
+  {w:'tulong',l:'Filipino'},{w:'pulis',l:'Filipino'},{w:'saklolo',l:'Filipino'},
+  // Hausa
+  {w:'taimako',l:'Hausa'},{w:'yan sanda',l:'Hausa'},
+  // Yoruba
+  {w:'iranlowo',l:'Yoruba'},{w:'ole',l:'Yoruba'},
+  // Amharic
+  {w:'aredani',l:'Amharic'},{w:'ebakih',l:'Amharic'},
+  // German
+  {w:'hilfe',l:'German'},{w:'notruf',l:'German'},
+  // Somali
+  {w:'caawin',l:'Somali'},{w:'khatar',l:'Somali'},
+  // Indonesian/Malay
+  {w:'tolong',l:'Indonesian'},{w:'bahaya',l:'Indonesian'},
+  // Russian
+  {w:'pomogite',l:'Russian'},{w:'opasnost',l:'Russian'},
+  // Chinese
+  {w:'jiuming',l:'Mandarin'},{w:'bangzhu',l:'Mandarin'},
+  // Japanese
+  {w:'tasukete',l:'Japanese'},{w:'kiken',l:'Japanese'},
+  // Korean
+  {w:'dowa juseyo',l:'Korean'},{w:'wihyeom',l:'Korean'},
+  // Turkish
+  {w:'imdat',l:'Turkish'},{w:'tehlike',l:'Turkish'},
+  // Urdu
+  {w:'madad',l:'Urdu'},{w:'bachao',l:'Urdu'},
+];
+
+// ── STATE ──
+var state = {
+  fromLang: 'en',
+  toLang: 'sw',
+  interpA: 'en',
+  interpB: 'sw',
+  history: JSON.parse(localStorage.getItem('babel_history')||'[]'),
+  sosListening: false,
+  sosTimer: null,
+  sosCount: 5,
+  recognition: null,
+  lastTranslation: null,
+  sentryCallsign: localStorage.getItem('babel_sentry_callsign')||'',
+  sentryToken: localStorage.getItem('babel_sentry_token')||'',
+};
+
+// ── TOAST ──
+function toast(msg, dur){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},dur||2000);
+}
+
+// ── TABS ──
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// ── POPULATE LANGUAGE SELECTS ──
+function populateLangs(){
+  var selects=['fromLang','toLang','interpLangA','interpLangB'];
+  selects.forEach(function(id){
+    var sel=document.getElementById(id);
+    LANGS.forEach(function(l){
+      var opt=document.createElement('option');
+      opt.value=l.c;opt.textContent=l.n;
+      sel.appendChild(opt);
+    });
+  });
+  document.getElementById('fromLang').value='en';
+  document.getElementById('toLang').value='sw';
+  document.getElementById('interpLangA').value='en';
+  document.getElementById('interpLangB').value='sw';
+}
+
+function updateLangPair(){
+  state.fromLang=document.getElementById('fromLang').value;
+  state.toLang=document.getElementById('toLang').value;
+  var fl=LANGS.find(function(l){return l.c===state.fromLang;});
+  var tl=LANGS.find(function(l){return l.c===state.toLang;});
+  document.getElementById('langPair').textContent=(fl?fl.n.substring(0,3).toUpperCase():'?')+' \u2192 '+(tl?tl.n.substring(0,3).toUpperCase():'?');
+}
+
+function updateInterpPair(){
+  state.interpA=document.getElementById('interpLangA').value;
+  state.interpB=document.getElementById('interpLangB').value;
+  var la=LANGS.find(function(l){return l.c===state.interpA;});
+  var lb=LANGS.find(function(l){return l.c===state.interpB;});
+  document.getElementById('labelA').textContent=la?la.n:'?';
+  document.getElementById('labelA2').textContent=lb?lb.n:'?';
+  document.getElementById('labelB').textContent=lb?lb.n:'?';
+  document.getElementById('labelB2').textContent=la?la.n:'?';
+}
+
+function swapLangs(){
+  var f=document.getElementById('fromLang').value;
+  var t=document.getElementById('toLang').value;
+  document.getElementById('fromLang').value=t;
+  document.getElementById('toLang').value=f;
+  updateLangPair();
+  toast('Languages swapped');
+}
+
+// ── TRANSLATE ──
+function translateText(){
+  var text=document.getElementById('inputText').value.trim();
+  if(!text){toast('Enter text to translate');return;}
+  var from=document.getElementById('fromLang').value;
+  var to=document.getElementById('toLang').value;
+  var outBox=document.getElementById('outputText');
+  outBox.innerHTML='<span class="spinner"></span>';
+  document.getElementById('outputCard').style.display='block';
+  callGoogleTranslate(text,from,to,function(result){
+    if(result){
+      outBox.textContent=result;
+      state.lastTranslation={orig:text,trans:result,from:from,to:to,ts:Date.now()};
+      checkForSOS(text);
+    } else {
+      outBox.textContent='Translation failed. Check connection.';
+    }
+  });
+}
+
+function callGoogleTranslate(text, from, to, cb){
+  var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+
+    (from==='auto'?'auto':from)+'&tl='+to+'&dt=t&q='+encodeURIComponent(text);
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var result='';
+      if(d&&d[0]){d[0].forEach(function(s){if(s[0])result+=s[0];});}
+      cb(result||null);
+    })
+    .catch(function(){cb(null);});
+}
+
+function clearTranslate(){
+  document.getElementById('inputText').value='';
+  document.getElementById('outputCard').style.display='none';
+  document.getElementById('charCount').textContent='0';
+}
+
+function speakOutput(){
+  var text=document.getElementById('outputText').textContent;
+  var lang=document.getElementById('toLang').value;
+  speakTTS(text,lang);
+}
+
+function speakTTS(text,lang){
+  if(!text||text.trim()==='')return;
+  if('speechSynthesis' in window){
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang=lang;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } else {
+    toast('TTS not supported on this browser');
+  }
+}
+
+function speakText(elId, side){
+  var text=document.getElementById(elId).textContent;
+  var lang=side==='A'?state.interpA:state.interpB;
+  speakTTS(text,lang);
+}
+
+function copyOutput(){
+  var text=document.getElementById('outputText').textContent;
+  copyToClipboard(text);
+}
+
+function copyEl(id){
+  var text=document.getElementById(id).textContent;
+  copyToClipboard(text);
+}
+
+function copyToClipboard(text){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){toast('Copied to clipboard');});
+  } else {
+    var t=document.createElement('textarea');
+    t.value=text;document.body.appendChild(t);t.select();
+    document.execCommand('copy');document.body.removeChild(t);
+    toast('Copied');
+  }
+}
+
+function saveToHistory(){
+  if(!state.lastTranslation){toast('Nothing to save');return;}
+  state.history.unshift(state.lastTranslation);
+  if(state.history.length>50)state.history.pop();
+  localStorage.setItem('babel_history',JSON.stringify(state.history));
+  renderHistory();
+  toast('Saved to history');
+}
+
+// ── INTERPRETER ──
+function interpretA(){
+  var text=document.getElementById('textA').value.trim();
+  if(!text){toast('Speaker A: enter text first');return;}
+  var out=document.getElementById('outputA');
+  out.innerHTML='<span class="spinner"></span>';
+  callGoogleTranslate(text,state.interpA,state.interpB,function(result){
+    out.textContent=result||'Translation failed.';
+    if(result)speakTTS(result,state.interpB);
+  });
+}
+
+function interpretB(){
+  var text=document.getElementById('textB').value.trim();
+  if(!text){toast('Speaker B: enter text first');return;}
+  var out=document.getElementById('outputB');
+  out.innerHTML='<span class="spinner"></span>';
+  callGoogleTranslate(text,state.interpB,state.interpA,function(result){
+    out.textContent=result||'Translation failed.';
+    if(result)speakTTS(result,state.interpA);
+  });
+}
+
+// ── MICROPHONE ──
+var activeRec=null;
+function toggleMic(target){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    toast('Voice not supported — use text input');return;
+  }
+  if(activeRec){activeRec.stop();activeRec=null;resetMicBtns();return;}
+  var SRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var rec=new SRec();
+  var lang=target==='translate'?state.fromLang:
+           target==='A'?state.interpA:state.interpB;
+  rec.lang=lang;
+  rec.continuous=false;
+  rec.interimResults=false;
+  rec.onstart=function(){
+    activeRec=rec;
+    var btn=target==='translate'?'micBtn':target==='A'?'micA':'micB';
+    document.getElementById(btn).classList.add('listening');
+    document.getElementById('micHint')?document.getElementById('micHint').textContent='LISTENING...':'';
+    toast('Listening...');
+  };
+  rec.onresult=function(e){
+    var transcript=e.results[0][0].transcript;
+    if(target==='translate'){
+      document.getElementById('inputText').value=transcript;
+      document.getElementById('charCount').textContent=transcript.length;
+    } else if(target==='A'){
+      document.getElementById('textA').value=transcript;
+    } else {
+      document.getElementById('textB').value=transcript;
+    }
+    checkForSOS(transcript);
+  };
+  rec.onend=function(){activeRec=null;resetMicBtns();};
+  rec.onerror=function(){activeRec=null;resetMicBtns();toast('Mic error — try again');};
+  rec.start();
+}
+
+function resetMicBtns(){
+  ['micBtn','micA','micB'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.classList.remove('listening');
+  });
+  if(document.getElementById('micHint'))
+    document.getElementById('micHint').textContent='TAP TO SPEAK';
+}
+
+// ── SOS DETECTION ──
+function checkForSOS(text){
+  var lower=text.toLowerCase();
+  var hit=SOS_KEYWORDS.find(function(k){return lower.indexOf(k.w)>-1;});
+  if(hit){
+    toast('⚠ DISTRESS WORD DETECTED: '+hit.w.toUpperCase()+' ('+hit.l+')',4000);
+    triggerSOS();
+  }
+}
+
+var sosListenRec=null;
+function toggleSOSListen(){
+  var btn=document.getElementById('sosListenBtn');
+  if(state.sosListening){
+    state.sosListening=false;
+    if(sosListenRec){sosListenRec.stop();sosListenRec=null;}
+    btn.textContent='🎤 START SOS LISTENING';
+    btn.className='btn btn-cyan btn-full';
+    toast('SOS listening stopped');
+    return;
+  }
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    toast('Voice recognition not supported');return;
+  }
+  state.sosListening=true;
+  btn.textContent='🔴 SOS LISTENING ACTIVE — TAP TO STOP';
+  btn.className='btn btn-red btn-full';
+  function startListen(){
+    if(!state.sosListening)return;
+    var SRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+    sosListenRec=new SRec();
+    sosListenRec.continuous=false;
+    sosListenRec.interimResults=false;
+    sosListenRec.lang='';
+    sosListenRec.onresult=function(e){
+      var t=e.results[0][0].transcript;
+      checkForSOS(t);
+    };
+    sosListenRec.onend=function(){if(state.sosListening)setTimeout(startListen,500);};
+    sosListenRec.onerror=function(){if(state.sosListening)setTimeout(startListen,1000);};
+    sosListenRec.start();
+  }
+  startListen();
+  toast('SOS listening active — speak any distress word');
+}
+
+function triggerSOS(){
+  var cd=document.getElementById('sosCountdown');
+  cd.classList.add('show');
+  state.sosCount=5;
+  document.getElementById('countdownNum').textContent=5;
+  state.sosTimer=setInterval(function(){
+    state.sosCount--;
+    document.getElementById('countdownNum').textContent=state.sosCount;
+    if(state.sosCount<=0){
+      clearInterval(state.sosTimer);
+      cd.classList.remove('show');
+      fireSOS();
+    }
+  },1000);
+}
+
+function cancelSOS(){
+  clearInterval(state.sosTimer);
+  document.getElementById('sosCountdown').classList.remove('show');
+  toast('SOS cancelled');
+}
+
+function fireSOS(){
+  toast('🚨 SOS BROADCAST SENT',4000);
+  // Link to SENTRY if configured
+  var callsign=localStorage.getItem('babel_sentry_callsign');
+  var token=localStorage.getItem('babel_sentry_token');
+  if(callsign&&token){
+    fetch('http://5.180.181.125/sentry/sos',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-sentry-token':token},
+      body:JSON.stringify({
+        mode:'SOS',callsign:callsign,
+        message:'BABEL SOS — Distress detected via BABEL translator',
+        source:'BABEL',timestamp:new Date().toISOString()
+      })
+    }).catch(function(){});
+  }
+}
+
+function saveSentryLink(){
+  var c=document.getElementById('sentryCallsign').value.trim();
+  var t=document.getElementById('sentryToken').value.trim();
+  if(!c||!t){toast('Enter callsign and passkey');return;}
+  localStorage.setItem('babel_sentry_callsign',c);
+  localStorage.setItem('babel_sentry_token',t);
+  toast('SENTRY link saved');
+}
+
+// ── HISTORY ──
+function renderHistory(){
+  var list=document.getElementById('historyList');
+  if(!state.history.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">No history yet.</div>';
+    return;
+  }
+  list.innerHTML=state.history.map(function(h,i){
+    var fl=LANGS.find(function(l){return l.c===h.from;});
+    var tl=LANGS.find(function(l){return l.c===h.to;});
+    return '<div class="history-item" onclick="restoreHistory('+i+')">'
+      +'<div class="history-langs">'+(fl?fl.n:'?')+' \u2192 '+(tl?tl.n:'?')
+      +' \u00B7 '+new Date(h.ts).toLocaleTimeString()+'</div>'
+      +'<div class="history-orig">'+h.orig+'</div>'
+      +'<div class="history-trans">'+h.trans+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function restoreHistory(i){
+  var h=state.history[i];
+  document.getElementById('inputText').value=h.orig;
+  document.getElementById('fromLang').value=h.from;
+  document.getElementById('toLang').value=h.to;
+  document.getElementById('outputText').textContent=h.trans;
+  document.getElementById('outputCard').style.display='block';
+  switchTab('translate');
+  updateLangPair();
+}
+
+function clearHistory(){
+  state.history=[];
+  localStorage.removeItem('babel_history');
+  renderHistory();
+  toast('History cleared');
+}
+
+// ── KEYWORD GRID ──
+function renderKeywords(){
+  var grid=document.getElementById('keywordGrid');
+  var sample=SOS_KEYWORDS.slice(0,24);
+  grid.innerHTML=sample.map(function(k){
+    return '<div class="keyword-chip"><span class="kw-lang">'+k.l+'</span>'+k.w+'</div>';
+  }).join('');
+}
+
+// ── INIT ──
+populateLangs();
+updateLangPair();
+updateInterpPair();
+renderHistory();
+renderKeywords();
+
+// Restore sentry link fields
+if(localStorage.getItem('babel_sentry_callsign'))
+  document.getElementById('sentryCallsign').value=localStorage.getItem('babel_sentry_callsign');
+if(localStorage.getItem('babel_sentry_token'))
+  document.getElementById('sentryToken').value=localStorage.getItem('babel_sentry_token');
+</script>
+</body>
+</html>
