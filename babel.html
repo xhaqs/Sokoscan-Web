@@ -356,6 +356,17 @@ body::after{
   border-radius:2px;letter-spacing:1px;
 }
 
+/* ── AI TUTOR ── */
+.tutor-streaming{
+  font-family:var(--mono);font-size:11px;color:var(--text);
+  line-height:1.8;white-space:pre-wrap;
+}
+.tutor-cursor{
+  display:inline-block;width:8px;height:13px;
+  background:var(--gold);animation:blink 1s step-end infinite;vertical-align:middle;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -437,6 +448,9 @@ body::after{
     <div class="tab" onclick="switchTab('endangered')" id="tab-endangered">
       <span class="tab-icon">🌿</span>HERITAGE
     </div>
+    <div class="tab" onclick="switchTab('tutor')" id="tab-tutor">
+      <span class="tab-icon">🧠</span>TUTOR
+    </div>
   </div>
 
   <!-- PANELS -->
@@ -490,6 +504,7 @@ body::after{
           <button class="btn btn-red btn-sm" onclick="stopSpeech()">⏹ STOP</button>
           <button class="btn btn-purple btn-sm" onclick="copyOutput()">📋 COPY</button>
           <button class="btn btn-green btn-sm" onclick="saveToHistory()">💾 SAVE</button>
+          <button class="btn btn-gold btn-sm" onclick="sendToTutor()">🧠 TUTOR</button>
         </div>
       </div>
     </div>
@@ -828,6 +843,88 @@ body::after{
         <input class="babel-input" id="endMeaning" placeholder="Meaning in English" style="height:auto;padding:10px;margin-bottom:6px;">
         <input class="babel-input" id="endContext" placeholder="Context / usage (optional)" style="height:auto;padding:10px;margin-bottom:8px;">
         <button class="btn btn-gold btn-full" onclick="submitEndangered()">🌿 SUBMIT PHRASE</button>
+      </div>
+    </div>
+
+    <!-- ── AI TUTOR PANEL ── -->
+    <div class="panel" id="panel-tutor">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">AI LANGUAGE TUTOR</span>
+          <span class="e2ee-badge" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold);">🧠 POWERED BY CLAUDE</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
+          Your personal language tutor. Learn the culture behind words, discover related phrases, get quizzed on what you've translated — in any language.
+        </div>
+      </div>
+
+      <!-- LAST TRANSLATION CONTEXT -->
+      <div class="card" id="tutorContextCard">
+        <div class="card-head">
+          <span class="card-title">CURRENT LESSON</span>
+          <span class="card-tag" id="tutorLangTag">—</span>
+        </div>
+        <div id="tutorOriginal" style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:4px;">Translate something first — then tap 🧠 TUTOR</div>
+        <div id="tutorTranslated" style="font-family:var(--mono);font-size:11px;color:var(--cyan);"></div>
+      </div>
+
+      <!-- TUTOR MODES -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">WHAT WOULD YOU LIKE TO LEARN?</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-gold btn-full" onclick="askTutor('explain')">
+            📖 EXPLAIN — Culture & context behind this phrase
+          </button>
+          <button class="btn btn-cyan btn-full" onclick="askTutor('related')">
+            🔗 RELATED — Teach me similar phrases
+          </button>
+          <button class="btn btn-purple btn-full" onclick="askTutor('quiz')">
+            ⚡ QUIZ — Test my knowledge
+          </button>
+          <button class="btn btn-green btn-full" onclick="askTutor('pronounce')">
+            🗣 PRONOUNCE — How to say this correctly
+          </button>
+          <button class="btn btn-gold btn-full" onclick="askTutor('endangered')">
+            🌿 HERITAGE — Is this phrase endangered or rare?
+          </button>
+        </div>
+      </div>
+
+      <!-- CUSTOM QUESTION -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">ASK ANYTHING</span>
+          <span class="card-tag">FREE MODE</span>
+        </div>
+        <textarea class="babel-input" id="tutorQuestion"
+          placeholder="Ask the tutor anything... e.g. 'How do I greet an elder in Kikuyu?' or 'What does this gesture mean in Arabic culture?'"
+          style="height:70px;"></textarea>
+        <button class="btn btn-gold btn-full" style="margin-top:8px;" onclick="askTutorCustom()">
+          🧠 ASK TUTOR
+        </button>
+      </div>
+
+      <!-- TUTOR RESPONSE -->
+      <div class="card" id="tutorResponseCard" style="display:none;">
+        <div class="card-head">
+          <span class="card-title">TUTOR SAYS</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-cyan btn-sm" onclick="speakTutorResponse()">🔊 SPEAK</button>
+            <button class="btn btn-purple btn-sm" onclick="copyEl('tutorResponse')">📋 COPY</button>
+          </div>
+        </div>
+        <div id="tutorResponse" style="font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.8;white-space:pre-wrap;"></div>
+      </div>
+
+      <!-- LEARNING PROGRESS -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">YOUR PROGRESS</span>
+          <button class="btn btn-red btn-sm" onclick="clearTutorHistory()">✕ RESET</button>
+        </div>
+        <div id="tutorStats" style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:2;"></div>
       </div>
     </div>
 
@@ -2012,17 +2109,144 @@ function submitEndangered(){
   toast('Phrase preserved — thank you');
 }
 
-populateLangs();
-renderHistory();
-renderKeywords();
-renderEndangered();
-updateTrainCount();
+// ── AI TUTOR ──
+var tutorContext={orig:'',trans:'',fromLang:'',toLang:''};
+var tutorLog=JSON.parse(localStorage.getItem('babel_tutor_log')||'[]');
+
+function sendToTutor(){
+  var orig=document.getElementById('inputText').value.trim();
+  var trans=document.getElementById('outputText').textContent.trim();
+  var from=langState.fromLang||'en';
+  var to=langState.toLang||'sw';
+  if(!orig||!trans){toast('Translate something first');return;}
+  tutorContext={orig:orig,trans:trans,fromLang:from,toLang:to};
+  // Update tutor context card
+  var fl=LANGS.find(function(l){return l.c===from;});
+  var tl=LANGS.find(function(l){return l.c===to;});
+  document.getElementById('tutorOriginal').textContent=orig;
+  document.getElementById('tutorTranslated').textContent=trans;
+  document.getElementById('tutorLangTag').textContent=(fl?fl.n:'?')+' → '+(tl?tl.n:'?');
+  switchTab('tutor');
+  toast('Ready to learn — choose a mode');
+}
+
+function askTutor(mode){
+  if(!tutorContext.orig){toast('Translate something first — tap 🧠 TUTOR on output');return;}
+  var fl=LANGS.find(function(l){return l.c===tutorContext.fromLang;});
+  var tl=LANGS.find(function(l){return l.c===tutorContext.toLang;});
+  var fromName=fl?fl.n:'the source language';
+  var toName=tl?tl.n:'the target language';
+  var prompts={
+    explain: 'You are a cultural language tutor. The user translated "'+tutorContext.orig+'" from '+fromName+' to '+toName+', result: "'+tutorContext.trans+'". Explain the cultural context, history, and deeper meaning behind this phrase. Mention any idioms, customs, or cultural nuances. Be warm, educational, and concise. Use plain text only.',
+    related: 'You are a language tutor. The user knows "'+tutorContext.orig+'" in '+fromName+' = "'+tutorContext.trans+'" in '+toName+'. Teach them 4-5 closely related phrases or expressions they should also know. Format each as: [original] = [translation] — [brief note]. Be practical and memorable.',
+    quiz: 'You are a language quiz master. Create a short 3-question quiz based on "'+tutorContext.orig+'" ('+fromName+') and "'+tutorContext.trans+'" ('+toName+'). Mix translation questions, fill-in-the-blank, and cultural questions. Number each question. After questions write "---ANSWERS---" then the answers numbered. Keep it fun and encouraging.',
+    pronounce: 'You are a pronunciation coach. The user wants to correctly pronounce "'+tutorContext.trans+'" in '+toName+'. Give a clear pronunciation guide using simple phonetics (no IPA symbols — write it as it sounds in English). Include syllable breaks, stress patterns, and any tricky sounds. Also mention common mistakes speakers of '+fromName+' make.',
+    endangered: 'You are a linguistic heritage expert. Analyze the phrase "'+tutorContext.orig+'" in '+fromName+'. Is this language endangered, at risk, or thriving? What is the current speaker population? Any notable preservation efforts? What would be lost culturally if this language disappeared? Be honest and informative.'
+  };
+  var prompt=prompts[mode];
+  runTutorAI(prompt, mode);
+}
+
+function askTutorCustom(){
+  var q=document.getElementById('tutorQuestion').value.trim();
+  if(!q){toast('Type a question first');return;}
+  var context=tutorContext.orig?
+    'Context: user recently translated "'+tutorContext.orig+'" to "'+tutorContext.trans+'". ':'';
+  var prompt='You are BABEL\'s AI language tutor — warm, knowledgeable, culturally aware. '+context+'User asks: '+q+'. Answer helpfully and concisely. Plain text only.';
+  document.getElementById('tutorQuestion').value='';
+  runTutorAI(prompt,'custom');
+}
+
+function runTutorAI(prompt, mode){
+  document.getElementById('tutorResponseCard').style.display='block';
+  var responseEl=document.getElementById('tutorResponse');
+  responseEl.innerHTML='<span class="spinner"></span> Thinking...';
+  // Scroll to response
+  setTimeout(function(){responseEl.scrollIntoView({behavior:'smooth',block:'start'});},100);
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system:'You are BABEL AI Tutor — a warm, knowledgeable multilingual language and culture teacher built into the BABEL translation app by RIAKOINE-EMPIRE. You help people understand not just words but the cultures, histories, and communities behind them. You have special knowledge of African languages including Gikuyu, Swahili, Luganda, Yoruba, Hausa and endangered languages. Always be encouraging. Plain text responses only — no markdown, no asterisks, no bullet symbols.',
+      messages:[{role:'user',content:prompt}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text='';
+    if(data.content&&data.content[0]&&data.content[0].text){
+      text=data.content[0].text;
+    } else if(data.error){
+      text='Tutor unavailable: '+data.error.message;
+    }
+    // Stream-style reveal
+    responseEl.textContent='';
+    var i=0;
+    var cursor=document.createElement('span');
+    cursor.className='tutor-cursor';
+    responseEl.appendChild(cursor);
+    var interval=setInterval(function(){
+      if(i<text.length){
+        responseEl.insertBefore(document.createTextNode(text[i]),cursor);
+        i++;
+        // Auto scroll
+        responseEl.parentElement.scrollTop=responseEl.parentElement.scrollHeight;
+      } else {
+        clearInterval(interval);
+        cursor.remove();
+        // Log to progress
+        tutorLog.push({mode:mode,orig:tutorContext.orig,to:tutorContext.toLang,ts:Date.now()});
+        if(tutorLog.length>200)tutorLog=tutorLog.slice(-200);
+        localStorage.setItem('babel_tutor_log',JSON.stringify(tutorLog));
+        updateTutorStats();
+      }
+    },12);
+  })
+  .catch(function(e){
+    responseEl.textContent='Could not reach AI tutor. Check connection and try again.';
+  });
+}
+
+function speakTutorResponse(){
+  var text=document.getElementById('tutorResponse').textContent;
+  speakTTS(text,'en');
+}
+
+function updateTutorStats(){
+  var el=document.getElementById('tutorStats');
+  if(!el)return;
+  var total=tutorLog.length;
+  var langs={};
+  tutorLog.forEach(function(e){langs[e.to]=(langs[e.to]||0)+1;});
+  var topLangs=Object.keys(langs).sort(function(a,b){return langs[b]-langs[a];}).slice(0,3).map(function(c){
+    var l=LANGS.find(function(x){return x.c===c;});
+    return (l?l.n:c)+' ('+langs[c]+')';
+  });
+  var modes={explain:0,related:0,quiz:0,pronounce:0,endangered:0,custom:0};
+  tutorLog.forEach(function(e){if(modes[e.mode]!==undefined)modes[e.mode]++;});
+  el.textContent=
+    'Total lessons: '+total+'\n'+
+    'Top languages: '+(topLangs.join(', ')||'none yet')+'\n'+
+    'Explains: '+modes.explain+' · Related: '+modes.related+' · Quizzes: '+modes.quiz+'\n'+
+    'Pronunciation: '+modes.pronounce+' · Heritage: '+modes.endangered+' · Custom: '+modes.custom;
+}
+
+function clearTutorHistory(){
+  tutorLog=[];
+  localStorage.removeItem('babel_tutor_log');
+  updateTutorStats();
+  toast('Progress reset');
+}
 
 // Restore sentry link fields
 if(localStorage.getItem('babel_sentry_callsign'))
   document.getElementById('sentryCallsign').value=localStorage.getItem('babel_sentry_callsign');
 if(localStorage.getItem('babel_sentry_token'))
   document.getElementById('sentryToken').value=localStorage.getItem('babel_sentry_token');
+updateTutorStats();
 </script>
 </body>
 </html>
