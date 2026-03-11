@@ -505,6 +505,7 @@ body::after{
           <button class="btn btn-purple btn-sm" onclick="copyOutput()">📋 COPY</button>
           <button class="btn btn-green btn-sm" onclick="saveToHistory()">💾 SAVE</button>
           <button class="btn btn-gold btn-sm" onclick="sendToTutor()">🧠 TUTOR</button>
+          <button class="btn btn-cyan btn-sm" onclick="shareTranslation()">↗ SHARE</button>
         </div>
       </div>
     </div>
@@ -641,6 +642,12 @@ body::after{
         </div>
         <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">
           Tap entry to restore. Swipe or tap ✕ to delete one.
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:var(--mono);font-size:8px;color:var(--dim);">📦 OFFLINE CACHE</span>
+          <button class="btn btn-gold btn-sm" style="font-size:8px;" onclick="showOfflineStats()">
+            <span id="offlineCacheCount">0</span> phrases stored
+          </button>
         </div>
       </div>
       <div id="historyList"></div>
@@ -1244,6 +1251,23 @@ function swapLangs(){
   toast('Languages swapped');
 }
 
+// ── OFFLINE TRANSLATION CACHE ──
+var offlineCache=(function(){
+  var CACHE_KEY='babel_offline_cache';
+  var MAX=200;
+  var cache=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}');
+  function key(text,from,to){return from+'|'+to+'|'+text.substring(0,100);}
+  function get(text,from,to){return cache[key(text,from,to)]||null;}
+  function set(text,from,to,result){
+    cache[key(text,from,to)]=result;
+    var keys=Object.keys(cache);
+    if(keys.length>MAX){delete cache[keys[0]];}
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){}
+  }
+  function size(){return Object.keys(cache).length;}
+  return {get:get,set:set,size:size};
+})();
+
 // ── TRANSLATE ──
 function translateText(){
   var text=document.getElementById('inputText').value.trim();
@@ -1265,6 +1289,8 @@ function translateText(){
       outBox.textContent=result;
       state.lastTranslation={orig:text,trans:result,from:from,to:to,ts:Date.now()};
       checkForSOS(text);
+      var el=document.getElementById('offlineCacheCount');
+      if(el)el.textContent=offlineCache.size();
     } else {
       outBox.textContent='Translation failed. Check connection.';
     }
@@ -1272,6 +1298,9 @@ function translateText(){
 }
 
 function callGoogleTranslate(text, from, to, cb){
+  // Check offline cache first
+  var cached=offlineCache.get(text,from,to);
+  if(cached){cb(cached);return;}
   var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+
     (from==='auto'?'auto':from)+'&tl='+to+'&dt=t&q='+encodeURIComponent(text);
   fetch(url)
@@ -1279,9 +1308,20 @@ function callGoogleTranslate(text, from, to, cb){
     .then(function(d){
       var result='';
       if(d&&d[0]){d[0].forEach(function(s){if(s[0])result+=s[0];});}
+      if(result){offlineCache.set(text,from,to,result);}
       cb(result||null);
     })
-    .catch(function(){cb(null);});
+    .catch(function(){
+      // Network failed — try cache one more time with fuzzy match
+      var cached2=offlineCache.get(text,from,to);
+      if(cached2){
+        toast('Offline — showing cached translation');
+        cb(cached2);
+      } else {
+        toast('No connection & no cache for this phrase');
+        cb(null);
+      }
+    });
 }
 
 function clearTranslate(){
@@ -2210,6 +2250,28 @@ function runTutorAI(prompt, mode){
   });
 }
 
+function shareTranslation(){
+  var orig=document.getElementById('inputText').value.trim();
+  var trans=document.getElementById('outputText').textContent.trim();
+  if(!orig||!trans){toast('Nothing to share');return;}
+  var fl=LANGS.find(function(l){return l.c===(langState.fromLang||'auto');});
+  var tl=LANGS.find(function(l){return l.c===langState.toLang;});
+  var fromName=fl?fl.n:'Auto';
+  var toName=tl?tl.n:'?';
+  var shareText=fromName+' \u2192 '+toName+'\n\n'+orig+'\n\n'+trans+'\n\n— BABEL by RIAKOINE-EMPIRE\n'+window.location.href;
+  if(navigator.share){
+    navigator.share({title:'BABEL Translation',text:shareText})
+      .catch(function(){copyToClipboard(shareText);toast('Copied — paste to share');});
+  } else {
+    copyToClipboard(shareText);
+    toast('Translation copied — paste to share');
+  }
+}
+
+function showOfflineStats(){
+  toast('Offline cache: '+offlineCache.size()+' phrases stored');
+}
+
 function speakTutorResponse(){
   var text=document.getElementById('tutorResponse').textContent;
   speakTTS(text,'en');
@@ -2247,6 +2309,8 @@ if(localStorage.getItem('babel_sentry_callsign'))
 if(localStorage.getItem('babel_sentry_token'))
   document.getElementById('sentryToken').value=localStorage.getItem('babel_sentry_token');
 updateTutorStats();
+var _ocEl=document.getElementById('offlineCacheCount');
+if(_ocEl)_ocEl.textContent=offlineCache.size();
 </script>
 </body>
 </html>
