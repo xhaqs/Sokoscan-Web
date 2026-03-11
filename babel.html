@@ -360,6 +360,9 @@ body::after{
     <div class="tab" onclick="switchTab('history')" id="tab-history">
       <span class="tab-icon">📋</span>HISTORY
     </div>
+    <div class="tab" onclick="switchTab('ocr')" id="tab-ocr">
+      <span class="tab-icon">📷</span>CAMERA
+    </div>
   </div>
 
   <!-- PANELS -->
@@ -538,6 +541,99 @@ body::after{
       <div id="historyList">
         <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">
           No history yet. Translate something and tap SAVE.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OCR CAMERA PANEL ── -->
+    <div class="panel" id="panel-ocr">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">CAMERA TRANSLATE</span>
+          <span class="card-tag">POINT & READ</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:10px;">
+          Point your camera at any text — menu, sign, document, label — in any language. BABEL reads and translates it instantly.
+        </div>
+        <div class="lang-grid">
+          <select class="lang-select" id="ocrFromLang">
+            <option value="auto">Auto Detect</option>
+          </select>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;">→</div>
+          <select class="lang-select" id="ocrToLang"></select>
+        </div>
+      </div>
+
+      <!-- CAMERA VIEW -->
+      <div class="card" style="padding:0;overflow:hidden;position:relative;">
+        <video id="ocrVideo" style="width:100%;display:block;max-height:240px;object-fit:cover;background:#000;" autoplay playsinline></video>
+        <canvas id="ocrCanvas" style="display:none;"></canvas>
+        <!-- Overlay frame -->
+        <div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;">
+          <div style="width:80%;height:60%;border:2px solid rgba(201,168,76,0.6);border-radius:4px;
+            box-shadow:0 0 0 1000px rgba(5,3,8,0.4);position:relative;">
+            <div style="position:absolute;top:-1px;left:-1px;width:16px;height:16px;
+              border-top:3px solid var(--gold);border-left:3px solid var(--gold);"></div>
+            <div style="position:absolute;top:-1px;right:-1px;width:16px;height:16px;
+              border-top:3px solid var(--gold);border-right:3px solid var(--gold);"></div>
+            <div style="position:absolute;bottom:-1px;left:-1px;width:16px;height:16px;
+              border-bottom:3px solid var(--gold);border-left:3px solid var(--gold);"></div>
+            <div style="position:absolute;bottom:-1px;right:-1px;width:16px;height:16px;
+              border-bottom:3px solid var(--gold);border-right:3px solid var(--gold);"></div>
+          </div>
+        </div>
+        <!-- Camera status -->
+        <div id="ocrStatus" style="position:absolute;bottom:0;left:0;right:0;
+          background:rgba(5,3,8,0.8);font-family:var(--mono);font-size:8px;
+          color:var(--dim);padding:6px 10px;letter-spacing:1px;text-align:center;">
+          CAMERA OFF
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div style="display:flex;gap:8px;margin-top:0;padding:10px;
+        background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;">
+        <button class="btn btn-gold" style="flex:2;padding:12px;" id="ocrStartBtn" onclick="toggleOCRCamera()">
+          📷 START CAMERA
+        </button>
+        <button class="btn btn-purple" style="flex:1;padding:12px;" onclick="captureOCR()">
+          ⚡ CAPTURE
+        </button>
+        <button class="btn btn-purple btn-sm" onclick="toggleOCRFlash()" id="ocrFlashBtn" style="padding:12px 10px;">
+          🔦
+        </button>
+      </div>
+
+      <!-- RESULT -->
+      <div class="card" id="ocrResultCard" style="display:none;margin-top:12px;">
+        <div class="output-label">DETECTED TEXT</div>
+        <div class="output-box" id="ocrDetected" style="color:var(--text);font-size:11px;min-height:40px;"></div>
+        <div style="margin:8px 0 4px;">
+          <div class="output-label">TRANSLATION</div>
+          <div class="output-box" id="ocrTranslated" style="min-height:40px;"></div>
+        </div>
+        <div class="output-actions">
+          <button class="btn btn-cyan btn-sm" onclick="speakOCRResult()">🔊 SPEAK</button>
+          <button class="btn btn-purple btn-sm" onclick="copyEl('ocrTranslated')">📋 COPY</button>
+          <button class="btn btn-gold btn-sm" onclick="sendOCRToTranslate()">↗ TRANSLATE TAB</button>
+        </div>
+      </div>
+
+      <!-- MANUAL FALLBACK -->
+      <div class="card" style="margin-top:12px;">
+        <div class="card-head">
+          <span class="card-title">MANUAL IMAGE</span>
+          <span class="card-tag">UPLOAD PHOTO</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">
+          No camera access? Upload a photo of the text instead.
+        </div>
+        <input type="file" id="ocrFileInput" accept="image/*" style="display:none;" onchange="handleOCRFile(event)">
+        <button class="btn btn-purple btn-full" onclick="document.getElementById('ocrFileInput').click()">
+          📁 UPLOAD IMAGE
+        </button>
+        <div id="ocrFilePreview" style="margin-top:8px;display:none;">
+          <img id="ocrPreviewImg" style="width:100%;border-radius:4px;border:1px solid var(--border);">
         </div>
       </div>
     </div>
@@ -1050,6 +1146,203 @@ function renderKeywords(){
 }
 
 // ── INIT ──
+// ── OCR CAMERA ──
+var ocrStream = null;
+var ocrActive = false;
+var ocrFlashOn = false;
+
+function populateOCRLangs(){
+  var toLang=document.getElementById('ocrToLang');
+  LANGS.forEach(function(l){
+    var opt=document.createElement('option');
+    opt.value=l.c;opt.textContent=l.n;
+    toLang.appendChild(opt);
+  });
+  toLang.value='en';
+  // fromLang already has auto + LANGS via separate populate
+  var fromLang=document.getElementById('ocrFromLang');
+  LANGS.forEach(function(l){
+    var opt=document.createElement('option');
+    opt.value=l.c;opt.textContent=l.n;
+    fromLang.appendChild(opt);
+  });
+}
+
+function toggleOCRCamera(){
+  if(ocrActive){stopOCRCamera();}
+  else{startOCRCamera();}
+}
+
+function startOCRCamera(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    toast('Camera not supported on this browser');return;
+  }
+  navigator.mediaDevices.getUserMedia({
+    video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
+  }).then(function(stream){
+    ocrStream=stream;
+    ocrActive=true;
+    var video=document.getElementById('ocrVideo');
+    video.srcObject=stream;
+    document.getElementById('ocrStartBtn').textContent='⏹ STOP CAMERA';
+    document.getElementById('ocrStartBtn').className='btn btn-red';
+    document.getElementById('ocrStatus').textContent='CAMERA ACTIVE — AIM AT TEXT';
+    document.getElementById('ocrStatus').style.color='var(--green)';
+  }).catch(function(e){
+    toast('Camera access denied — use Upload instead');
+    document.getElementById('ocrStatus').textContent='CAMERA DENIED — USE UPLOAD';
+  });
+}
+
+function stopOCRCamera(){
+  if(ocrStream){ocrStream.getTracks().forEach(function(t){t.stop();});ocrStream=null;}
+  ocrActive=false;
+  var video=document.getElementById('ocrVideo');
+  video.srcObject=null;
+  document.getElementById('ocrStartBtn').textContent='📷 START CAMERA';
+  document.getElementById('ocrStartBtn').className='btn btn-gold';
+  document.getElementById('ocrStatus').textContent='CAMERA OFF';
+  document.getElementById('ocrStatus').style.color='var(--dim)';
+}
+
+function captureOCR(){
+  var video=document.getElementById('ocrVideo');
+  var canvas=document.getElementById('ocrCanvas');
+  if(!ocrActive&&!canvas.width){
+    toast('Start camera or upload an image first');return;
+  }
+  if(ocrActive){
+    canvas.width=video.videoWidth||640;
+    canvas.height=video.videoHeight||480;
+    var ctx=canvas.getContext('2d');
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  }
+  var imageData=canvas.toDataURL('image/jpeg',0.8);
+  runOCR(imageData);
+}
+
+function runOCR(imageData){
+  document.getElementById('ocrResultCard').style.display='block';
+  document.getElementById('ocrDetected').innerHTML='<span class="spinner"></span> Reading text...';
+  document.getElementById('ocrTranslated').innerHTML='<span class="spinner"></span>';
+  var toLang=document.getElementById('ocrToLang').value;
+
+  // Use Tesseract.js via CDN for OCR
+  if(typeof Tesseract==='undefined'){
+    // Load Tesseract dynamically
+    var script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js';
+    script.onload=function(){doTesseract(imageData,toLang);};
+    script.onerror=function(){
+      // Fallback: use Google Vision via translate hack
+      fallbackOCR(imageData,toLang);
+    };
+    document.head.appendChild(script);
+  } else {
+    doTesseract(imageData,toLang);
+  }
+}
+
+function doTesseract(imageData,toLang){
+  var fromLang=document.getElementById('ocrFromLang').value;
+  var tessLang=fromLang==='auto'?'eng':getTessLang(fromLang);
+  document.getElementById('ocrStatus').textContent='READING TEXT...';
+  Tesseract.recognize(imageData,tessLang,{
+    logger:function(m){
+      if(m.status==='recognizing text'){
+        document.getElementById('ocrStatus').textContent=
+          'READING: '+Math.round((m.progress||0)*100)+'%';
+      }
+    }
+  }).then(function(result){
+    var text=(result.data.text||'').trim();
+    if(!text){
+      document.getElementById('ocrDetected').textContent='No text detected. Try again with better lighting.';
+      document.getElementById('ocrTranslated').textContent='—';
+      document.getElementById('ocrStatus').textContent='NO TEXT FOUND';
+      return;
+    }
+    document.getElementById('ocrDetected').textContent=text;
+    document.getElementById('ocrStatus').textContent='TRANSLATING...';
+    callGoogleTranslate(text,'auto',toLang,function(trans){
+      document.getElementById('ocrTranslated').textContent=trans||'Translation failed.';
+      document.getElementById('ocrStatus').textContent='DONE — READY';
+      window._lastOCRText=text;
+      window._lastOCRTrans=trans;
+    });
+  }).catch(function(e){
+    document.getElementById('ocrDetected').textContent='OCR failed. Try upload instead.';
+    document.getElementById('ocrStatus').textContent='ERROR';
+  });
+}
+
+function getTessLang(code){
+  var map={
+    'ar':'ara','zh':'chi_sim','zh-TW':'chi_tra','fr':'fra',
+    'de':'deu','hi':'hin','ja':'jpn','ko':'kor','pt':'por',
+    'ru':'rus','es':'spa','sw':'swa','tr':'tur','uk':'ukr',
+    'vi':'vie','th':'tha','fa':'fas','ur':'urd','en':'eng'
+  };
+  return map[code]||'eng';
+}
+
+function fallbackOCR(imageData,toLang){
+  // Graceful fallback — ask user to type detected text
+  document.getElementById('ocrDetected').textContent='Auto-read not available. Type the text below to translate.';
+  document.getElementById('ocrTranslated').textContent='—';
+  document.getElementById('ocrStatus').textContent='MANUAL MODE';
+  toast('OCR unavailable — type text manually for translation');
+}
+
+function handleOCRFile(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var canvas=document.getElementById('ocrCanvas');
+    var img=new Image();
+    img.onload=function(){
+      canvas.width=img.width;
+      canvas.height=img.height;
+      var ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      document.getElementById('ocrFilePreview').style.display='block';
+      document.getElementById('ocrPreviewImg').src=e.target.result;
+      toast('Image loaded — tap CAPTURE to read');
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function toggleOCRFlash(){
+  if(!ocrStream)return;
+  var track=ocrStream.getVideoTracks()[0];
+  if(!track){return;}
+  ocrFlashOn=!ocrFlashOn;
+  try{
+    track.applyConstraints({advanced:[{torch:ocrFlashOn}]});
+    document.getElementById('ocrFlashBtn').style.color=ocrFlashOn?'var(--gold)':'var(--dim)';
+  }catch(e){toast('Flash not supported on this device');}
+}
+
+function speakOCRResult(){
+  var text=document.getElementById('ocrTranslated').textContent;
+  var lang=document.getElementById('ocrToLang').value;
+  speakTTS(text,lang);
+}
+
+function sendOCRToTranslate(){
+  if(window._lastOCRText){
+    document.getElementById('inputText').value=window._lastOCRText;
+    document.getElementById('charCount').textContent=window._lastOCRText.length;
+    switchTab('translate');
+    toast('Text sent to Translate tab');
+  }
+}
+
+populateOCRLangs();
+
 populateLangs();
 updateLangPair();
 updateInterpPair();
