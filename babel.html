@@ -530,7 +530,7 @@ body::after{
             </div>
           </div>
           <button class="btn btn-gold btn-full" onclick="interpretA()">
-            🌐 TRANSLATE → <span id="labelA2">SWAHILI</span>
+            🎙 INTERPRET → <span id="labelA2">Swahili</span>
           </button>
           <div class="speaker-output" id="outputA">Translation will appear here...</div>
           <div class="output-actions" style="margin-top:6px;">
@@ -555,7 +555,7 @@ body::after{
             </div>
           </div>
           <button class="btn btn-cyan btn-full" onclick="interpretB()">
-            🌐 TRANSLATE → <span id="labelB2">ENGLISH</span>
+            🎙 INTERPRET → <span id="labelB2">English</span>
           </button>
           <div class="speaker-output" id="outputB">Translation will appear here...</div>
           <div class="output-actions" style="margin-top:6px;">
@@ -1087,14 +1087,21 @@ function updateLangPairNew(){
 }
 
 function updateInterpPairNew(){
-  state.interpA=langState.interpLangA;
-  state.interpB=langState.interpLangB;
+  state.interpA=langState.interpLangA||'en';
+  state.interpB=langState.interpLangB||'sw';
   var la=LANGS.find(function(l){return l.c===state.interpA;});
   var lb=LANGS.find(function(l){return l.c===state.interpB;});
+  // Speaker A header label
   if(document.getElementById('labelA'))document.getElementById('labelA').textContent=la?la.n:'?';
+  // Speaker A button — interprets TO B's language
   if(document.getElementById('labelA2'))document.getElementById('labelA2').textContent=lb?lb.n:'?';
+  // Speaker B header label
   if(document.getElementById('labelB'))document.getElementById('labelB').textContent=lb?lb.n:'?';
+  // Speaker B button — interprets TO A's language
   if(document.getElementById('labelB2'))document.getElementById('labelB2').textContent=la?la.n:'?';
+  // Also update the lang picker button labels
+  if(document.getElementById('interpLangALabel'))document.getElementById('interpLangALabel').textContent=la?la.n:'?';
+  if(document.getElementById('interpLangBLabel'))document.getElementById('interpLangBLabel').textContent=lb?lb.n:'?';
 }
 
 function populateLangs(){
@@ -1193,8 +1200,7 @@ function speakOutput(){
 
 function speakTTS(text,lang){
   if(!text||text.trim()==='')return;
-  if(!('speechSynthesis' in window)){toast('TTS not supported on this browser');return;}
-  // Map language codes to BCP-47 tags supported by speech synthesis
+  if(!('speechSynthesis' in window)){speakGoogleTTS(text,lang);return;}
   var ttsMap={
     'af':'af-ZA','sq':'sq-AL','am':'am-ET','ar':'ar-SA','hy':'hy-AM',
     'az':'az-AZ','eu':'eu-ES','be':'be-BY','bn':'bn-BD','bs':'bs-BA',
@@ -1222,18 +1228,29 @@ function speakTTS(text,lang){
     'ee':'ee','tw':'ak',
   };
   var bcp=ttsMap[lang]||lang;
-  var u=new SpeechSynthesisUtterance(text);
-  u.lang=bcp;
-  // Check if voice available for this language
   var voices=window.speechSynthesis.getVoices();
-  var match=voices.find(function(v){return v.lang.startsWith(bcp.split('-')[0]);});
-  if(!match&&voices.length>0){
-    // Fallback — use default voice but notify
-    toast('No voice for this language — playing default');
-    u.lang='en-US';
+  var rootLang=bcp.split('-')[0];
+  var match=voices.find(function(v){return v.lang.toLowerCase().startsWith(rootLang.toLowerCase());});
+  if(!match){
+    // No device voice — use Google TTS fallback
+    speakGoogleTTS(text,lang);
+    return;
   }
   window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=bcp;
+  u.voice=match;
   window.speechSynthesis.speak(u);
+}
+
+function speakGoogleTTS(text,lang){
+  // Google Translate TTS — works for all languages including Arabic
+  var url='https://translate.googleapis.com/translate_tts?ie=UTF-8&q='
+    +encodeURIComponent(text.substring(0,200))+'&tl='+lang+'&client=gtx';
+  var audio=new Audio(url);
+  audio.play().catch(function(){
+    toast('No voice available for this language');
+  });
 }
 
 function speakText(elId, side){
@@ -1298,22 +1315,26 @@ function saveToHistory(){
 function interpretA(){
   var text=document.getElementById('textA').value.trim();
   if(!text){toast('Speaker A: enter text first');return;}
+  var from=langState.interpLangA||'en';
+  var to=langState.interpLangB||'sw';
   var out=document.getElementById('outputA');
   out.innerHTML='<span class="spinner"></span>';
-  callGoogleTranslate(text,state.interpA,state.interpB,function(result){
+  callGoogleTranslate(text,from,to,function(result){
     out.textContent=result||'Translation failed.';
-    if(result)speakTTS(result,state.interpB);
+    if(result)speakTTS(result,to);
   });
 }
 
 function interpretB(){
   var text=document.getElementById('textB').value.trim();
   if(!text){toast('Speaker B: enter text first');return;}
+  var from=langState.interpLangB||'sw';
+  var to=langState.interpLangA||'en';
   var out=document.getElementById('outputB');
   out.innerHTML='<span class="spinner"></span>';
-  callGoogleTranslate(text,state.interpB,state.interpA,function(result){
+  callGoogleTranslate(text,from,to,function(result){
     out.textContent=result||'Translation failed.';
-    if(result)speakTTS(result,state.interpA);
+    if(result)speakTTS(result,to);
   });
 }
 
