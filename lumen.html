@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#03060f">
+<title>LUMEN — RIAKOINE-EMPIRE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03060f;
+  --bg2:#060a16;
+  --card:#0a1020;
+  --border:rgba(100,160,255,0.1);
+  --gold:#C9A84C;
+  --blue:#4a9eff;
+  --cyan:#64d2ff;
+  --dim:#3a4a6a;
+  --text:#c8d8f0;
+  --text2:#7a9abf;
+  --mono:'Share Tech Mono',monospace;
+  --display:'Cinzel',serif;
+  --body:'Barlow Condensed',sans-serif;
+  --glow:0 0 20px rgba(74,158,255,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── PASSKEY ── */
+#pkScreen{
+  position:fixed;inset:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:1000;padding:40px 24px;
+  background-image:radial-gradient(ellipse at 50% 0%, rgba(74,158,255,0.08) 0%, transparent 60%);
+}
+.pk-logo{
+  font-family:var(--display);font-size:52px;
+  font-weight:900;letter-spacing:0.2em;
+  color:var(--blue);
+  text-shadow:0 0 40px rgba(74,158,255,0.4);
+  margin-bottom:4px;
+}
+.pk-sub{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.3em;margin-bottom:4px;}
+.pk-zack{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:0.15em;margin-bottom:24px;opacity:0.8;}
+.pk-tagline{font-family:var(--mono);font-size:9px;color:var(--text2);text-align:center;line-height:1.8;margin-bottom:32px;letter-spacing:0.05em;}
+.pk-label{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.2em;margin-bottom:8px;}
+#pkInput{
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:16px;
+  padding:14px 16px;border-radius:8px;width:100%;max-width:300px;
+  text-align:center;letter-spacing:0.3em;margin-bottom:8px;
+  outline:none;
+}
+#pkInput:focus{border-color:rgba(74,158,255,0.4);}
+#pkError{font-family:var(--mono);font-size:8px;color:#ff3b30;min-height:16px;margin-bottom:8px;letter-spacing:0.1em;}
+#pkBtn{
+  background:linear-gradient(135deg,rgba(74,158,255,0.2),rgba(74,158,255,0.1));
+  border:1px solid rgba(74,158,255,0.3);color:var(--blue);
+  font-family:var(--mono);font-size:11px;letter-spacing:0.2em;
+  padding:12px 40px;border-radius:6px;cursor:pointer;
+  transition:all 0.2s;
+}
+#pkBtn:active{transform:scale(0.97);}
+.pk-foot{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.15em;margin-top:24px;text-align:center;}
+
+/* ── TOPBAR ── */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 8px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+  flex-shrink:0;
+}
+.lumen-logo{
+  font-family:var(--display);font-size:22px;font-weight:700;
+  color:var(--blue);letter-spacing:0.2em;
+  text-shadow:0 0 20px rgba(74,158,255,0.3);
+}
+.lumen-empire{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.2em;}
+.lumen-zack{font-family:var(--mono);font-size:7px;color:var(--gold);letter-spacing:0.1em;opacity:0.7;}
+.top-status{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:8px;color:var(--dim);
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--blue);
+  box-shadow:0 0 6px var(--blue);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* ── CONTEXT BAR ── */
+#contextBar{
+  display:flex;gap:6px;padding:8px 16px;
+  overflow-x:auto;flex-shrink:0;
+  scrollbar-width:none;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+#contextBar::-webkit-scrollbar{display:none;}
+.ctx-chip{
+  flex-shrink:0;
+  font-family:var(--mono);font-size:8px;
+  padding:4px 10px;border-radius:20px;
+  border:1px solid var(--border);
+  color:var(--dim);cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.ctx-chip.active{
+  background:rgba(74,158,255,0.1);
+  border-color:rgba(74,158,255,0.3);
+  color:var(--blue);
+}
+.ctx-chip:active{transform:scale(0.95);}
+
+/* ── CHAT AREA ── */
+#chatArea{
+  flex:1;overflow-y:auto;
+  padding:16px;
+  display:flex;flex-direction:column;
+  gap:12px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--dim) transparent;
+}
+
+/* ── MESSAGES ── */
+.msg{display:flex;flex-direction:column;max-width:88%;}
+.msg.user{align-self:flex-end;align-items:flex-end;}
+.msg.lumen{align-self:flex-start;align-items:flex-start;}
+.msg-sender{
+  font-family:var(--mono);font-size:7px;
+  color:var(--dim);letter-spacing:0.15em;
+  margin-bottom:4px;
+}
+.msg-bubble{
+  padding:10px 14px;border-radius:12px;
+  font-family:var(--body);font-size:13px;
+  line-height:1.7;
+}
+.msg.user .msg-bubble{
+  background:rgba(74,158,255,0.12);
+  border:1px solid rgba(74,158,255,0.2);
+  color:var(--text);
+  border-bottom-right-radius:3px;
+}
+.msg.lumen .msg-bubble{
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-bottom-left-radius:3px;
+  box-shadow:var(--glow);
+  white-space:pre-wrap;
+}
+.msg-time{
+  font-family:var(--mono);font-size:7px;
+  color:var(--dim);margin-top:3px;
+}
+
+/* ── TYPING INDICATOR ── */
+.typing-dots{display:flex;gap:4px;padding:12px 14px;}
+.typing-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--blue);opacity:0.4;
+  animation:typingDot 1.2s infinite;
+}
+.typing-dot:nth-child(2){animation-delay:0.2s;}
+.typing-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes typingDot{0%,100%{opacity:0.2;transform:translateY(0);}50%{opacity:1;transform:translateY(-4px);}}
+
+/* ── CURSOR ── */
+.lumen-cursor{
+  display:inline-block;width:2px;height:14px;
+  background:var(--blue);
+  animation:blink 0.8s step-end infinite;
+  vertical-align:middle;margin-left:2px;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* ── QUICK PROMPTS ── */
+#quickPrompts{
+  padding:8px 16px;
+  display:flex;gap:6px;overflow-x:auto;
+  flex-shrink:0;scrollbar-width:none;
+  border-top:1px solid var(--border);
+}
+#quickPrompts::-webkit-scrollbar{display:none;}
+.quick-btn{
+  flex-shrink:0;
+  font-family:var(--mono);font-size:8px;
+  padding:6px 12px;border-radius:20px;
+  background:rgba(74,158,255,0.06);
+  border:1px solid rgba(74,158,255,0.15);
+  color:var(--text2);cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.quick-btn:active{
+  background:rgba(74,158,255,0.15);
+  border-color:rgba(74,158,255,0.3);
+  color:var(--blue);
+  transform:scale(0.96);
+}
+
+/* ── INPUT BAR ── */
+#inputBar{
+  display:flex;align-items:flex-end;gap:8px;
+  padding:10px 16px 16px;
+  background:var(--bg);
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+#msgInput{
+  flex:1;
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:var(--body);font-size:14px;
+  padding:10px 14px;border-radius:20px;
+  resize:none;outline:none;
+  max-height:100px;overflow-y:auto;
+  line-height:1.5;
+  transition:border-color 0.2s;
+}
+#msgInput:focus{border-color:rgba(74,158,255,0.3);}
+#msgInput::placeholder{color:var(--dim);}
+.send-btn{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(74,158,255,0.3),rgba(74,158,255,0.15));
+  border:1px solid rgba(74,158,255,0.3);
+  color:var(--blue);font-size:16px;
+  cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.send-btn:active{transform:scale(0.92);}
+.mic-btn{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(201,168,76,0.08);
+  border:1px solid rgba(201,168,76,0.2);
+  color:var(--gold);font-size:16px;
+  cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.mic-btn.listening{
+  background:rgba(201,168,76,0.2);
+  border-color:rgba(201,168,76,0.5);
+  animation:micPulse 1s infinite;
+}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.3);}50%{box-shadow:0 0 0 8px rgba(201,168,76,0);}}
+
+/* ── MEMORY PANEL ── */
+#memoryPanel{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(3,6,15,0.95);
+  z-index:500;padding:20px;
+  overflow-y:auto;
+}
+.mem-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.mem-title{font-family:var(--display);font-size:16px;color:var(--blue);letter-spacing:0.1em;}
+.mem-item{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;margin-bottom:8px;
+  font-family:var(--mono);font-size:9px;color:var(--text2);
+  line-height:1.7;
+}
+.mem-item-key{color:var(--blue);font-size:8px;margin-bottom:3px;}
+
+/* ── EMPIRE NAV ── */
+#empireNav{
+  display:flex;justify-content:space-around;
+  padding:8px 16px 12px;
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+  background:var(--bg2);
+}
+.empire-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-family:var(--mono);font-size:7px;color:var(--dim);
+  cursor:pointer;padding:4px 8px;border-radius:6px;
+  transition:all 0.2s;text-decoration:none;
+}
+.empire-btn:active{background:rgba(74,158,255,0.1);}
+.empire-btn.active{color:var(--blue);}
+.empire-icon{font-size:16px;}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:rgba(10,16,32,0.95);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:10px;
+  padding:8px 16px;border-radius:20px;
+  opacity:0;transition:opacity 0.3s;
+  pointer-events:none;z-index:999;
+  white-space:nowrap;letter-spacing:0.05em;
+}
+#toast.show{opacity:1;}
+
+/* ── SCROLLBAR ── */
+#chatArea::-webkit-scrollbar{width:2px;}
+#chatArea::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- PASSKEY -->
+<div id="pkScreen">
+  <div class="pk-logo">LUMEN</div>
+  <div class="pk-sub">BY RIAKOINE-EMPIRE</div>
+  <div class="pk-zack">✦ ZACK IN TONGUES ✦</div>
+  <div class="pk-tagline">Your personal intelligence.<br>Connecting the empire.</div>
+  <div class="pk-label">ENTER ACCESS CODE</div>
+  <input id="pkInput" type="password" maxlength="32"
+    placeholder="· · · · · · · ·"
+    onkeydown="if(event.key==='Enter')checkPK();">
+  <div id="pkError"></div>
+  <button id="pkBtn" onclick="checkPK()">ENTER</button>
+  <div class="pk-foot">PERSONAL INTELLIGENCE SYSTEM · RIAKOINE-EMPIRE</div>
+</div>
+
+<div id="app" style="display:none;flex-direction:column;height:100dvh;">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div>
+      <div class="lumen-logo">LUMEN</div>
+      <div class="lumen-empire">RIAKOINE-EMPIRE</div>
+      <div class="lumen-zack">✦ ZACK IN TONGUES</div>
+    </div>
+    <div class="top-status">
+      <div class="status-dot"></div>
+      <span id="statusText">ONLINE</span>
+      <button onclick="toggleMemory()" style="background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.2);color:var(--blue);font-family:var(--mono);font-size:8px;padding:4px 8px;border-radius:4px;cursor:pointer;margin-left:4px;">🧠 MEMORY</button>
+    </div>
+  </div>
+
+  <!-- CONTEXT CHIPS -->
+  <div id="contextBar">
+    <div class="ctx-chip active" onclick="setContext('general')" id="ctx-general">⚡ GENERAL</div>
+    <div class="ctx-chip" onclick="setContext('babel')" id="ctx-babel">🌐 BABEL</div>
+    <div class="ctx-chip" onclick="setContext('sentry')" id="ctx-sentry">🚨 SENTRY</div>
+    <div class="ctx-chip" onclick="setContext('sokoscan')" id="ctx-sokoscan">📊 SOKOSCAN</div>
+    <div class="ctx-chip" onclick="setContext('strategy')" id="ctx-strategy">👑 STRATEGY</div>
+    <div class="ctx-chip" onclick="setContext('language')" id="ctx-language">🗣 LANGUAGE</div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div id="chatArea"></div>
+
+  <!-- QUICK PROMPTS -->
+  <div id="quickPrompts">
+    <button class="quick-btn" onclick="quickSend('What should I focus on today?')">🎯 Today's focus</button>
+    <button class="quick-btn" onclick="quickSend('Give me a status summary of the empire')">👑 Empire status</button>
+    <button class="quick-btn" onclick="quickSend('What languages should BABEL support next?')">🌐 BABEL advice</button>
+    <button class="quick-btn" onclick="quickSend('How do I grow my user base in Kenya?')">📈 Growth</button>
+    <button class="quick-btn" onclick="quickSend('Teach me something fascinating about African languages')">🌍 Africa</button>
+    <button class="quick-btn" onclick="quickSend('What are the biggest risks to watch out for?')">⚠ Risks</button>
+  </div>
+
+  <!-- INPUT BAR -->
+  <div id="inputBar">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+    <textarea id="msgInput" rows="1" placeholder="Ask LUMEN anything..."
+      oninput="autoResize(this)"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+    <button class="send-btn" onclick="sendMsg()">➤</button>
+  </div>
+
+  <!-- EMPIRE NAV -->
+  <div id="empireNav">
+    <a class="empire-btn" href="/babel/" >
+      <span class="empire-icon">🌐</span>BABEL
+    </a>
+    <a class="empire-btn" href="/sentry/">
+      <span class="empire-icon">🚨</span>SENTRY
+    </a>
+    <a class="empire-btn active" href="/lumen/">
+      <span class="empire-icon">💡</span>LUMEN
+    </a>
+    <a class="empire-btn" href="/">
+      <span class="empire-icon">📊</span>SOKOSCAN
+    </a>
+  </div>
+
+</div>
+
+<!-- MEMORY PANEL -->
+<div id="memoryPanel">
+  <div class="mem-head">
+    <div class="mem-title">🧠 LUMEN MEMORY</div>
+    <button onclick="toggleMemory()" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);color:#ff3b30;font-family:var(--mono);font-size:9px;padding:6px 12px;border-radius:4px;cursor:pointer;">✕ CLOSE</button>
+  </div>
+  <div id="memoryList"></div>
+  <button onclick="clearMemory()" style="width:100%;margin-top:12px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);color:#ff3b30;font-family:var(--mono);font-size:9px;padding:10px;border-radius:6px;cursor:pointer;">✕ CLEAR ALL MEMORY</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── PASSKEY ──
+(function(){
+  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
+  var HASH=hc('Zack_Lingua');
+  var SK='lumen_sk1';
+  window.checkPK=function(){
+    var v=document.getElementById('pkInput').value.trim();
+    if(!v){document.getElementById('pkError').textContent='ACCESS CODE REQUIRED';return;}
+    if(hc(v)===HASH){
+      sessionStorage.setItem(SK,'1');
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      initLumen();
+    } else {
+      document.getElementById('pkError').textContent='INVALID CODE';
+      document.getElementById('pkInput').value='';
+    }
+  };
+  if(sessionStorage.getItem(SK)){
+    document.getElementById('pkScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+  }
+})();
+
+// ── STATE ──
+var currentContext='general';
+var chatHistory=[];
+var luMemory=JSON.parse(localStorage.getItem('lumen_memory')||'{}');
+var isTyping=false;
+
+var CONTEXT_PROMPTS={
+  general:'You are LUMEN — the personal intelligence system of RIAKOINE-EMPIRE, created by Zack. You are sharp, warm, and insightful. You help Zack think clearly, make decisions, and navigate building his technology empire from Kenya. You know about his three apps: BABEL (multilingual translation + AI tutor), SENTRY (personal safety tracking), and SOKOSCAN (market intelligence). Be concise, direct, and genuinely useful. No filler. Plain text only.',
+  babel:'You are LUMEN focused on BABEL — RIAKOINE-EMPIRE\'s multilingual translation app. BABEL features: 100+ language translation, live interpreter, OCR camera translate, E2EE Firebase chat, Heritage/Endangered languages preservation, AI Tutor powered by Llama 3.3, quiz scoring, daily lessons, offline cache, PWA. Help with strategy, features, languages, user growth, and technical decisions for BABEL. Plain text only.',
+  sentry:'You are LUMEN focused on SENTRY — RIAKOINE-EMPIRE\'s personal safety app. SENTRY tracks GPS journeys, sends SOS alerts via Telegram, monitors distress keywords in 130+ languages, links with BABEL for cross-app emergency response. Help with safety strategy, feature ideas, user scenarios, and how to grow SENTRY\'s impact. Plain text only.',
+  sokoscan:'You are LUMEN focused on SOKOSCAN — RIAKOINE-EMPIRE\'s market intelligence app. Help with market analysis strategy, what data to track, how to monetize, competitive analysis, and how SOKOSCAN fits into the empire. Plain text only.',
+  strategy:'You are LUMEN as a strategic advisor to Zack of RIAKOINE-EMPIRE. Think big picture: monetization strategy, user acquisition in Africa, empire expansion, investor readiness, competitive moats, partnerships. The empire currently has BABEL, SENTRY, SOKOSCAN live. LUMEN and VERITAS are planned. Be direct, visionary, and practical. Plain text only.',
+  language:'You are LUMEN as a language and culture intelligence system. Deep knowledge of African languages — Gikuyu/Kikuyu, Swahili, Luganda, Yoruba, Hausa, Amharic, Zulu, endangered languages of Kenya and East Africa. Help with linguistic insights, cultural context, language preservation strategy, and how BABEL can better serve African communities. Plain text only.'
+};
+
+// ── INIT ──
+function initLumen(){
+  // Welcome message
+  var hour=new Date().getHours();
+  var greeting='Good morning';
+  if(hour>=12&&hour<17)greeting='Good afternoon';
+  else if(hour>=17)greeting='Good evening';
+  addMessage('lumen','LUMEN online.\n\n'+greeting+', Zack. The empire is running. BABEL, SENTRY, and SOKOSCAN are live.\n\nWhat do you need?');
+  renderMemory();
+}
+
+// ── CONTEXT ──
+function setContext(ctx){
+  currentContext=ctx;
+  document.querySelectorAll('.ctx-chip').forEach(function(c){c.classList.remove('active');});
+  document.getElementById('ctx-'+ctx).classList.add('active');
+  toast('Context: '+ctx.toUpperCase());
+}
+
+// ── SEND MESSAGE ──
+function sendMsg(){
+  var input=document.getElementById('msgInput');
+  var text=input.value.trim();
+  if(!text||isTyping)return;
+  input.value='';
+  input.style.height='auto';
+  quickSend(text);
+}
+
+function quickSend(text){
+  if(isTyping)return;
+  addMessage('user',text);
+  chatHistory.push({role:'user',content:text});
+  showTyping();
+  callLumen(text);
+}
+
+// ── CALL LUMEN AI ──
+function callLumen(userMsg){
+  isTyping=true;
+  // Build memory context
+  var memCtx='';
+  var memKeys=Object.keys(luMemory);
+  if(memKeys.length){
+    memCtx='\n\nKnown context about Zack:\n'+memKeys.map(function(k){return k+': '+luMemory[k];}).join('\n');
+  }
+  var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
+  // Keep last 10 messages for context
+  var msgs=chatHistory.slice(-10);
+  fetch('/api/tutor',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      max_tokens:800,
+      system:systemPrompt,
+      messages:msgs
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    removeTyping();
+    var text='';
+    if(data.choices&&data.choices[0]){
+      text=data.choices[0].message.content;
+    } else if(data.error){
+      text='Connection issue: '+( data.error.message||'Try again');
+    }
+    chatHistory.push({role:'assistant',content:text});
+    streamMessage(text);
+    // Auto-extract memory hints
+    extractMemory(userMsg,text);
+  })
+  .catch(function(){
+    removeTyping();
+    addMessage('lumen','Connection lost. Check your network and try again.');
+    isTyping=false;
+  });
+}
+
+// ── STREAM MESSAGE ──
+function streamMessage(text){
+  var area=document.getElementById('chatArea');
+  var msgEl=document.createElement('div');
+  msgEl.className='msg lumen';
+  var sender=document.createElement('div');
+  sender.className='msg-sender';
+  sender.textContent='LUMEN · '+getTime();
+  var bubble=document.createElement('div');
+  bubble.className='msg-bubble';
+  var cursor=document.createElement('span');
+  cursor.className='lumen-cursor';
+  bubble.appendChild(cursor);
+  msgEl.appendChild(sender);
+  msgEl.appendChild(bubble);
+  area.appendChild(msgEl);
+  area.scrollTop=area.scrollHeight;
+  var i=0;
+  var interval=setInterval(function(){
+    if(i<text.length){
+      bubble.insertBefore(document.createTextNode(text[i]),cursor);
+      i++;
+      area.scrollTop=area.scrollHeight;
+    } else {
+      clearInterval(interval);
+      cursor.remove();
+      isTyping=false;
+    }
+  },8);
+}
+
+// ── ADD MESSAGE ──
+function addMessage(role,text){
+  var area=document.getElementById('chatArea');
+  var msgEl=document.createElement('div');
+  msgEl.className='msg '+role;
+  var sender=document.createElement('div');
+  sender.className='msg-sender';
+  sender.textContent=(role==='user'?'YOU':'LUMEN')+' · '+getTime();
+  var bubble=document.createElement('div');
+  bubble.className='msg-bubble';
+  bubble.textContent=text;
+  msgEl.appendChild(sender);
+  msgEl.appendChild(bubble);
+  area.appendChild(msgEl);
+  area.scrollTop=area.scrollHeight;
+}
+
+// ── TYPING INDICATOR ──
+function showTyping(){
+  var area=document.getElementById('chatArea');
+  var el=document.createElement('div');
+  el.className='msg lumen';
+  el.id='typingIndicator';
+  var bubble=document.createElement('div');
+  bubble.className='msg-bubble';
+  var dots=document.createElement('div');
+  dots.className='typing-dots';
+  for(var i=0;i<3;i++){
+    var d=document.createElement('div');
+    d.className='typing-dot';
+    dots.appendChild(d);
+  }
+  bubble.appendChild(dots);
+  el.appendChild(bubble);
+  area.appendChild(el);
+  area.scrollTop=area.scrollHeight;
+}
+
+function removeTyping(){
+  var el=document.getElementById('typingIndicator');
+  if(el)el.remove();
+}
+
+// ── MEMORY ──
+function extractMemory(userMsg,response){
+  // Simple keyword extraction for memory
+  var memPatterns=[
+    {re:/my name is (\w+)/i,key:'name'},
+    {re:/i (?:work|am working) (?:at|on|in) ([^.]+)/i,key:'work'},
+    {re:/i(?:'m| am) (?:based|located|living) in ([^.]+)/i,key:'location'},
+    {re:/my (?:goal|target|plan) is ([^.]+)/i,key:'goal'},
+    {re:/i have (\d+) users/i,key:'users'},
+  ];
+  memPatterns.forEach(function(p){
+    var m=userMsg.match(p.re);
+    if(m){
+      luMemory[p.key]=m[1].trim();
+      localStorage.setItem('lumen_memory',JSON.stringify(luMemory));
+      renderMemory();
+    }
+  });
+}
+
+function toggleMemory(){
+  var panel=document.getElementById('memoryPanel');
+  panel.style.display=panel.style.display==='none'||!panel.style.display?'block':'none';
+}
+
+function renderMemory(){
+  var list=document.getElementById('memoryList');
+  var keys=Object.keys(luMemory);
+  if(!keys.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">No memories yet. LUMEN learns as you talk.</div>';
+    return;
+  }
+  list.innerHTML=keys.map(function(k){
+    return '<div class="mem-item"><div class="mem-item-key">'+k.toUpperCase()+'</div>'+luMemory[k]+'</div>';
+  }).join('');
+}
+
+function clearMemory(){
+  luMemory={};
+  localStorage.removeItem('lumen_memory');
+  renderMemory();
+  toast('Memory cleared');
+}
+
+function rememberThis(key,val){
+  luMemory[key]=val;
+  localStorage.setItem('lumen_memory',JSON.stringify(luMemory));
+  renderMemory();
+  toast('Remembered: '+key);
+}
+
+// ── MIC ──
+var lumenRec=null;
+function toggleMic(){
+  var btn=document.getElementById('micBtn');
+  if(lumenRec){
+    lumenRec.stop();lumenRec=null;
+    btn.classList.remove('listening');
+    return;
+  }
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice not supported on this browser');return;}
+  lumenRec=new SR();
+  lumenRec.continuous=false;
+  lumenRec.interimResults=false;
+  lumenRec.onresult=function(e){
+    var text=e.results[0][0].transcript;
+    document.getElementById('msgInput').value=text;
+    sendMsg();
+  };
+  lumenRec.onerror=function(){btn.classList.remove('listening');lumenRec=null;};
+  lumenRec.onend=function(){btn.classList.remove('listening');lumenRec=null;};
+  lumenRec.start();
+  btn.classList.add('listening');
+  toast('Listening...');
+}
+
+// ── UTILS ──
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+function getTime(){
+  return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+</script>
+</body>
+</html>
