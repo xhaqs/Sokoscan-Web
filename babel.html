@@ -1266,7 +1266,17 @@ function speakGoogleTTS(text,lang){
     +encodeURIComponent(text.substring(0,200))+'&tl='+lang+'&client=gtx';
   _currentAudio=new Audio(url);
   _currentAudio.play().catch(function(){
-    toast('No voice available for this language');
+    // No Google TTS either — invite to train
+    var langName=LANGS.find(function(l){return l.c===lang;});
+    toast('No voice for '+(langName?langName.n:lang)+' — help train it in CHAT tab');
+    setTimeout(function(){
+      switchTab('chat');
+      // Pre-fill the training language
+      langState.trainLang=lang;
+      var lbl=document.getElementById('trainLangLabel');
+      if(lbl&&langName)lbl.textContent=langName.n;
+      document.getElementById('trainOriginal').focus();
+    },1800);
   });
 }
 
@@ -1342,7 +1352,7 @@ function interpretA(){
   out.innerHTML='<span class="spinner"></span>';
   callGoogleTranslate(text,from,to,function(result){
     out.textContent=result||'Translation failed.';
-    if(result)speakTTS(result,to);
+    // No auto-speak — user taps PLAY TO B when ready
   });
 }
 
@@ -1355,7 +1365,7 @@ function interpretB(){
   out.innerHTML='<span class="spinner"></span>';
   callGoogleTranslate(text,from,to,function(result){
     out.textContent=result||'Translation failed.';
-    if(result)speakTTS(result,to);
+    // No auto-speak — user taps PLAY TO A when ready
   });
 }
 
