@@ -1198,9 +1198,19 @@ function speakOutput(){
   speakTTS(text,langState.toLang||'en');
 }
 
+// Cache voices once loaded
+var _cachedVoices=[];
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged=function(){
+    _cachedVoices=window.speechSynthesis.getVoices();
+  };
+  // Load immediately in case already available
+  _cachedVoices=window.speechSynthesis.getVoices();
+}
+var _currentAudio=null;
+
 function speakTTS(text,lang){
   if(!text||text.trim()==='')return;
-  if(!('speechSynthesis' in window)){speakGoogleTTS(text,lang);return;}
   var ttsMap={
     'af':'af-ZA','sq':'sq-AL','am':'am-ET','ar':'ar-SA','hy':'hy-AM',
     'az':'az-AZ','eu':'eu-ES','be':'be-BY','bn':'bn-BD','bs':'bs-BA',
@@ -1228,39 +1238,50 @@ function speakTTS(text,lang){
     'ee':'ee','tw':'ak',
   };
   var bcp=ttsMap[lang]||lang;
-  var voices=window.speechSynthesis.getVoices();
   var rootLang=bcp.split('-')[0];
-  var match=voices.find(function(v){return v.lang.toLowerCase().startsWith(rootLang.toLowerCase());});
-  if(!match){
-    // No device voice — use Google TTS fallback
+  // Use cached voices — avoids race condition on first load
+  var voices=_cachedVoices.length?_cachedVoices:
+    ('speechSynthesis' in window?window.speechSynthesis.getVoices():[]);
+  var match=voices.find(function(v){
+    return v.lang.toLowerCase().startsWith(rootLang.toLowerCase());
+  });
+  if(match&&'speechSynthesis' in window){
+    // Device has a voice for this language
+    window.speechSynthesis.cancel();
+    if(_currentAudio){_currentAudio.pause();_currentAudio=null;}
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang=bcp;
+    u.voice=match;
+    window.speechSynthesis.speak(u);
+  } else {
+    // No device voice — Google TTS fallback (Arabic, Hindi, etc.)
     speakGoogleTTS(text,lang);
-    return;
   }
-  window.speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(text);
-  u.lang=bcp;
-  u.voice=match;
-  window.speechSynthesis.speak(u);
 }
 
 function speakGoogleTTS(text,lang){
-  // Google Translate TTS — works for all languages including Arabic
+  if(_currentAudio){_currentAudio.pause();_currentAudio=null;}
+  if('speechSynthesis' in window)window.speechSynthesis.cancel();
   var url='https://translate.googleapis.com/translate_tts?ie=UTF-8&q='
     +encodeURIComponent(text.substring(0,200))+'&tl='+lang+'&client=gtx';
-  var audio=new Audio(url);
-  audio.play().catch(function(){
+  _currentAudio=new Audio(url);
+  _currentAudio.play().catch(function(){
     toast('No voice available for this language');
   });
 }
 
+// speakText used by PLAY TO A / PLAY TO B in interpret tab
 function speakText(elId, side){
   var text=document.getElementById(elId).textContent;
-  var lang=side==='A'?state.interpA:state.interpB;
+  if(!text||text==='Translation will appear here...')return;
+  // Use langState directly — side A plays in A's language, side B plays in B's language
+  var lang=side==='A'?langState.interpLangA:langState.interpLangB;
   speakTTS(text,lang);
 }
 
 function stopSpeech(){
-  if('speechSynthesis' in window){window.speechSynthesis.cancel();}
+  if('speechSynthesis' in window)window.speechSynthesis.cancel();
+  if(_currentAudio){_currentAudio.pause();_currentAudio=null;}
   toast('Stopped');
 }
 
