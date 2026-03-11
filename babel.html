@@ -384,6 +384,29 @@ body::after{
 }
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 
+/* ── CHANNELS ── */
+.ch-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px;border-radius:8px;
+  background:rgba(201,168,76,0.04);
+  border:1px solid rgba(201,168,76,0.1);
+  margin-bottom:6px;cursor:pointer;
+  transition:all 0.2s;
+}
+.ch-item:active{background:rgba(201,168,76,0.1);}
+.ch-icon{font-size:22px;flex-shrink:0;}
+.ch-info{flex:1;min-width:0;}
+.ch-name{font-family:var(--mono);font-size:10px;color:var(--gold);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ch-desc{font-family:var(--mono);font-size:8px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ch-meta{font-family:var(--mono);font-size:7px;color:var(--dim);display:flex;gap:8px;margin-top:2px;}
+.ch-post{padding:10px 0;border-bottom:1px solid var(--border);}
+.ch-post:last-child{border:none;}
+.ch-post-user{font-family:var(--mono);font-size:8px;color:var(--gold);margin-bottom:3px;}
+.ch-post-text{font-family:var(--mono);font-size:10px;color:var(--text);line-height:1.7;margin-bottom:3px;}
+.ch-post-meta{font-family:var(--mono);font-size:7px;color:var(--dim);display:flex;gap:8px;}
+.ch-views{font-family:var(--mono);font-size:7px;color:var(--dim);}
+.ch-badge-public{font-family:var(--mono);font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
+.ch-badge-private{font-family:var(--mono);font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:var(--purple2);}
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -470,6 +493,9 @@ body::after{
     </div>
     <div class="tab" onclick="switchTab('tutor')" id="tab-tutor">
       <span class="tab-icon">🧠</span>TUTOR
+    </div>
+    <div class="tab" onclick="switchTab('channels')" id="tab-channels">
+      <span class="tab-icon">📡</span>CHANNELS
     </div>
   </div>
 
@@ -1007,6 +1033,110 @@ body::after{
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ── CHANNELS PANEL ── -->
+    <div class="panel" id="panel-channels">
+
+      <!-- HEADER -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">📡 CHANNELS</span>
+          <span class="e2ee-badge" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold);">SOCIAL LAYER</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;">
+          Community language channels. Join, post, and connect — all messages auto-translate to your language.
+        </div>
+      </div>
+
+      <!-- CREATE / JOIN TOGGLE -->
+      <div class="card">
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button class="btn btn-gold btn-full" id="chBrowseBtn" onclick="showChannelView('browse')">🌐 BROWSE</button>
+          <button class="btn btn-purple btn-full" id="chCreateBtn" onclick="showChannelView('create')">＋ CREATE</button>
+          <button class="btn btn-cyan btn-full" id="chJoinBtn" onclick="showChannelView('join')">🔑 JOIN</button>
+        </div>
+
+        <!-- BROWSE VIEW -->
+        <div id="chViewBrowse">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">Public channels — tap to enter</div>
+          <div id="channelBrowseList"></div>
+          <button class="btn btn-gold btn-full" style="margin-top:8px;" onclick="loadPublicChannels()">🔄 REFRESH</button>
+        </div>
+
+        <!-- CREATE VIEW -->
+        <div id="chViewCreate" style="display:none;">
+          <input class="babel-input" id="chNewName" placeholder="Channel name e.g. Swahili Learners" style="height:auto;padding:10px;margin-bottom:6px;">
+          <input class="babel-input" id="chNewDesc" placeholder="Description — what is this channel about?" style="height:auto;padding:10px;margin-bottom:6px;">
+          <select class="babel-input" id="chNewLang" style="height:auto;padding:10px;margin-bottom:6px;">
+            <option value="sw">Swahili</option>
+            <option value="en">English</option>
+            <option value="ki">Kikuyu</option>
+            <option value="fr">French</option>
+            <option value="ar">Arabic</option>
+            <option value="ha">Hausa</option>
+            <option value="yo">Yoruba</option>
+            <option value="am">Amharic</option>
+            <option value="pt">Portuguese</option>
+            <option value="es">Spanish</option>
+            <option value="zh">Chinese</option>
+            <option value="hi">Hindi</option>
+          </select>
+          <select class="babel-input" id="chNewType" style="height:auto;padding:10px;margin-bottom:8px;">
+            <option value="public">🌐 Public — anyone can join</option>
+            <option value="private">🔒 Private — invite only</option>
+          </select>
+          <button class="btn btn-gold btn-full" onclick="createChannel()">📡 CREATE CHANNEL</button>
+        </div>
+
+        <!-- JOIN VIEW -->
+        <div id="chViewJoin" style="display:none;">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">Enter a channel code to join</div>
+          <input class="babel-input" id="chJoinCode" placeholder="CHANNEL CODE e.g. SW-LEARN-4821" style="height:auto;padding:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">
+          <button class="btn btn-cyan btn-full" onclick="joinChannelByCode()">🔑 JOIN CHANNEL</button>
+        </div>
+      </div>
+
+      <!-- ACTIVE CHANNEL -->
+      <div class="card" id="chActiveCard" style="display:none;">
+        <div class="card-head">
+          <span class="card-title" id="chActiveName">CHANNEL</span>
+          <div style="display:flex;gap:6px;">
+            <span style="font-family:var(--mono);font-size:8px;color:var(--dim);" id="chActiveViews">👁 0</span>
+            <button class="btn btn-gold btn-sm" onclick="shareChannel()">↗ SHARE</button>
+            <button class="btn btn-red btn-sm" onclick="leaveChannel()">✕ LEAVE</button>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;" id="chActiveDesc"></div>
+        <div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:10px;">
+          CODE: <span id="chActiveCode" style="color:var(--gold);letter-spacing:0.15em;"></span> · 
+          LANG: <span id="chActiveLang"></span> · 
+          MEMBERS: <span id="chActiveMembers">—</span>
+        </div>
+
+        <!-- POSTS FEED -->
+        <div id="chPostsFeed" style="max-height:300px;overflow-y:auto;margin-bottom:10px;"></div>
+
+        <!-- POST INPUT -->
+        <div style="display:flex;gap:6px;">
+          <textarea class="babel-input" id="chPostInput" placeholder="Share a phrase, translation, or insight..." style="height:60px;flex:1;"></textarea>
+        </div>
+        <button class="btn btn-gold btn-full" style="margin-top:6px;" onclick="postToChannel()">📤 POST</button>
+      </div>
+
+      <!-- MY CHANNELS -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">MY CHANNELS</span>
+          <span class="card-tag" id="myChannelCount">0</span>
+        </div>
+        <div id="myChannelsList">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">
+            You haven't joined any channels yet.
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div><!-- /panels -->
@@ -2691,6 +2821,245 @@ updateProgressDisplay();
 loadDailyLesson();
 var _ocEl=document.getElementById('offlineCacheCount');
 if(_ocEl)_ocEl.textContent=offlineCache.size();
+
+// ── CHANNELS ──
+var CHANNELS_DB=FIREBASE_DB_URL+'/babel_channels';
+var activeChannel=null;
+var myChannels=JSON.parse(localStorage.getItem('babel_my_channels')||'[]');
+var channelUser=localStorage.getItem('babel_channel_user')||('USER_'+(Math.random().toString(36).substr(2,5).toUpperCase()));
+localStorage.setItem('babel_channel_user',channelUser);
+var chPollTimer=null;
+
+function showChannelView(v){
+  document.getElementById('chViewBrowse').style.display=v==='browse'?'block':'none';
+  document.getElementById('chViewCreate').style.display=v==='create'?'block':'none';
+  document.getElementById('chViewJoin').style.display=v==='join'?'block':'none';
+  if(v==='browse')loadPublicChannels();
+}
+
+function genChannelCode(name,lang){
+  var prefix=(lang||'XX').toUpperCase().substr(0,2);
+  var suffix=Math.floor(1000+Math.random()*9000);
+  var slug=name.replace(/[^a-z0-9]/gi,'').toUpperCase().substr(0,6);
+  return prefix+'-'+slug+'-'+suffix;
+}
+
+function createChannel(){
+  var name=document.getElementById('chNewName').value.trim();
+  var desc=document.getElementById('chNewDesc').value.trim();
+  var lang=document.getElementById('chNewLang').value;
+  var type=document.getElementById('chNewType').value;
+  if(!name){toast('Enter a channel name');return;}
+  var code=genChannelCode(name,lang);
+  var ch={
+    code:code,name:name,desc:desc||'A BABEL community channel',
+    lang:lang,type:type,
+    owner:channelUser,
+    created:Date.now(),
+    members:1,views:0,posts:0
+  };
+  fetch(CHANNELS_DB+'/'+code+'.json',{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(ch)
+  }).then(function(r){return r.json();}).then(function(){
+    toast('Channel created: '+code);
+    addToMyChannels(ch);
+    openChannel(ch);
+    showChannelView('browse');
+    document.getElementById('chNewName').value='';
+    document.getElementById('chNewDesc').value='';
+  }).catch(function(){toast('Error creating channel — check connection');});
+}
+
+function joinChannelByCode(){
+  var code=document.getElementById('chJoinCode').value.trim().toUpperCase();
+  if(!code){toast('Enter a channel code');return;}
+  fetch(CHANNELS_DB+'/'+code+'.json')
+    .then(function(r){return r.json();})
+    .then(function(ch){
+      if(!ch||!ch.name){toast('Channel not found: '+code);return;}
+      addToMyChannels(ch);
+      openChannel(ch);
+      toast('Joined '+ch.name);
+    }).catch(function(){toast('Channel not found');});
+}
+
+function loadPublicChannels(){
+  var list=document.getElementById('channelBrowseList');
+  list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Loading channels...</div>';
+  fetch(CHANNELS_DB+'.json?orderBy="type"&equalTo="public"&limitToLast=20')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data||typeof data!=='object'){
+        list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No public channels yet. Create the first one!</div>';
+        return;
+      }
+      var channels=Object.values(data).sort(function(a,b){return (b.views||0)-(a.views||0);});
+      list.innerHTML=channels.map(function(ch){
+        var langName=LANGS.find(function(l){return l.c===ch.lang;});
+        return '<div class="ch-item" onclick="openChannel('+JSON.stringify(ch).replace(/"/g,'&quot;')+')">'
+          +'<div class="ch-icon">📡</div>'
+          +'<div class="ch-info">'
+          +'<div class="ch-name">'+ch.name+'</div>'
+          +'<div class="ch-desc">'+ch.desc+'</div>'
+          +'<div class="ch-meta"><span>'+(langName?langName.n:ch.lang)+'</span><span>👁 '+(ch.views||0)+'</span><span>📝 '+(ch.posts||0)+'</span></div>'
+          +'</div>'
+          +'<span class="ch-badge-'+(ch.type||'public')+'">'+(ch.type==='private'?'🔒':'🌐')+'</span>'
+          +'</div>';
+      }).join('');
+    }).catch(function(){
+      list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Could not load channels</div>';
+    });
+}
+
+function openChannel(ch){
+  activeChannel=ch;
+  document.getElementById('chActiveCard').style.display='block';
+  document.getElementById('chActiveName').textContent=ch.name;
+  document.getElementById('chActiveDesc').textContent=ch.desc||'';
+  document.getElementById('chActiveCode').textContent=ch.code;
+  var langName=LANGS.find(function(l){return l.c===ch.lang;});
+  document.getElementById('chActiveLang').textContent=langName?langName.n:ch.lang;
+  document.getElementById('chActiveCard').scrollIntoView({behavior:'smooth'});
+  // Increment views
+  fetch(CHANNELS_DB+'/'+ch.code+'/views.json')
+    .then(function(r){return r.json();})
+    .then(function(v){
+      var newViews=(v||0)+1;
+      fetch(CHANNELS_DB+'/'+ch.code+'/views.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(newViews)});
+      document.getElementById('chActiveViews').textContent='👁 '+newViews;
+    }).catch(function(){});
+  // Start polling posts
+  if(chPollTimer)clearInterval(chPollTimer);
+  loadChannelPosts();
+  chPollTimer=setInterval(loadChannelPosts,3000);
+}
+
+function loadChannelPosts(){
+  if(!activeChannel)return;
+  fetch(CHANNELS_DB+'/'+activeChannel.code+'/posts.json?limitToLast=30')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var feed=document.getElementById('chPostsFeed');
+      if(!data||typeof data!=='object'){
+        feed.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No posts yet. Be the first to post!</div>';
+        return;
+      }
+      var posts=Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+      var myLang=langState.toLang||'en';
+      feed.innerHTML=posts.map(function(p){
+        var time=new Date(p.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        var isMe=p.user===channelUser;
+        return '<div class="ch-post">'
+          +'<div class="ch-post-user">'+(isMe?'YOU':p.user)+' · '+time+'</div>'
+          +'<div class="ch-post-text" id="chpost_'+p.ts+'">'+p.text+'</div>'
+          +'<div class="ch-post-meta"><span>'+p.lang+'</span><span>👁 '+(p.views||1)+'</span></div>'
+          +'</div>';
+      }).join('');
+      feed.scrollTop=feed.scrollHeight;
+      // Auto-translate posts not in my language
+      posts.forEach(function(p){
+        if(p.lang&&p.lang!==myLang){
+          callGoogleTranslate(p.text,p.lang,myLang,function(trans){
+            var el=document.getElementById('chpost_'+p.ts);
+            if(el&&trans)el.textContent=trans;
+          });
+        }
+      });
+      // Update member count
+      var unique=[...new Set(posts.map(function(p){return p.user;}))].length;
+      document.getElementById('chActiveMembers').textContent=unique;
+    }).catch(function(){});
+}
+
+function postToChannel(){
+  if(!activeChannel){toast('Join a channel first');return;}
+  var text=document.getElementById('chPostInput').value.trim();
+  if(!text){toast('Write something first');return;}
+  var myLang=langState.fromLang||'en';
+  var post={user:channelUser,text:text,lang:myLang,ts:Date.now(),views:1};
+  fetch(CHANNELS_DB+'/'+activeChannel.code+'/posts.json',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(post)
+  }).then(function(){
+    document.getElementById('chPostInput').value='';
+    // Increment post count
+    fetch(CHANNELS_DB+'/'+activeChannel.code+'/posts.json?limitToLast=1')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var count=d?Object.keys(d).length:1;
+        fetch(CHANNELS_DB+'/'+activeChannel.code+'/posts_count.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(count)});
+      });
+    loadChannelPosts();
+  }).catch(function(){toast('Post failed — check connection');});
+}
+
+function addToMyChannels(ch){
+  var exists=myChannels.some(function(c){return c.code===ch.code;});
+  if(!exists){
+    myChannels.push({code:ch.code,name:ch.name,lang:ch.lang,type:ch.type});
+    localStorage.setItem('babel_my_channels',JSON.stringify(myChannels));
+    renderMyChannels();
+  }
+}
+
+function renderMyChannels(){
+  var list=document.getElementById('myChannelsList');
+  var count=document.getElementById('myChannelCount');
+  if(count)count.textContent=myChannels.length;
+  if(!myChannels.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No channels joined yet.</div>';
+    return;
+  }
+  list.innerHTML=myChannels.map(function(ch){
+    var langName=LANGS.find(function(l){return l.c===ch.lang;});
+    return '<div class="ch-item" onclick="joinChannelByCodeDirect(\''+ch.code+'\')">'
+      +'<div class="ch-icon">📡</div>'
+      +'<div class="ch-info">'
+      +'<div class="ch-name">'+ch.name+'</div>'
+      +'<div class="ch-desc">'+(langName?langName.n:ch.lang)+' · '+ch.code+'</div>'
+      +'</div>'
+      +'<span class="ch-badge-'+(ch.type||'public')+'">'+(ch.type==='private'?'🔒':'🌐')+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+function joinChannelByCodeDirect(code){
+  fetch(CHANNELS_DB+'/'+code+'.json')
+    .then(function(r){return r.json();})
+    .then(function(ch){if(ch&&ch.name)openChannel(ch);})
+    .catch(function(){});
+}
+
+function leaveChannel(){
+  if(!activeChannel)return;
+  myChannels=myChannels.filter(function(c){return c.code!==activeChannel.code;});
+  localStorage.setItem('babel_my_channels',JSON.stringify(myChannels));
+  if(chPollTimer)clearInterval(chPollTimer);
+  activeChannel=null;
+  document.getElementById('chActiveCard').style.display='none';
+  renderMyChannels();
+  toast('Left channel');
+}
+
+function shareChannel(){
+  if(!activeChannel)return;
+  var msg='Join my BABEL channel "'+activeChannel.name+'" — code: '+activeChannel.code+'\nhttps://sic-enzyme-dramatically-links.trycloudflare.com/babel/';
+  if(navigator.share){
+    navigator.share({title:'BABEL Channel: '+activeChannel.name,text:msg});
+  } else {
+    navigator.clipboard.writeText(msg).then(function(){toast('Channel link copied!');}).catch(function(){toast('Code: '+activeChannel.code);});
+  }
+}
+
+// Init channels
+renderMyChannels();
+// Auto-load public channels when channels tab is opened
+document.getElementById('tab-channels').addEventListener('click',function(){
+  loadPublicChannels();
+});
 </script>
 </body>
 </html>
