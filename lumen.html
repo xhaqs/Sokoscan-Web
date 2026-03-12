@@ -281,6 +281,25 @@ body{
 }
 .mem-item-key{color:var(--blue);font-size:8px;margin-bottom:3px;}
 
+/* MEMORY CAT BUTTONS */
+.mem-cat-btn{
+  font-family:var(--mono);font-size:7px;padding:4px 8px;
+  border-radius:3px;border:1px solid rgba(74,158,255,0.15);
+  background:rgba(74,158,255,0.05);color:var(--text2);
+  cursor:pointer;letter-spacing:0.05em;
+}
+.mem-cat-btn.active{
+  background:rgba(74,158,255,0.15);
+  border-color:rgba(74,158,255,0.3);
+  color:var(--blue);
+}
+.mem-item-delete{
+  background:none;border:none;color:var(--dim);
+  font-size:10px;cursor:pointer;padding:0 4px;
+  float:right;
+}
+.mem-item-delete:active{color:#ff3b30;}
+
 /* ── EMPIRE NAV ── */
 #empireNav{
   display:flex;justify-content:space-around;
@@ -405,8 +424,46 @@ body{
     <div class="mem-title">🧠 LUMEN MEMORY</div>
     <button onclick="toggleMemory()" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);color:#ff3b30;font-family:var(--mono);font-size:9px;padding:6px 12px;border-radius:4px;cursor:pointer;">✕ CLOSE</button>
   </div>
+
+  <!-- SEARCH -->
+  <input id="memSearch" placeholder="Search memories..." onkeyup="filterMemory(this.value)"
+    style="width:100%;background:rgba(74,158,255,0.05);border:1px solid rgba(74,158,255,0.15);color:#c8d8f0;font-family:'Share Tech Mono',monospace;font-size:11px;padding:10px 12px;border-radius:6px;outline:none;margin-bottom:12px;">
+
+  <!-- ADD MEMORY -->
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <select id="memCatSelect" style="background:rgba(74,158,255,0.05);border:1px solid rgba(74,158,255,0.15);color:#7a9abf;font-family:'Share Tech Mono',monospace;font-size:9px;padding:8px;border-radius:6px;outline:none;flex-shrink:0;">
+      <option value="empire">👑 EMPIRE</option>
+      <option value="personal">👤 PERSONAL</option>
+      <option value="language">🌍 LANGUAGE</option>
+      <option value="strategy">⚡ STRATEGY</option>
+      <option value="contact">📞 CONTACT</option>
+      <option value="note">📝 NOTE</option>
+    </select>
+    <input id="memKeyInput" placeholder="Key e.g. users, goal, city"
+      style="flex:1;background:rgba(74,158,255,0.05);border:1px solid rgba(74,158,255,0.15);color:#c8d8f0;font-family:'Share Tech Mono',monospace;font-size:10px;padding:8px;border-radius:6px;outline:none;">
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <input id="memValInput" placeholder="Value e.g. 150 active users, Nairobi, riakoine.com"
+      style="flex:1;background:rgba(74,158,255,0.05);border:1px solid rgba(74,158,255,0.15);color:#c8d8f0;font-family:'Share Tech Mono',monospace;font-size:10px;padding:8px;border-radius:6px;outline:none;">
+    <button onclick="addMemoryManual()" style="background:rgba(74,158,255,0.15);border:1px solid rgba(74,158,255,0.3);color:#4a9eff;font-family:'Share Tech Mono',monospace;font-size:9px;padding:8px 12px;border-radius:6px;cursor:pointer;flex-shrink:0;">＋ SAVE</button>
+  </div>
+
+  <!-- CATEGORY FILTERS -->
+  <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;" id="memCatFilters">
+    <button onclick="filterMemCat('all')" class="mem-cat-btn active" data-cat="all">ALL</button>
+    <button onclick="filterMemCat('empire')" class="mem-cat-btn" data-cat="empire">👑 EMPIRE</button>
+    <button onclick="filterMemCat('personal')" class="mem-cat-btn" data-cat="personal">👤 PERSONAL</button>
+    <button onclick="filterMemCat('language')" class="mem-cat-btn" data-cat="language">🌍 LANGUAGE</button>
+    <button onclick="filterMemCat('strategy')" class="mem-cat-btn" data-cat="strategy">⚡ STRATEGY</button>
+    <button onclick="filterMemCat('contact')" class="mem-cat-btn" data-cat="contact">📞 CONTACT</button>
+    <button onclick="filterMemCat('note')" class="mem-cat-btn" data-cat="note">📝 NOTE</button>
+  </div>
+
   <div id="memoryList"></div>
-  <button onclick="clearMemory()" style="width:100%;margin-top:12px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);color:#ff3b30;font-family:var(--mono);font-size:9px;padding:10px;border-radius:6px;cursor:pointer;">✕ CLEAR ALL MEMORY</button>
+  <div style="display:flex;gap:6px;margin-top:12px;">
+    <button onclick="exportMemory()" style="flex:1;background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.2);color:#4a9eff;font-family:'Share Tech Mono',monospace;font-size:9px;padding:10px;border-radius:6px;cursor:pointer;">📋 EXPORT</button>
+    <button onclick="clearMemory()" style="flex:1;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.2);color:#ff3b30;font-family:'Share Tech Mono',monospace;font-size:9px;padding:10px;border-radius:6px;cursor:pointer;">✕ CLEAR ALL</button>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -439,7 +496,6 @@ body{
 // ── STATE ──
 var currentContext='general';
 var chatHistory=[];
-var luMemory=JSON.parse(localStorage.getItem('lumen_memory')||'{}');
 var isTyping=false;
 
 var CONTEXT_PROMPTS={
@@ -495,7 +551,11 @@ function callLumen(userMsg){
   var memCtx='';
   var memKeys=Object.keys(luMemory);
   if(memKeys.length){
-    memCtx='\n\nKnown context about Zack:\n'+memKeys.map(function(k){return k+': '+luMemory[k];}).join('\n');
+    memCtx='\n\nKnown context about Zack:\n'+memKeys.map(function(k){
+      var m=luMemory[k];
+      var val=typeof m==='object'?m.value:m;
+      return k+': '+val;
+    }).join('\n');
   }
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
   // Keep last 10 messages for context
@@ -558,6 +618,16 @@ function streamMessage(text){
       clearInterval(interval);
       cursor.remove();
       isTyping=false;
+      // Add remember button
+      var remBtn=document.createElement('button');
+      remBtn.style.cssText='margin-top:8px;background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);color:#4a9eff;font-family:var(--mono);font-size:8px;padding:4px 10px;border-radius:4px;cursor:pointer;display:block;';
+      remBtn.textContent='🧠 REMEMBER THIS';
+      var capturedText=text;
+      remBtn.onclick=function(){
+        var key=prompt('Save as (e.g. strategy, insight, goal):');
+        if(key){rememberFromChat(key.trim(),capturedText.substring(0,200),'note');toggleMemory();}
+      };
+      bubble.appendChild(remBtn);
     }
   },8);
 }
@@ -606,54 +676,143 @@ function removeTyping(){
 }
 
 // ── MEMORY ──
-function extractMemory(userMsg,response){
-  // Simple keyword extraction for memory
-  var memPatterns=[
-    {re:/my name is (\w+)/i,key:'name'},
-    {re:/i (?:work|am working) (?:at|on|in) ([^.]+)/i,key:'work'},
-    {re:/i(?:'m| am) (?:based|located|living) in ([^.]+)/i,key:'location'},
-    {re:/my (?:goal|target|plan) is ([^.]+)/i,key:'goal'},
-    {re:/i have (\d+) users/i,key:'users'},
-  ];
-  memPatterns.forEach(function(p){
-    var m=userMsg.match(p.re);
-    if(m){
-      luMemory[p.key]=m[1].trim();
-      localStorage.setItem('lumen_memory',JSON.stringify(luMemory));
-      renderMemory();
-    }
+// New structure: {key: {value, category, ts}}
+var luMemory=JSON.parse(localStorage.getItem('lumen_memory')||'{}');
+var memFilter={cat:'all',search:''};
+
+function saveMemory(){
+  localStorage.setItem('lumen_memory',JSON.stringify(luMemory));
+}
+
+function addMemoryManual(){
+  var key=document.getElementById('memKeyInput').value.trim();
+  var val=document.getElementById('memValInput').value.trim();
+  var cat=document.getElementById('memCatSelect').value;
+  if(!key||!val){toast('Enter both key and value');return;}
+  luMemory[key]={value:val,category:cat,ts:Date.now()};
+  saveMemory();
+  document.getElementById('memKeyInput').value='';
+  document.getElementById('memValInput').value='';
+  renderMemory();
+  toast('Remembered: '+key);
+}
+
+function rememberFromChat(key,val,cat){
+  luMemory[key]={value:val,category:cat||'note',ts:Date.now()};
+  saveMemory();
+  renderMemory();
+  toast('Remembered: '+key);
+}
+
+function deleteMemory(key){
+  delete luMemory[key];
+  saveMemory();
+  renderMemory();
+  toast('Deleted: '+key);
+}
+
+function filterMemCat(cat){
+  memFilter.cat=cat;
+  document.querySelectorAll('.mem-cat-btn').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-cat')===cat);
   });
+  renderMemory();
+}
+
+function filterMemory(search){
+  memFilter.search=search.toLowerCase();
+  renderMemory();
 }
 
 function toggleMemory(){
   var panel=document.getElementById('memoryPanel');
   panel.style.display=panel.style.display==='none'||!panel.style.display?'block':'none';
+  if(panel.style.display==='block')renderMemory();
 }
 
 function renderMemory(){
   var list=document.getElementById('memoryList');
   var keys=Object.keys(luMemory);
+  // Filter by category
+  if(memFilter.cat!=='all'){
+    keys=keys.filter(function(k){
+      var m=luMemory[k];
+      var cat=typeof m==='object'?m.category:'note';
+      return cat===memFilter.cat;
+    });
+  }
+  // Filter by search
+  if(memFilter.search){
+    keys=keys.filter(function(k){
+      var m=luMemory[k];
+      var val=typeof m==='object'?m.value:m;
+      return k.toLowerCase().includes(memFilter.search)||val.toLowerCase().includes(memFilter.search);
+    });
+  }
+  // Sort by newest
+  keys.sort(function(a,b){
+    var ta=typeof luMemory[a]==='object'?luMemory[a].ts:0;
+    var tb=typeof luMemory[b]==='object'?luMemory[b].ts:0;
+    return tb-ta;
+  });
   if(!keys.length){
-    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">No memories yet. LUMEN learns as you talk.</div>';
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">'+(memFilter.search||memFilter.cat!=='all'?'No matches found.':'No memories yet. LUMEN learns as you talk.')+'</div>';
     return;
   }
+  var catIcons={empire:'👑',personal:'👤',language:'🌍',strategy:'⚡',contact:'📞',note:'📝'};
   list.innerHTML=keys.map(function(k){
-    return '<div class="mem-item"><div class="mem-item-key">'+k.toUpperCase()+'</div>'+luMemory[k]+'</div>';
+    var m=luMemory[k];
+    var val=typeof m==='object'?m.value:m;
+    var cat=typeof m==='object'?(m.category||'note'):'note';
+    var icon=catIcons[cat]||'📝';
+    var time=typeof m==='object'&&m.ts?new Date(m.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+    return '<div class="mem-item">'
+      +'<button class="mem-item-delete" onclick="deleteMemory(\''+k.replace(/'/g,"\\'")+'\')" title="Delete">✕</button>'
+      +'<div class="mem-item-key">'+icon+' '+k.toUpperCase()+'<span style="color:var(--dim);font-size:7px;margin-left:8px;">'+time+'</span></div>'
+      +'<div style="color:var(--text2);font-size:10px;line-height:1.6;">'+val+'</div>'
+      +'</div>';
   }).join('');
 }
 
 function clearMemory(){
   luMemory={};
-  localStorage.removeItem('lumen_memory');
+  saveMemory();
   renderMemory();
   toast('Memory cleared');
 }
 
-function rememberThis(key,val){
-  luMemory[key]=val;
-  localStorage.setItem('lumen_memory',JSON.stringify(luMemory));
-  renderMemory();
-  toast('Remembered: '+key);
+function exportMemory(){
+  var keys=Object.keys(luMemory);
+  if(!keys.length){toast('No memories to export');return;}
+  var text='LUMEN MEMORY EXPORT\n'+new Date().toLocaleString()+'\n\n';
+  keys.forEach(function(k){
+    var m=luMemory[k];
+    var val=typeof m==='object'?m.value:m;
+    text+=k.toUpperCase()+': '+val+'\n';
+  });
+  navigator.clipboard.writeText(text).then(function(){toast('Memory copied to clipboard');}).catch(function(){toast('Export failed');});
+}
+
+function extractMemory(userMsg,response){
+  var memPatterns=[
+    {re:/my name is (\w+)/i,key:'name',cat:'personal'},
+    {re:/i (?:work|am working) (?:at|on|in) ([^.]+)/i,key:'work',cat:'empire'},
+    {re:/i(?:'m| am) (?:based|located|living) in ([^.]+)/i,key:'location',cat:'personal'},
+    {re:/my (?:goal|target|plan) is ([^.]+)/i,key:'goal',cat:'strategy'},
+    {re:/i have (\d+) users/i,key:'users',cat:'empire'},
+    {re:/my (?:domain|website) is ([^\s.]+\.[^\s]+)/i,key:'domain',cat:'empire'},
+    {re:/(\d+) (?:followers|subscribers)/i,key:'audience',cat:'empire'},
+    {re:/my (?:phone|number) is ([0-9+\s]+)/i,key:'phone',cat:'contact'},
+    {re:/budget (?:is|of) ([^.]+)/i,key:'budget',cat:'strategy'},
+  ];
+  memPatterns.forEach(function(p){
+    var m=userMsg.match(p.re);
+    if(m){
+      luMemory[p.key]={value:m[1].trim(),category:p.cat,ts:Date.now()};
+      saveMemory();
+      renderMemory();
+    }
+  });
 }
 
 // ── MIC ──
