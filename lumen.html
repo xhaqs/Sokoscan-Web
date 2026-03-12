@@ -491,6 +491,7 @@ body{
   if(sessionStorage.getItem(SK)){
     document.getElementById('pkScreen').style.display='none';
     document.getElementById('app').style.display='flex';
+    setTimeout(initLumen,50);
   }
 })();
 
@@ -498,6 +499,7 @@ body{
 var LUMEN_API=window.location.protocol+'//'+window.location.host+'/api/tutor';
 var chatHistory=[];
 var isTyping=false;
+var currentContext='general';
 
 var CONTEXT_PROMPTS={
   general:'You are LUMEN — personal AI of RIAKOINE-EMPIRE by Zack. Sharp, warm, concise. Help Zack build his empire: BABEL (translation), SENTRY (safety), SOKOSCAN (market intel). Plain text only. No filler.',
@@ -579,7 +581,7 @@ function callLumen(userMsg){
     }).join('; ');
   }
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
-  var msgs=chatHistory.slice(-4);
+  var msgs=chatHistory.slice(-5);  // includes current user msg
   var timedOut=false;
   var controller=new AbortController();
   _lumenController=controller;
@@ -594,7 +596,7 @@ function callLumen(userMsg){
     headers:{'Content-Type':'application/json'},
     signal:controller.signal,
     body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
+      model:'llama-3.1-8b-instant',
       max_tokens:200,
       system:systemPrompt,
       messages:msgs.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};})
@@ -618,6 +620,7 @@ function callLumen(userMsg){
       text='Unexpected response: '+JSON.stringify(data).substring(0,100);
     }
     chatHistory.push({role:'assistant',content:text});
+    isTyping=false;
     streamMessage(text);
     extractMemory(userMsg,text);
   })
@@ -626,8 +629,8 @@ function callLumen(userMsg){
     clearTimeout(_lumenTimeout);
     removeTyping();
     showStopBtn(false);
-    addMessage('lumen','Error: '+(err.message||'Connection failed. Check network.'));
     isTyping=false;
+    addMessage('lumen','Error: '+(err.message||'Connection failed. Check network.'));
   });
 }
 
@@ -658,7 +661,6 @@ function streamMessage(text){
     } else {
       clearInterval(interval);
       cursor.remove();
-      isTyping=false;
       // Add remember button
       var remBtn=document.createElement('button');
       remBtn.style.cssText='margin-top:8px;background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);color:#4a9eff;font-family:var(--mono);font-size:8px;padding:4px 10px;border-radius:4px;cursor:pointer;display:block;';
