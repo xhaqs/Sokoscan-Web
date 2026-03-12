@@ -2902,7 +2902,7 @@ function loadPublicChannels(){
       var channels=Object.values(data).sort(function(a,b){return (b.views||0)-(a.views||0);});
       list.innerHTML=channels.map(function(ch){
         var langName=LANGS.find(function(l){return l.c===ch.lang;});
-        return '<div class="ch-item" onclick="openChannel('+JSON.stringify(ch).replace(/"/g,'&quot;')+')">'
+        return '<div class="ch-item" onclick="openChannelByCode(\''+ch.code+'\')">'
           +'<div class="ch-icon">📡</div>'
           +'<div class="ch-info">'
           +'<div class="ch-name">'+ch.name+'</div>'
@@ -2915,6 +2915,13 @@ function loadPublicChannels(){
     }).catch(function(){
       list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Could not load channels</div>';
     });
+}
+
+function openChannelByCode(code){
+  fetch(CHANNELS_DB+'/'+code+'.json')
+    .then(function(r){return r.json();})
+    .then(function(ch){if(ch&&ch.name)openChannel(ch);else toast('Channel not found');})
+    .catch(function(){toast('Could not load channel');});
 }
 
 function openChannel(ch){
@@ -2950,7 +2957,16 @@ function loadChannelPosts(){
         feed.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No posts yet. Be the first to post!</div>';
         return;
       }
-      var posts=Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+      var rawPosts=Object.values(data);
+      // Firebase POST wraps in object — unwrap if needed
+      var posts=rawPosts.map(function(p){
+        if(p&&typeof p==='object'&&p.text)return p;
+        if(p&&typeof p==='object'){
+          var vals=Object.values(p);
+          if(vals.length&&vals[0]&&vals[0].text)return vals[0];
+        }
+        return null;
+      }).filter(Boolean).sort(function(a,b){return (a.ts||0)-(b.ts||0);});
       var myLang=langState.toLang||'en';
       feed.innerHTML=posts.map(function(p){
         var time=new Date(p.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
