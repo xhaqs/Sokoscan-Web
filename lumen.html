@@ -588,13 +588,13 @@ function callLumen(userMsg){
     addMessage('lumen','Taking longer than usual — server busy. Try again.');
     isTyping=false;
     showStopBtn(false);
-  },15000);
+  },30000);
   fetch(LUMEN_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       model:'llama-3.1-8b-instant',
-      max_tokens:500,
+      max_tokens:300,
       system:systemPrompt,
       messages:msgs
     })
