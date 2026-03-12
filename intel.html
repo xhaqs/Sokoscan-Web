@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#020508">
+<title>BABEL INTEL — RIAKOINE-EMPIRE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020508;
+  --bg2:#040c12;
+  --card:#071018;
+  --border:#0e2030;
+  --gold:#c9a84c;
+  --gold2:#f0c866;
+  --teal:#0ea5b0;
+  --teal2:#22d3db;
+  --green:#10b981;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --text:#e8f4f8;
+  --text2:#94b8c8;
+  --dim:#3a5a6a;
+  --mono:'Share Tech Mono',monospace;
+  --cond:'Barlow Condensed',sans-serif;
+  --serif:'Cinzel',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    linear-gradient(135deg,rgba(14,165,176,0.04) 0%,transparent 50%),
+    linear-gradient(225deg,rgba(201,168,76,0.03) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* GRID */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(14,165,176,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(14,165,176,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── PASSKEY ── */
+#pkScreen{
+  position:fixed;inset:0;z-index:100;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px;
+}
+.pk-logo{font-family:var(--serif);font-size:13px;letter-spacing:0.3em;color:var(--teal);margin-bottom:4px;}
+.pk-title{font-family:var(--serif);font-size:28px;color:var(--gold);margin-bottom:4px;letter-spacing:0.1em;}
+.pk-sub{font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:32px;letter-spacing:0.2em;}
+.pk-input{
+  width:100%;max-width:320px;background:rgba(14,165,176,0.05);
+  border:1px solid rgba(14,165,176,0.2);color:var(--text);
+  font-family:var(--mono);font-size:14px;padding:14px 16px;
+  border-radius:6px;outline:none;text-align:center;
+  letter-spacing:0.2em;margin-bottom:12px;
+}
+.pk-btn{
+  width:100%;max-width:320px;background:rgba(14,165,176,0.12);
+  border:1px solid rgba(14,165,176,0.3);color:var(--teal2);
+  font-family:var(--mono);font-size:11px;padding:14px;
+  border-radius:6px;cursor:pointer;letter-spacing:0.15em;
+}
+.pk-error{font-family:var(--mono);font-size:9px;color:var(--red);margin-top:8px;letter-spacing:0.1em;}
+
+/* ── APP ── */
+#app{display:none;flex-direction:column;height:100%;position:relative;z-index:1;}
+
+/* TOPBAR */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:rgba(2,5,8,0.95);
+  backdrop-filter:blur(10px);
+  flex-shrink:0;
+}
+.topbar-brand{
+  display:flex;flex-direction:column;
+}
+.topbar-logo{font-family:var(--serif);font-size:9px;letter-spacing:0.3em;color:var(--dim);}
+.topbar-name{font-family:var(--serif);font-size:16px;color:var(--gold);letter-spacing:0.15em;line-height:1;}
+.topbar-sub{font-family:var(--mono);font-size:7px;color:var(--teal);letter-spacing:0.2em;margin-top:1px;}
+.topbar-actions{display:flex;gap:6px;align-items:center;}
+
+/* NAV */
+.nav-pills{
+  display:flex;gap:0;border-bottom:1px solid var(--border);
+  overflow-x:auto;flex-shrink:0;
+  background:rgba(2,5,8,0.9);
+  scrollbar-width:none;
+}
+.nav-pills::-webkit-scrollbar{display:none;}
+.nav-pill{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  padding:10px 14px;color:var(--dim);cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap;
+  transition:color 0.2s;flex-shrink:0;
+}
+.nav-pill.active{color:var(--teal2);border-bottom-color:var(--teal);}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;padding:14px;}
+#content::-webkit-scrollbar{width:2px;}
+#content::-webkit-scrollbar-thumb{background:var(--border);}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* CARDS */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:14px;margin-bottom:12px;
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.card-title{font-family:var(--serif);font-size:12px;letter-spacing:0.15em;color:var(--gold);}
+.card-tag{font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:var(--teal);background:rgba(14,165,176,0.1);border:1px solid rgba(14,165,176,0.2);padding:3px 7px;border-radius:3px;}
+
+/* INPUTS */
+.intel-input{
+  width:100%;background:rgba(14,165,176,0.04);
+  border:1px solid rgba(14,165,176,0.15);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:10px 12px;
+  border-radius:6px;outline:none;
+}
+.intel-input:focus{border-color:rgba(14,165,176,0.35);}
+.intel-input::placeholder{color:var(--dim);}
+select.intel-input option{background:var(--card);}
+
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;padding:10px 14px;border-radius:6px;border:1px solid;cursor:pointer;}
+.btn-teal{background:rgba(14,165,176,0.12);border-color:rgba(14,165,176,0.3);color:var(--teal2);}
+.btn-gold{background:rgba(201,168,76,0.12);border-color:rgba(201,168,76,0.3);color:var(--gold);}
+.btn-full{width:100%;}
+.btn-sm{padding:6px 10px;font-size:8px;}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.stat-box{
+  background:rgba(14,165,176,0.04);border:1px solid rgba(14,165,176,0.1);
+  border-radius:6px;padding:10px;text-align:center;
+}
+.stat-val{font-family:var(--serif);font-size:20px;color:var(--teal2);line-height:1;}
+.stat-lbl{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.1em;margin-top:3px;}
+
+/* VITALITY BAR */
+.vitality-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;margin:6px 0;overflow:hidden;}
+.vitality-fill{height:100%;border-radius:3px;transition:width 0.6s;}
+
+/* LANGUAGE FAMILY TREE */
+.family-node{
+  font-family:var(--mono);font-size:9px;padding:5px 10px;
+  border-radius:4px;display:inline-block;margin:3px;
+  background:rgba(14,165,176,0.08);border:1px solid rgba(14,165,176,0.15);
+  color:var(--text2);
+}
+.family-root{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.25);color:var(--gold);}
+
+/* FIELD RECORDER */
+.field-entry{
+  background:rgba(14,165,176,0.04);border:1px solid rgba(14,165,176,0.1);
+  border-radius:6px;padding:10px;margin-bottom:8px;
+}
+.field-entry-meta{font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:4px;}
+.field-entry-word{font-size:16px;color:var(--teal2);font-family:var(--mono);margin-bottom:2px;}
+.field-entry-meaning{font-family:var(--mono);font-size:9px;color:var(--text2);}
+
+/* REPORT */
+.report-block{
+  border-left:2px solid var(--teal);padding:10px 12px;margin-bottom:10px;
+  background:rgba(14,165,176,0.03);border-radius:0 6px 6px 0;
+}
+.report-block-title{font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.15em;margin-bottom:6px;}
+.report-block-body{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.7;}
+
+/* CORPUS ENTRY */
+.corpus-entry{
+  border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px;
+}
+.corpus-lang{font-family:var(--mono);font-size:7px;color:var(--teal);letter-spacing:0.1em;margin-bottom:4px;}
+.corpus-phrase{font-size:14px;color:var(--text);margin-bottom:3px;}
+.corpus-meaning{font-family:var(--mono);font-size:9px;color:var(--dim);}
+
+/* EMPIRE NAV */
+.empire-nav{
+  display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;
+  border-top:1px solid var(--border);background:rgba(2,5,8,0.95);
+  flex-shrink:0;
+}
+.empire-link{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.05em;
+  padding:5px 10px;border-radius:4px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  color:var(--dim);cursor:pointer;text-decoration:none;
+}
+.empire-link.active{color:var(--teal);border-color:rgba(14,165,176,0.2);}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:rgba(14,165,176,0.15);border:1px solid rgba(14,165,176,0.3);
+  color:var(--teal2);font-family:var(--mono);font-size:10px;
+  padding:10px 18px;border-radius:6px;opacity:0;transition:opacity 0.3s;
+  pointer-events:none;z-index:999;white-space:nowrap;
+}
+#toast.show{opacity:1;}
+
+/* LOADING DOTS */
+.dots::after{content:'...';animation:dots 1.5s infinite;}
+@keyframes dots{0%{content:'.';}33%{content:'..';}66%{content:'...';}100%{content:'.'}}
+</style>
+</head>
+<body>
+
+<!-- PASSKEY -->
+<div id="pkScreen">
+  <div class="pk-logo">RIAKOINE-EMPIRE</div>
+  <div class="pk-title">BABEL INTEL</div>
+  <div class="pk-sub">LAYER 7 · LINGUISTIC INTELLIGENCE</div>
+  <input class="pk-input" id="pkInput" type="password" placeholder="ACCESS CODE" onkeydown="if(event.key==='Enter')checkPK()">
+  <button class="pk-btn" onclick="checkPK()">▶ ENTER</button>
+  <div class="pk-error" id="pkError"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">RIAKOINE-EMPIRE</div>
+      <div class="topbar-name">BABEL INTEL</div>
+      <div class="topbar-sub">LINGUISTIC INTELLIGENCE · LAYER 7</div>
+    </div>
+    <div class="topbar-actions">
+      <div style="font-family:var(--mono);font-size:7px;color:var(--dim);text-align:right;">
+        <div id="corpusCount" style="color:var(--teal);">0 ENTRIES</div>
+        <div>CORPUS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-pills">
+    <div class="nav-pill active" onclick="switchPanel('search')" id="pill-search">🔍 LANGUAGE SEARCH</div>
+    <div class="nav-pill" onclick="switchPanel('field')" id="pill-field">📝 FIELD DOCS</div>
+    <div class="nav-pill" onclick="switchPanel('corpus')" id="pill-corpus">📚 CORPUS</div>
+    <div class="nav-pill" onclick="switchPanel('report')" id="pill-report">🧠 AI ANALYSIS</div>
+    <div class="nav-pill" onclick="switchPanel('map')" id="pill-map">🗺️ ETHNOLINGUISTIC</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- ── LANGUAGE SEARCH ── -->
+    <div class="panel active" id="panel-search">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">LANGUAGE INTELLIGENCE</span>
+          <span class="card-tag">7,168 LANGUAGES</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px;">Search any language for full vitality report, family tree, speaker data and field notes.</div>
+        <div style="display:flex;gap:8px;">
+          <input class="intel-input" id="langSearchInput" placeholder="e.g. Ogiek, Swahili, Aramaic, Dahalo..." style="flex:1;">
+          <button class="btn btn-teal" onclick="searchLanguage()">SEARCH</button>
+        </div>
+      </div>
+
+      <!-- QUICK LANGUAGES -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">QUICK ACCESS</span>
+          <span class="card-tag">EAST AFRICA FOCUS</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <button class="btn btn-sm" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.2);color:var(--gold);" onclick="quickSearch('Ogiek')">Ogiek</button>
+          <button class="btn btn-sm" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.2);color:var(--gold);" onclick="quickSearch('Dahalo')">Dahalo</button>
+          <button class="btn btn-sm" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.2);color:var(--gold);" onclick="quickSearch('Elmolo')">Elmolo</button>
+          <button class="btn btn-sm" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.2);color:var(--gold);" onclick="quickSearch('Yaaku')">Yaaku</button>
+          <button class="btn btn-sm" style="background:rgba(14,165,176,0.08);border-color:rgba(14,165,176,0.2);color:var(--teal2);" onclick="quickSearch('Swahili')">Swahili</button>
+          <button class="btn btn-sm" style="background:rgba(14,165,176,0.08);border-color:rgba(14,165,176,0.2);color:var(--teal2);" onclick="quickSearch('Gikuyu')">Gikuyu</button>
+          <button class="btn btn-sm" style="background:rgba(14,165,176,0.08);border-color:rgba(14,165,176,0.2);color:var(--teal2);" onclick="quickSearch('Dholuo')">Dholuo</button>
+          <button class="btn btn-sm" style="background:rgba(14,165,176,0.08);border-color:rgba(14,165,176,0.2);color:var(--teal2);" onclick="quickSearch('Somali')">Somali</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text2);" onclick="quickSearch('Aramaic')">Aramaic</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text2);" onclick="quickSearch('Coptic')">Coptic</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text2);" onclick="quickSearch('Sanskrit')">Sanskrit</button>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="searchResults"></div>
+    </div>
+
+    <!-- ── FIELD DOCUMENTATION ── -->
+    <div class="panel" id="panel-field">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">FIELD DOCUMENTATION</span>
+          <span class="card-tag">RECORD & PRESERVE</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px;">Document words, phrases and patterns from languages in the field. Every entry goes to the community corpus.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">LANGUAGE</div>
+            <input class="intel-input" id="fieldLang" placeholder="e.g. Ogiek">
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">REGION</div>
+            <input class="intel-input" id="fieldRegion" placeholder="e.g. Mau Forest, Kenya">
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">WORD / PHRASE (original script or romanized)</div>
+          <input class="intel-input" id="fieldWord" placeholder="e.g. mwanzo or ابتداء">
+        </div>
+        <div style="margin-bottom:8px;">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">MEANING / TRANSLATION</div>
+          <input class="intel-input" id="fieldMeaning" placeholder="English meaning or description">
+        </div>
+        <div style="margin-bottom:8px;">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">CONTEXT / NOTES</div>
+          <textarea class="intel-input" id="fieldNotes" placeholder="Usage context, cultural significance, tone..." style="height:70px;resize:none;"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">TYPE</div>
+            <select class="intel-input" id="fieldType">
+              <option value="word">Word</option>
+              <option value="phrase">Phrase</option>
+              <option value="proverb">Proverb</option>
+              <option value="greeting">Greeting</option>
+              <option value="number">Number</option>
+              <option value="name">Place name</option>
+              <option value="ritual">Ritual term</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">ENDANGERMENT</div>
+            <select class="intel-input" id="fieldEndanger">
+              <option value="safe">Safe</option>
+              <option value="vulnerable">Vulnerable</option>
+              <option value="endangered">Endangered</option>
+              <option value="critical">Critically Endangered</option>
+              <option value="dormant">Dormant</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-teal btn-full" onclick="saveFieldEntry()">📝 SAVE TO CORPUS</button>
+      </div>
+
+      <!-- RECENT FIELD ENTRIES -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">RECENT ENTRIES</span>
+          <span class="card-tag" id="fieldCount">0</span>
+        </div>
+        <div id="fieldList">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">No field entries yet. Start documenting.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CORPUS ── -->
+    <div class="panel" id="panel-corpus">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">COMMUNITY CORPUS</span>
+          <span class="card-tag" id="corpusTag">CROWDSOURCED</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px;">Phrases, words and patterns submitted by BABEL users and field researchers worldwide.</div>
+        <div style="display:flex;gap:8px;">
+          <input class="intel-input" id="corpusFilter" placeholder="Filter by language or keyword..." style="flex:1;" oninput="filterCorpus(this.value)">
+          <button class="btn btn-teal btn-sm" onclick="exportCorpus()">📋 EXPORT</button>
+        </div>
+      </div>
+      <div id="corpusList">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">Loading corpus...</div>
+      </div>
+    </div>
+
+    <!-- ── AI ANALYSIS ── -->
+    <div class="panel" id="panel-report">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">AI DEEP ANALYSIS</span>
+          <span class="card-tag">LAYER 7</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px;">Generate research-grade linguistic analysis, comparison reports, and documentation for professional use.</div>
+
+        <div style="margin-bottom:8px;">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">ANALYSIS TYPE</div>
+          <select class="intel-input" id="reportType">
+            <option value="vitality">Language Vitality Assessment</option>
+            <option value="compare">Language Comparison</option>
+            <option value="family">Family Tree & Classification</option>
+            <option value="documentation">Documentation Protocol</option>
+            <option value="revitalization">Revitalization Strategy</option>
+            <option value="contact">Language Contact Analysis</option>
+          </select>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">QUERY / SUBJECT</div>
+          <textarea class="intel-input" id="reportQuery" placeholder="e.g. Compare Ogiek and Yaaku as endangered Cushitic languages in Kenya..." style="height:80px;resize:none;"></textarea>
+        </div>
+        <button class="btn btn-teal btn-full" onclick="generateReport()" id="reportBtn">🧠 GENERATE ANALYSIS</button>
+      </div>
+
+      <div id="reportOutput"></div>
+    </div>
+
+    <!-- ── ETHNOLINGUISTIC MAP ── -->
+    <div class="panel" id="panel-map">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">ETHNOLINGUISTIC INTELLIGENCE</span>
+          <span class="card-tag">GLOBAL DATA</span>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-val">7,168</div>
+            <div class="stat-lbl">LIVING LANGUAGES</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">40%</div>
+            <div class="stat-lbl">ENDANGERED</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">3,000+</div>
+            <div class="stat-lbl">AFRICAN TRIBES</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">23</div>
+            <div class="stat-lbl">LANGUAGES = 50% WORLD</div>
+          </div>
+        </div>
+
+        <!-- AFRICA FOCUS -->
+        <div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.15em;margin-bottom:10px;">AFRICA — THE DIVERSITY EPICENTER</div>
+        <div id="africaData"></div>
+      </div>
+
+      <!-- LANGUAGE FAMILIES -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">MAJOR LANGUAGE FAMILIES</span>
+        </div>
+        <div id="familyData"></div>
+      </div>
+
+      <!-- KENYA TRIBES -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">KENYA — 42+ TRIBES</span>
+          <span class="card-tag">HOME BASE</span>
+        </div>
+        <div id="kenyaData"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- EMPIRE NAV -->
+  <div class="empire-nav">
+    <a class="empire-link" href="/babel/">🌐 BABEL</a>
+    <a class="empire-link active">🧬 INTEL</a>
+    <a class="empire-link" href="/lumen/">💡 LUMEN</a>
+    <a class="empire-link" href="/veritas/">🔍 VERITAS</a>
+    <a class="empire-link" href="/sentry/">🚨 SENTRY</a>
+    <a class="empire-link" href="/">📊 SOKOSCAN</a>
+  </div>
+
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ── PASSKEY ──
+(function(){
+  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
+  var HASH=hc('Zack_Lingua');
+  var SK='intel_sk1';
+  window.checkPK=function(){
+    var v=document.getElementById('pkInput').value.trim();
+    if(!v){document.getElementById('pkError').textContent='ACCESS CODE REQUIRED';return;}
+    if(hc(v)===HASH){
+      try{sessionStorage.setItem(SK,'1');}catch(e){}
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      initIntel();
+    } else {
+      document.getElementById('pkError').textContent='INVALID CODE';
+      document.getElementById('pkInput').value='';
+    }
+  };
+  try{
+    if(sessionStorage.getItem(SK)==='1'){
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      window.addEventListener('DOMContentLoaded',initIntel);
+    }
+  }catch(e){}
+})();
+
+// ── TOAST ──
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+// ── NAV ──
+function switchPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-pill').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('pill-'+id).classList.add('active');
+  if(id==='corpus')renderCorpus();
+}
+
+// ── CORPUS (localStorage) ──
+var CORPUS_KEY='intel_corpus';
+var corpus=JSON.parse(localStorage.getItem(CORPUS_KEY)||'[]');
+
+function saveCorpus(){
+  localStorage.setItem(CORPUS_KEY,JSON.stringify(corpus));
+  updateCorpusCount();
+}
+
+function updateCorpusCount(){
+  var n=corpus.length;
+  var el=document.getElementById('corpusCount');
+  var tag=document.getElementById('corpusTag');
+  if(el)el.textContent=n+' ENTRIES';
+  if(tag)tag.textContent=n+' ENTRIES';
+}
+
+// ── FIELD DOCUMENTATION ──
+var fieldEntries=JSON.parse(localStorage.getItem('intel_field')||'[]');
+
+function saveFieldEntry(){
+  var lang=document.getElementById('fieldLang').value.trim();
+  var word=document.getElementById('fieldWord').value.trim();
+  var meaning=document.getElementById('fieldMeaning').value.trim();
+  if(!lang||!word||!meaning){toast('Language, word and meaning required');return;}
+  var entry={
+    lang:lang,
+    region:document.getElementById('fieldRegion').value.trim(),
+    word:word,
+    meaning:meaning,
+    notes:document.getElementById('fieldNotes').value.trim(),
+    type:document.getElementById('fieldType').value,
+    endangerment:document.getElementById('fieldEndanger').value,
+    ts:Date.now(),
+    id:'FLD-'+Math.random().toString(36).substr(2,6).toUpperCase()
+  };
+  fieldEntries.unshift(entry);
+  corpus.unshift(entry);
+  localStorage.setItem('intel_field',JSON.stringify(fieldEntries));
+  saveCorpus();
+  // Clear form
+  ['fieldLang','fieldRegion','fieldWord','fieldMeaning','fieldNotes'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  renderFieldList();
+  toast('Entry saved to corpus — '+entry.id);
+}
+
+function renderFieldList(){
+  var list=document.getElementById('fieldList');
+  var count=document.getElementById('fieldCount');
+  if(count)count.textContent=fieldEntries.length;
+  if(!fieldEntries.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">No field entries yet.</div>';
+    return;
+  }
+  var dangerColors={safe:'#10b981',vulnerable:'#f59e0b',endangered:'#f97316',critical:'#ef4444',dormant:'#6b7280'};
+  list.innerHTML=fieldEntries.slice(0,10).map(function(e){
+    var col=dangerColors[e.endangerment]||'#6b7280';
+    var date=new Date(e.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+    return '<div class="field-entry">'
+      +'<div class="field-entry-meta">'+e.id+' · '+e.lang+(e.region?' · '+e.region:'')+' · '+date+'<span style="float:right;color:'+col+';">●&nbsp;'+e.endangerment.toUpperCase()+'</span></div>'
+      +'<div class="field-entry-word">'+e.word+'</div>'
+      +'<div class="field-entry-meaning">'+e.meaning+'</div>'
+      +(e.notes?'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px;">'+e.notes+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+// ── CORPUS ──
+var corpusFilterVal='';
+
+function filterCorpus(val){
+  corpusFilterVal=val.toLowerCase();
+  renderCorpus();
+}
+
+function renderCorpus(){
+  var list=document.getElementById('corpusList');
+  var filtered=corpus.filter(function(e){
+    if(!corpusFilterVal)return true;
+    return (e.lang||'').toLowerCase().includes(corpusFilterVal)||
+           (e.word||'').toLowerCase().includes(corpusFilterVal)||
+           (e.meaning||'').toLowerCase().includes(corpusFilterVal);
+  });
+  if(!filtered.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">'+(corpus.length?'No matches.':'Corpus is empty. Add field entries to populate.')+'</div>';
+    return;
+  }
+  list.innerHTML=filtered.slice(0,30).map(function(e){
+    return '<div class="corpus-entry">'
+      +'<div class="corpus-lang">'+e.lang+(e.region?' · '+e.region:'')+(e.type?' · '+e.type.toUpperCase():'')+'</div>'
+      +'<div class="corpus-phrase">'+e.word+'</div>'
+      +'<div class="corpus-meaning">'+e.meaning+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function exportCorpus(){
+  if(!corpus.length){toast('Corpus is empty');return;}
+  var lines=['BABEL INTEL CORPUS EXPORT','Generated: '+new Date().toLocaleString(),'Total entries: '+corpus.length,'','ID | LANGUAGE | WORD | MEANING | TYPE | ENDANGERMENT'];
+  corpus.forEach(function(e){
+    lines.push((e.id||'?')+' | '+(e.lang||'?')+' | '+(e.word||'?')+' | '+(e.meaning||'?')+' | '+(e.type||'?')+' | '+(e.endangerment||'?'));
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){toast('Corpus copied — '+corpus.length+' entries');}).catch(function(){toast('Export failed');});
+}
+
+// ── AI ANALYSIS ──
+function generateReport(){
+  var type=document.getElementById('reportType').value;
+  var query=document.getElementById('reportQuery').value.trim();
+  if(!query){toast('Enter a query or subject');return;}
+  var btn=document.getElementById('reportBtn');
+  var output=document.getElementById('reportOutput');
+  btn.textContent='🧠 Analyzing';
+  btn.className='btn btn-teal btn-full dots';
+  btn.disabled=true;
+  output.innerHTML='';
+
+  var typePrompts={
+    vitality:'You are a linguistic vitality assessor. Provide a structured vitality report including: speaker population estimate, UNESCO endangerment status, geographic distribution, intergenerational transmission rate, institutional support, and recommended preservation actions.',
+    compare:'You are a comparative linguist. Compare the given languages across: language family, phonology, morphology, syntax, lexical similarity, mutual intelligibility, and sociolinguistic status.',
+    family:'You are a historical linguist. Provide the complete language family classification, proto-language origins, closest relatives, branching timeline, and notable daughter languages.',
+    documentation:'You are a field documentation specialist. Provide a professional documentation protocol including: data collection methods, transcription standards, ethical considerations, community engagement approach, and archiving recommendations.',
+    revitalization:'You are a language revitalization specialist. Provide a strategic revitalization plan including: community assessment, educational integration, digital tools, intergenerational transmission strategies, and success metrics.',
+    contact:'You are a language contact analyst. Analyze the contact situation including: borrowing patterns, code-switching, pidgin/creole formation, language shift pressures, and sociolinguistic outcomes.'
+  };
+
+  var systemPrompt=typePrompts[type]+' Format your response with clear sections using these markers: [SECTION: Title]. Be thorough, accurate and professional. This is for researchers, NGOs and academic use.';
+
+  // Add corpus context if relevant
+  var corpusCtx='';
+  if(corpus.length){
+    var relevant=corpus.filter(function(e){
+      return query.toLowerCase().includes((e.lang||'').toLowerCase())||(e.lang||'').toLowerCase().includes(query.toLowerCase().split(' ')[0]);
+    }).slice(0,5);
+    if(relevant.length){
+      corpusCtx='\n\nRelevant field corpus entries:\n'+relevant.map(function(e){return e.lang+': "'+e.word+'" = '+e.meaning;}).join('\n');
+    }
+  }
+
+  fetch('/api/tutor',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      max_tokens:1000,
+      system:systemPrompt,
+      messages:[{role:'user',content:query+corpusCtx}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='🧠 GENERATE ANALYSIS';
+    btn.className='btn btn-teal btn-full';
+    btn.disabled=false;
+    var text='';
+    if(data.choices&&data.choices[0])text=data.choices[0].message.content;
+    else if(data.error)text='Error: '+(data.error.message||'Try again');
+    renderReport(text,query,type);
+  })
+  .catch(function(){
+    btn.textContent='🧠 GENERATE ANALYSIS';
+    btn.className='btn btn-teal btn-full';
+    btn.disabled=false;
+    output.innerHTML='<div class="card" style="color:var(--red);font-family:var(--mono);font-size:10px;">Connection error. Try again.</div>';
+  });
+}
+
+function renderReport(text,query,type){
+  var output=document.getElementById('reportOutput');
+  var typeLabels={vitality:'VITALITY REPORT',compare:'COMPARATIVE ANALYSIS',family:'FAMILY CLASSIFICATION',documentation:'DOCUMENTATION PROTOCOL',revitalization:'REVITALIZATION STRATEGY',contact:'CONTACT ANALYSIS'};
+  // Parse [SECTION: Title] markers
+  var sections=[];
+  var parts=text.split(/\[SECTION:\s*([^\]]+)\]/);
+  if(parts.length>1){
+    for(var i=1;i<parts.length;i+=2){
+      sections.push({title:parts[i],body:parts[i+1]||''});
+    }
+  } else {
+    sections=[{title:'ANALYSIS',body:text}];
+  }
+  var html='<div class="card">'
+    +'<div class="card-head"><span class="card-title">'+typeLabels[type]+'</span><span class="card-tag">'+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</span></div>'
+    +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px;">SUBJECT: '+query+'</div>';
+  sections.forEach(function(s){
+    html+='<div class="report-block">'
+      +'<div class="report-block-title">'+s.title.trim().toUpperCase()+'</div>'
+      +'<div class="report-block-body">'+s.body.trim().replace(/\n/g,'<br>')+'</div>'
+      +'</div>';
+  });
+  html+='<button class="btn btn-gold btn-full" style="margin-top:8px;" onclick="exportReport(this)">📋 EXPORT REPORT</button>';
+  html+='</div>';
+  output.innerHTML=html;
+  output.scrollIntoView({behavior:'smooth'});
+}
+
+function exportReport(btn){
+  var blocks=document.querySelectorAll('#reportOutput .report-block-body');
+  var titles=document.querySelectorAll('#reportOutput .report-block-title');
+  var lines=['BABEL INTEL — ANALYSIS REPORT','Generated: '+new Date().toLocaleString(),''];
+  titles.forEach(function(t,i){
+    lines.push('--- '+t.textContent+' ---');
+    if(blocks[i])lines.push(blocks[i].innerText);
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){toast('Report copied to clipboard');}).catch(function(){toast('Export failed');});
+}
+
+// ── LANGUAGE SEARCH ──
+function quickSearch(lang){
+  document.getElementById('langSearchInput').value=lang;
+  searchLanguage();
+}
+
+function searchLanguage(){
+  var query=document.getElementById('langSearchInput').value.trim();
+  if(!query){toast('Enter a language name');return;}
+  var results=document.getElementById('searchResults');
+  results.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;" class="dots">Searching intelligence database</div></div>';
+
+  fetch('/api/tutor',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      max_tokens:800,
+      system:'You are a linguistic intelligence database. When given a language name, return a JSON object with these exact fields: name, alternateNames (array), family, subfamily, isoCode, speakerCount (number), speakerCountFormatted (string), endangerment (one of: safe/vulnerable/endangered/critically_endangered/dormant/extinct), countries (array of country names), region, description (2 sentences), features (array of 4 linguistic features), relatedLanguages (array of 3), vitalityScore (0-100), dialects (array), writingSystem, culturalNotes. Return ONLY valid JSON, no other text.',
+      messages:[{role:'user',content:'Language: '+query}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text='';
+    if(data.choices&&data.choices[0])text=data.choices[0].message.content;
+    try{
+      var clean=text.replace(/```json|```/g,'').trim();
+      var lang=JSON.parse(clean);
+      renderLanguageCard(lang,query);
+    } catch(e){
+      results.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">Could not parse language data. Try again.</div></div>';
+    }
+  })
+  .catch(function(){
+    results.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">Connection error. Try again.</div></div>';
+  });
+}
+
+function renderLanguageCard(lang,query){
+  var results=document.getElementById('searchResults');
+  var dangerColors={safe:'#10b981',vulnerable:'#f59e0b',endangered:'#f97316',critically_endangered:'#ef4444',dormant:'#6b7280',extinct:'#4b5563'};
+  var dangerLabels={safe:'SAFE',vulnerable:'VULNERABLE',endangered:'ENDANGERED',critically_endangered:'CRITICALLY ENDANGERED',dormant:'DORMANT',extinct:'EXTINCT'};
+  var col=dangerColors[lang.endangerment]||'#6b7280';
+  var label=dangerLabels[lang.endangerment]||lang.endangerment.toUpperCase();
+  var vScore=lang.vitalityScore||0;
+  var vColor=vScore>60?'#10b981':vScore>30?'#f59e0b':'#ef4444';
+
+  var html='<div class="card">'
+    // Header
+    +'<div style="margin-bottom:14px;">'
+    +'<div style="font-family:var(--serif);font-size:22px;color:var(--gold);margin-bottom:4px;">'+lang.name+'</div>'
+    +(lang.alternateNames&&lang.alternateNames.length?'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);">Also: '+lang.alternateNames.join(', ')+'</div>':'')
+    +'<div style="font-family:var(--mono);font-size:8px;color:var(--teal);margin-top:2px;">'+lang.family+(lang.subfamily?' · '+lang.subfamily:'')+(lang.isoCode?' · ISO: '+lang.isoCode:'')+'</div>'
+    +'</div>'
+
+    // Stats
+    +'<div class="stat-grid">'
+    +'<div class="stat-box">'
+    +'<div class="stat-val" style="font-size:16px;color:var(--teal2);">'+(lang.speakerCountFormatted||'Unknown')+'</div>'
+    +'<div class="stat-lbl">SPEAKERS</div>'
+    +'</div>'
+    +'<div class="stat-box" style="border-color:'+col+'33;">'
+    +'<div class="stat-val" style="font-size:13px;color:'+col+';">'+label+'</div>'
+    +'<div class="stat-lbl">UNESCO STATUS</div>'
+    +'</div>'
+    +'</div>'
+
+    // Vitality bar
+    +'<div style="margin-bottom:12px;">'
+    +'<div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:4px;">'
+    +'<span>VITALITY SCORE</span><span style="color:'+vColor+';">'+vScore+'/100</span>'
+    +'</div>'
+    +'<div class="vitality-bar"><div class="vitality-fill" style="width:'+vScore+'%;background:'+vColor+';"></div></div>'
+    +'</div>'
+
+    // Description
+    +'<div style="font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.7;margin-bottom:12px;">'+lang.description+'</div>'
+
+    // Countries
+    +(lang.countries&&lang.countries.length?'<div style="margin-bottom:12px;"><div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.1em;margin-bottom:6px;">GEOGRAPHIC DISTRIBUTION</div>'
+    +'<div>'+lang.countries.map(function(c){return '<span style="font-family:var(--mono);font-size:8px;background:rgba(14,165,176,0.08);border:1px solid rgba(14,165,176,0.15);border-radius:3px;padding:3px 7px;margin:2px;display:inline-block;color:var(--text2);">'+c+'</span>';}).join('')+'</div>'
+    +'</div>':'')
+
+    // Features
+    +(lang.features&&lang.features.length?'<div style="margin-bottom:12px;"><div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.1em;margin-bottom:6px;">LINGUISTIC FEATURES</div>'
+    +'<div>'+lang.features.map(function(f){return '<span style="font-family:var(--mono);font-size:8px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:3px;padding:3px 7px;margin:2px;display:inline-block;color:var(--gold);">'+f+'</span>';}).join('')+'</div>'
+    +'</div>':'')
+
+    // Writing system
+    +(lang.writingSystem?'<div style="margin-bottom:10px;font-family:var(--mono);font-size:9px;color:var(--dim);">SCRIPT: <span style="color:var(--text2);">'+lang.writingSystem+'</span></div>':'')
+
+    // Dialects
+    +(lang.dialects&&lang.dialects.length?'<div style="margin-bottom:10px;"><div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.1em;margin-bottom:4px;">KNOWN DIALECTS</div>'
+    +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);">'+lang.dialects.join(' · ')+'</div>'
+    +'</div>':'')
+
+    // Cultural notes
+    +(lang.culturalNotes?'<div style="margin-bottom:12px;padding:10px;background:rgba(201,168,76,0.04);border-left:2px solid rgba(201,168,76,0.3);border-radius:0 4px 4px 0;"><div style="font-family:var(--mono);font-size:8px;color:var(--gold);margin-bottom:4px;">CULTURAL NOTES</div><div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.6;">'+lang.culturalNotes+'</div></div>':'')
+
+    // Related languages
+    +(lang.relatedLanguages&&lang.relatedLanguages.length?'<div style="margin-bottom:12px;"><div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.1em;margin-bottom:6px;">RELATED LANGUAGES</div>'
+    +'<div>'+lang.relatedLanguages.map(function(r){return '<button class="family-node" onclick="quickSearch(\''+r+'\')">'+r+'</button>';}).join('')+'</div>'
+    +'</div>':'')
+
+    // Actions
+    +'<div style="display:flex;gap:8px;margin-top:4px;">'
+    +'<button class="btn btn-teal btn-sm" style="flex:1;" onclick="documentLanguage(\''+lang.name+'\')">📝 DOCUMENT</button>'
+    +'<button class="btn btn-gold btn-sm" style="flex:1;" onclick="analyzeLanguage(\''+lang.name+'\')">🧠 DEEP ANALYSIS</button>'
+    +'</div>'
+    +'</div>';
+
+  results.innerHTML=html;
+  results.scrollIntoView({behavior:'smooth'});
+}
+
+function documentLanguage(name){
+  document.getElementById('fieldLang').value=name;
+  switchPanel('field');
+  toast('Ready to document '+name);
+}
+
+function analyzeLanguage(name){
+  document.getElementById('reportQuery').value=name+' — comprehensive linguistic analysis';
+  switchPanel('report');
+  toast('Ready to analyze '+name);
+}
+
+// ── ETHNOLINGUISTIC MAP DATA ──
+function renderMapData(){
+  // Africa data
+  var africaData=document.getElementById('africaData');
+  var africaRegions=[
+    {name:'West Africa',count:'1,500+',top:'Hausa, Yoruba, Igbo, Fulfulde, Wolof'},
+    {name:'East Africa',count:'700+',top:'Swahili, Amharic, Somali, Oromo, Gikuyu'},
+    {name:'Central Africa',count:'600+',top:'Lingala, Kikongo, Sango, Zande'},
+    {name:'Southern Africa',count:'400+',top:'Zulu, Xhosa, Shona, Ndebele, Tswana'},
+    {name:'North Africa',count:'300+',top:'Arabic, Tamazight, Tigrinya, Coptic'}
+  ];
+  africaData.innerHTML=africaRegions.map(function(r){
+    return '<div style="margin-bottom:10px;padding:10px;background:rgba(14,165,176,0.04);border:1px solid rgba(14,165,176,0.1);border-radius:6px;">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
+      +'<span style="font-family:var(--mono);font-size:9px;color:var(--teal2);">'+r.name+'</span>'
+      +'<span style="font-family:var(--mono);font-size:9px;color:var(--gold);">'+r.count+' languages</span>'
+      +'</div>'
+      +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);">'+r.top+'</div>'
+      +'</div>';
+  }).join('');
+
+  // Language families
+  var familyData=document.getElementById('familyData');
+  var families=[
+    {name:'Niger-Congo',count:'1,542',pct:85,region:'Sub-Saharan Africa'},
+    {name:'Austronesian',count:'1,257',pct:80,region:'Southeast Asia, Pacific'},
+    {name:'Trans-New Guinea',count:'482',pct:45,region:'Papua New Guinea'},
+    {name:'Sino-Tibetan',count:'403',pct:95,region:'East & Southeast Asia'},
+    {name:'Indo-European',count:'449',pct:99,region:'Europe, South Asia, Americas'},
+    {name:'Afro-Asiatic',count:'374',pct:70,region:'North Africa, Middle East'},
+    {name:'Nilo-Saharan',count:'206',pct:30,region:'East & Central Africa'},
+    {name:'Cushitic',count:'40',pct:15,region:'Horn of Africa, Kenya'}
+  ];
+  familyData.innerHTML=families.map(function(f){
+    return '<div style="margin-bottom:8px;">'
+      +'<div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;margin-bottom:3px;">'
+      +'<span style="color:var(--text2);">'+f.name+'</span>'
+      +'<span style="color:var(--dim);">'+f.count+' langs</span>'
+      +'</div>'
+      +'<div class="vitality-bar"><div class="vitality-fill" style="width:'+f.pct+'%;background:var(--teal);opacity:0.6;"></div></div>'
+      +'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);">'+f.region+'</div>'
+      +'</div>';
+  }).join('');
+
+  // Kenya tribes
+  var kenyaData=document.getElementById('kenyaData');
+  var tribes=[
+    {name:'Kikuyu (Gikuyu)',family:'Bantu',speakers:'8.1M',status:'safe'},
+    {name:'Luhya',family:'Bantu',speakers:'6.8M',status:'safe'},
+    {name:'Luo (Dholuo)',family:'Nilotic',speakers:'4.2M',status:'safe'},
+    {name:'Kalenjin',family:'Nilotic',speakers:'4.9M',status:'safe'},
+    {name:'Kamba',family:'Bantu',speakers:'4.6M',status:'safe'},
+    {name:'Somali',family:'Cushitic',speakers:'2.4M',status:'safe'},
+    {name:'Maasai',family:'Nilotic',speakers:'1.2M',status:'vulnerable'},
+    {name:'Turkana',family:'Nilotic',speakers:'988K',status:'vulnerable'},
+    {name:'Ogiek',family:'Cushitic',speakers:'~35K',status:'endangered'},
+    {name:'Elmolo',family:'Cushitic',speakers:'~1K',status:'critically_endangered'},
+    {name:'Dahalo',family:'Cushitic',speakers:'~400',status:'critically_endangered'},
+    {name:'Yaaku',family:'Cushitic',speakers:'~100',status:'critically_endangered'},
+  ];
+  var dc={safe:'#10b981',vulnerable:'#f59e0b',endangered:'#f97316',critically_endangered:'#ef4444'};
+  kenyaData.innerHTML=tribes.map(function(t){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">'
+      +'<div>'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);">'+t.name+'</div>'
+      +'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);">'+t.family+' · '+t.speakers+' speakers</div>'
+      +'</div>'
+      +'<button style="font-family:var(--mono);font-size:7px;color:'+(dc[t.status]||'#6b7280')+';background:none;border:none;cursor:pointer;" onclick="quickSearch(\''+t.name.split(' ')[0]+'\')">● '+t.status.replace('_',' ').toUpperCase()+' ›</button>'
+      +'</div>';
+  }).join('');
+}
+
+// ── INIT ──
+function initIntel(){
+  renderFieldList();
+  updateCorpusCount();
+  renderMapData();
+}
+</script>
+</body>
+</html>
