@@ -1345,6 +1345,7 @@ body::after{
           🧠 AI INTERPRET — Translate symbols to text
         </button>
         <div id="iconInterpretResult" style="display:none;background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.15);border-radius:6px;padding:10px;font-family:var(--mono);font-size:10px;color:var(--purple2);margin-bottom:14px;line-height:1.6;"></div>
+        <button id="iconInterpretCopyBtn" onclick="copyIconInterpret()" style="display:none;width:100%;padding:7px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);color:var(--purple2);font-family:var(--mono);font-size:9px;border-radius:4px;cursor:pointer;letter-spacing:1px;margin-bottom:8px;">📋 COPY INTERPRETATION</button>
       </div>
 
       <!-- CATEGORY FILTERS -->
@@ -1358,6 +1359,9 @@ body::after{
           <button class="icon-cat-btn" onclick="showIconCat('nature')" data-cat="nature">🌍 NATURE</button>
           <button class="icon-cat-btn" onclick="showIconCat('time')" data-cat="time">⏰ TIME</button>
           <button class="icon-cat-btn" onclick="showIconCat('social')" data-cat="social">👥 SOCIAL</button>
+          <button class="icon-cat-btn" onclick="showIconCat('food')" data-cat="food">🍚 FOOD</button>
+          <button class="icon-cat-btn" onclick="showIconCat('numbers')" data-cat="numbers">🔢 NUMBERS</button>
+          <button class="icon-cat-btn" onclick="showIconCat('signs')" data-cat="signs">🚫 SIGNS</button>
         </div>
       </div>
 
@@ -3736,49 +3740,111 @@ var ICON_SYMBOLS={
     {s:'🆘',l:'HELP'},{s:'🚨',l:'DANGER'},{s:'💧',l:'WATER'},{s:'🍚',l:'FOOD'},
     {s:'🏠',l:'SHELTER'},{s:'🔥',l:'FIRE'},{s:'❄️',l:'COLD'},{s:'☀️',l:'HEAT'},
     {s:'🧭',l:'LOST'},{s:'📍',l:'HERE'},{s:'🚑',l:'MEDIC'},{s:'🛑',l:'STOP'},
-    {s:'✅',l:'SAFE'},{s:'⚠️',l:'CAUTION'},{s:'🔊',l:'LOUD'},{s:'🤫',l:'QUIET'}
+    {s:'✅',l:'SAFE'},{s:'⚠️',l:'CAUTION'},{s:'🔊',l:'LOUD'},{s:'🤫',l:'QUIET'},
+    {s:'🪢',l:'ROPE'},{s:'🔦',l:'LIGHT'},{s:'🪓',l:'AXE'},{s:'🏕️',l:'CAMP'},
+    {s:'🧯',l:'EXTINGUISH'},{s:'🪣',l:'BUCKET'},{s:'🧲',l:'SIGNAL'},{s:'📡',l:'TRANSMIT'},
+    {s:'🔴',l:'RED/NO'},{s:'🟢',l:'GREEN/GO'},{s:'🟡',l:'YELLOW/WAIT'},{s:'⛔',l:'BLOCKED'},
+    {s:'🏳️',l:'SURRENDER'},{s:'🚩',l:'MARK'},{s:'💡',l:'IDEA'},{s:'🔋',l:'POWER'}
   ],
   trade:[
     {s:'🤝',l:'DEAL'},{s:'💰',l:'MONEY'},{s:'📦',l:'GOODS'},{s:'⬆️',l:'MORE'},
     {s:'⬇️',l:'LESS'},{s:'✅',l:'YES'},{s:'❌',l:'NO'},{s:'🔄',l:'EXCHANGE'},
     {s:'⚖️',l:'FAIR'},{s:'🏪',l:'SHOP'},{s:'🚚',l:'DELIVER'},{s:'📋',l:'LIST'},
-    {s:'💎',l:'VALUE'},{s:'🎁',l:'GIFT'},{s:'🔑',l:'KEY'},{s:'📊',l:'PRICE'}
+    {s:'💎',l:'VALUE'},{s:'🎁',l:'GIFT'},{s:'🔑',l:'KEY'},{s:'📊',l:'PRICE'},
+    {s:'🪙',l:'COIN'},{s:'💳',l:'CARD'},{s:'🏦',l:'BANK'},{s:'📈',l:'RISE'},
+    {s:'📉',l:'FALL'},{s:'🧾',l:'RECEIPT'},{s:'🤲',l:'GIVE'},{s:'👐',l:'OPEN'},
+    {s:'🔒',l:'LOCKED'},{s:'🔓',l:'UNLOCKED'},{s:'📮',l:'SEND'},{s:'📥',l:'RECEIVE'},
+    {s:'🏷️',l:'LABEL'},{s:'⚡',l:'FAST'},{s:'🕐',l:'WAIT'},{s:'♻️',l:'REUSE'}
   ],
   emotion:[
     {s:'😊',l:'HAPPY'},{s:'😢',l:'SAD'},{s:'😠',l:'ANGRY'},{s:'😨',l:'FEAR'},
     {s:'🤢',l:'DISGUST'},{s:'😲',l:'SURPRISE'},{s:'😑',l:'CONTEMPT'},{s:'❤️',l:'LOVE'},
     {s:'🙏',l:'PLEASE'},{s:'👍',l:'GOOD'},{s:'👎',l:'BAD'},{s:'😴',l:'TIRED'},
-    {s:'💪',l:'STRONG'},{s:'🤒',l:'SICK'},{s:'😰',l:'STRESS'},{s:'🥳',l:'JOY'}
+    {s:'💪',l:'STRONG'},{s:'🤒',l:'SICK'},{s:'😰',l:'STRESS'},{s:'🥳',l:'JOY'},
+    {s:'😤',l:'FRUSTRATED'},{s:'🥺',l:'PLEADING'},{s:'😶',l:'SILENT'},{s:'🤔',l:'THINKING'},
+    {s:'😌',l:'RELIEF'},{s:'🤗',l:'COMFORT'},{s:'😔',l:'SHAME'},{s:'😎',l:'CONFIDENT'},
+    {s:'🫂',l:'HUG'},{s:'💔',l:'BROKEN'},{s:'✊',l:'RESIST'},{s:'🤞',l:'HOPE'},
+    {s:'😭',l:'CRYING'},{s:'😡',l:'RAGE'},{s:'🥰',l:'ADORE'},{s:'😶‍🌫️',l:'CONFUSED'}
   ],
   travel:[
     {s:'✈️',l:'FLY'},{s:'🚌',l:'BUS'},{s:'🚂',l:'TRAIN'},{s:'🚗',l:'CAR'},
     {s:'🚶',l:'WALK'},{s:'⬅️',l:'LEFT'},{s:'➡️',l:'RIGHT'},{s:'⬆️',l:'FORWARD'},
     {s:'🗺️',l:'MAP'},{s:'🛂',l:'BORDER'},{s:'🏨',l:'HOTEL'},{s:'🚽',l:'TOILET'},
-    {s:'🅿️',l:'PARK'},{s:'⛽',l:'FUEL'},{s:'📍',l:'DEST.'},{s:'🔙',l:'BACK'}
+    {s:'🅿️',l:'PARK'},{s:'⛽',l:'FUEL'},{s:'📍',l:'DEST.'},{s:'🔙',l:'BACK'},
+    {s:'🚢',l:'BOAT'},{s:'🛵',l:'MOTO'},{s:'🚲',l:'BIKE'},{s:'🛺',l:'TUK-TUK'},
+    {s:'🚁',l:'HELI'},{s:'⛵',l:'SAIL'},{s:'🛣️',l:'ROAD'},{s:'🌉',l:'BRIDGE'},
+    {s:'🧳',l:'LUGGAGE'},{s:'🎫',l:'TICKET'},{s:'🛃',l:'CUSTOMS'},{s:'🛄',l:'BAGGAGE'},
+    {s:'🔃',l:'DETOUR'},{s:'⬇️',l:'DOWN'},{s:'🚧',l:'BLOCKED'},{s:'🏁',l:'ARRIVE'}
   ],
   body:[
     {s:'🤕',l:'HURT'},{s:'🤒',l:'FEVER'},{s:'💊',l:'MEDICINE'},{s:'🩺',l:'DOCTOR'},
     {s:'🏥',l:'HOSPITAL'},{s:'🩸',l:'BLOOD'},{s:'💉',l:'INJECT'},{s:'🦷',l:'TEETH'},
     {s:'👁️',l:'EYE'},{s:'👂',l:'EAR'},{s:'🫁',l:'BREATHE'},{s:'❤️',l:'HEART'},
-    {s:'🤰',l:'PREGNANT'},{s:'👶',l:'BABY'},{s:'🧓',l:'ELDER'},{s:'♿',l:'ACCESS'}
+    {s:'🤰',l:'PREGNANT'},{s:'👶',l:'BABY'},{s:'🧓',l:'ELDER'},{s:'♿',l:'ACCESS'},
+    {s:'🦴',l:'BONE'},{s:'🧠',l:'HEAD'},{s:'🦵',l:'LEG'},{s:'🦾',l:'ARM'},
+    {s:'🤧',l:'SNEEZE'},{s:'🤮',l:'VOMIT'},{s:'💀',l:'CRITICAL'},{s:'🩹',l:'WOUND'},
+    {s:'🧪',l:'TEST'},{s:'🩻',l:'SCAN'},{s:'🫀',l:'PULSE'},{s:'🧬',l:'GENES'},
+    {s:'😵',l:'DIZZY'},{s:'🥶',l:'CHILLS'},{s:'🥵',l:'BURNING'},{s:'💤',l:'SLEEP'}
   ],
   nature:[
     {s:'🌍',l:'EARTH'},{s:'🌊',l:'FLOOD'},{s:'🌪️',l:'STORM'},{s:'🌋',l:'VOLCANO'},
     {s:'🐊',l:'WILDLIFE'},{s:'🌿',l:'PLANT'},{s:'🌾',l:'CROPS'},{s:'🐄',l:'LIVESTOCK'},
     {s:'☔',l:'RAIN'},{s:'🌵',l:'DRY'},{s:'🏔️',l:'MOUNTAIN'},{s:'🏜️',l:'DESERT'},
-    {s:'🌙',l:'NIGHT'},{s:'🌅',l:'DAWN'},{s:'⛅',l:'CLOUD'},{s:'🌡️',l:'TEMP'}
+    {s:'🌙',l:'NIGHT'},{s:'🌅',l:'DAWN'},{s:'⛅',l:'CLOUD'},{s:'🌡️',l:'TEMP'},
+    {s:'🐍',l:'SNAKE'},{s:'🦁',l:'PREDATOR'},{s:'🐝',l:'INSECT'},{s:'🌊',l:'OCEAN'},
+    {s:'🏞️',l:'VALLEY'},{s:'🌲',l:'FOREST'},{s:'🍃',l:'LEAF'},{s:'🪨',l:'ROCK'},
+    {s:'💧',l:'RIVER'},{s:'🐟',l:'FISH'},{s:'🦅',l:'BIRD'},{s:'🌱',l:'SEED'},
+    {s:'🌬️',l:'WIND'},{s:'⛈️',l:'THUNDER'},{s:'🌈',l:'RAINBOW'},{s:'🌫️',l:'FOG'}
   ],
   time:[
     {s:'⏰',l:'NOW'},{s:'🌅',l:'MORNING'},{s:'🌆',l:'AFTERNOON'},{s:'🌙',l:'NIGHT'},
     {s:'📅',l:'TODAY'},{s:'⏭️',l:'TOMORROW'},{s:'⏮️',l:'YESTERDAY'},{s:'⌛',l:'WAIT'},
     {s:'⚡',l:'URGENT'},{s:'🔄',l:'AGAIN'},{s:'1️⃣',l:'ONE'},{s:'7️⃣',l:'SEVEN'},
-    {s:'📆',l:'DATE'},{s:'🕐',l:'HOUR'},{s:'✅',l:'DONE'},{s:'🚫',l:'NEVER'}
+    {s:'📆',l:'DATE'},{s:'🕐',l:'HOUR'},{s:'✅',l:'DONE'},{s:'🚫',l:'NEVER'},
+    {s:'2️⃣',l:'TWO'},{s:'3️⃣',l:'THREE'},{s:'5️⃣',l:'FIVE'},{s:'🔟',l:'TEN'},
+    {s:'🌒',l:'DAYS'},{s:'🗓️',l:'WEEK'},{s:'📊',l:'MONTHS'},{s:'🔁',l:'DAILY'},
+    {s:'⏩',l:'SOON'},{s:'⏪',l:'PAST'},{s:'🕛',l:'MIDNIGHT'},{s:'🕧',l:'HALF'},
+    {s:'🌄',l:'SUNRISE'},{s:'🌇',l:'SUNSET'},{s:'🌃',l:'LATE NIGHT'},{s:'☀️',l:'MIDDAY'}
   ],
   social:[
     {s:'👤',l:'ME'},{s:'👥',l:'US'},{s:'👨‍👩‍👧',l:'FAMILY'},{s:'👮',l:'POLICE'},
     {s:'👨‍⚕️',l:'DOCTOR'},{s:'👨‍🏫',l:'TEACHER'},{s:'🧑‍💼',l:'LEADER'},{s:'👶',l:'CHILD'},
     {s:'👴',l:'ELDER'},{s:'🤝',l:'FRIEND'},{s:'⚔️',l:'ENEMY'},{s:'🏘️',l:'VILLAGE'},
-    {s:'🕌',l:'WORSHIP'},{s:'🏫',l:'SCHOOL'},{s:'🏛️',l:'GOVT'},{s:'📞',l:'CALL'}
+    {s:'🕌',l:'WORSHIP'},{s:'🏫',l:'SCHOOL'},{s:'🏛️',l:'GOVT'},{s:'📞',l:'CALL'},
+    {s:'👩',l:'WOMAN'},{s:'👨',l:'MAN'},{s:'🧒',l:'YOUTH'},{s:'👫',l:'COUPLE'},
+    {s:'🫂',l:'TOGETHER'},{s:'🤲',l:'ASK'},{s:'👋',l:'GREET'},{s:'🤐',l:'SECRET'},
+    {s:'📢',l:'ANNOUNCE'},{s:'🗣️',l:'SPEAK'},{s:'👁️',l:'WITNESS'},{s:'✍️',l:'WRITE'},
+    {s:'🏠',l:'HOME'},{s:'🕊️',l:'PEACE'},{s:'⚖️',l:'JUSTICE'},{s:'🆘',l:'RESCUE'}
+  ],
+  food:[
+    {s:'🍚',l:'RICE'},{s:'🍞',l:'BREAD'},{s:'🥩',l:'MEAT'},{s:'🐟',l:'FISH'},
+    {s:'🥛',l:'MILK'},{s:'🫙',l:'RATION'},{s:'🍌',l:'FRUIT'},{s:'🥦',l:'VEG'},
+    {s:'🥚',l:'EGGS'},{s:'🧂',l:'SALT'},{s:'🫒',l:'OIL'},{s:'🍯',l:'HONEY'},
+    {s:'🫖',l:'TEA'},{s:'☕',l:'COFFEE'},{s:'🥤',l:'DRINK'},{s:'🍲',l:'STEW'},
+    {s:'🌽',l:'MAIZE'},{s:'🥜',l:'NUTS'},{s:'🫘',l:'BEANS'},{s:'🧁',l:'SWEET'},
+    {s:'🍋',l:'SOUR'},{s:'🌶️',l:'SPICY'},{s:'🍵',l:'HERBAL'},{s:'💧',l:'WATER'},
+    {s:'🚫',l:'NONE'},{s:'⬆️',l:'MORE'},{s:'⬇️',l:'LESS'},{s:'⏰',l:'COOK TIME'},
+    {s:'🔥',l:'HOT'},{s:'❄️',l:'COLD'},{s:'😋',l:'TASTY'},{s:'🤢',l:'BAD/SICK'}
+  ],
+  numbers:[
+    {s:'0️⃣',l:'ZERO'},{s:'1️⃣',l:'ONE'},{s:'2️⃣',l:'TWO'},{s:'3️⃣',l:'THREE'},
+    {s:'4️⃣',l:'FOUR'},{s:'5️⃣',l:'FIVE'},{s:'6️⃣',l:'SIX'},{s:'7️⃣',l:'SEVEN'},
+    {s:'8️⃣',l:'EIGHT'},{s:'9️⃣',l:'NINE'},{s:'🔟',l:'TEN'},{s:'💯',l:'HUNDRED'},
+    {s:'➕',l:'ADD'},{s:'➖',l:'MINUS'},{s:'✖️',l:'MULTIPLY'},{s:'➗',l:'DIVIDE'},
+    {s:'⬆️',l:'MORE'},{s:'⬇️',l:'LESS'},{s:'🔁',l:'REPEAT'},{s:'📐',l:'MEASURE'},
+    {s:'⚖️',l:'EQUAL'},{s:'🔝',l:'MOST'},{s:'🔛',l:'SOME'},{s:'🔜',l:'FEW'},
+    {s:'📏',l:'SIZE'},{s:'🏋️',l:'WEIGHT'},{s:'📦',l:'QUANTITY'},{s:'💰',l:'AMOUNT'},
+    {s:'🕐',l:'1 HOUR'},{s:'📅',l:'1 DAY'},{s:'📆',l:'1 WEEK'},{s:'🗓️',l:'1 MONTH'}
+  ],
+  signs:[
+    {s:'🚫',l:'FORBIDDEN'},{s:'⛔',l:'NO ENTRY'},{s:'🚷',l:'NO PEOPLE'},{s:'🚯',l:'NO LITTER'},
+    {s:'🚳',l:'NO BIKES'},{s:'📵',l:'NO PHONE'},{s:'🔞',l:'ADULT ONLY'},{s:'🔇',l:'SILENCE'},
+    {s:'♿',l:'ACCESSIBLE'},{s:'🚾',l:'TOILET'},{s:'🛗',l:'LIFT'},{s:'🚹',l:'MEN'},
+    {s:'🚺',l:'WOMEN'},{s:'🚼',l:'BABY'},{s:'🏧',l:'ATM'},{s:'⛽',l:'FUEL'},
+    {s:'🅿️',l:'PARKING'},{s:'🛂',l:'PASSPORT'},{s:'🛃',l:'CUSTOMS'},{s:'🛄',l:'BAGGAGE'},
+    {s:'🛅',l:'LUGGAGE'},{s:'🚑',l:'AMBULANCE'},{s:'🚒',l:'FIRE DEPT'},{s:'🚔',l:'POLICE'},
+    {s:'⚕️',l:'MEDICAL'},{s:'☢️',l:'RADIATION'},{s:'☣️',l:'BIOHAZARD'},{s:'⚡',l:'ELECTRIC'},
+    {s:'🔥',l:'FLAMMABLE'},{s:'💧',l:'WATER POINT'},{s:'✅',l:'APPROVED'},{s:'❌',l:'REJECTED'}
   ]
 };
 
@@ -3832,6 +3898,7 @@ function clearIconMsg(){
   iconMessage=[];
   renderIconMessage();
   document.getElementById('iconInterpretResult').style.display='none';
+  document.getElementById('iconInterpretCopyBtn').style.display='none';
 }
 
 function shareIconMsg(){
@@ -3852,6 +3919,18 @@ function iconToChat(){
   var chatInput=document.getElementById('chatInput');
   if(chatInput)chatInput.value=text;
   toast('Symbols added to chat');
+}
+
+function copyIconInterpret(){
+  var result=document.getElementById('iconInterpretResult');
+  if(!result||!result.textContent)return;
+  var symbols=iconMessage.map(function(s){return s.s;}).join(' ');
+  var text=symbols+'\n\n'+result.textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    toast('Copied to clipboard');
+    var btn=document.getElementById('iconInterpretCopyBtn');
+    if(btn){btn.textContent='✅ COPIED';setTimeout(function(){btn.textContent='📋 COPY INTERPRETATION';},2000);}
+  }).catch(function(){toast('Copy failed');});
 }
 
 function interpretIcons(){
@@ -3882,12 +3961,14 @@ function interpretIcons(){
     else text='Could not interpret. Try again.';
     result.style.display='block';
     result.textContent=text;
+    document.getElementById('iconInterpretCopyBtn').style.display='block';
   })
   .catch(function(e){
     btn.textContent='🧠 AI INTERPRET — Translate symbols to text';
     btn.disabled=false;
     result.style.display='block';
     result.textContent='Connection error. Try again.';
+    document.getElementById('iconInterpretCopyBtn').style.display='none';
   });
 }
 
