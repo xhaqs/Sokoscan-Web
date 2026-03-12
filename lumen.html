@@ -661,16 +661,31 @@ function streamMessage(text){
     } else {
       clearInterval(interval);
       cursor.remove();
-      // Add remember button
-      var remBtn=document.createElement('button');
-      remBtn.style.cssText='margin-top:8px;background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);color:#4a9eff;font-family:var(--mono);font-size:8px;padding:4px 10px;border-radius:4px;cursor:pointer;display:block;';
-      remBtn.textContent='🧠 REMEMBER THIS';
+      // Action buttons row
+      var btnRow=document.createElement('div');
+      btnRow.style.cssText='display:flex;gap:6px;margin-top:8px;';
+      // Copy button
+      var copyBtn=document.createElement('button');
+      copyBtn.style.cssText='background:rgba(100,210,255,0.08);border:1px solid rgba(100,210,255,0.2);color:#64d2ff;font-family:var(--mono);font-size:8px;padding:4px 10px;border-radius:4px;cursor:pointer;';
+      copyBtn.textContent='📋 COPY';
       var capturedText=text;
+      copyBtn.onclick=function(){
+        navigator.clipboard.writeText(capturedText).then(function(){
+          copyBtn.textContent='✅ COPIED';
+          setTimeout(function(){copyBtn.textContent='📋 COPY';},2000);
+        }).catch(function(){toast('Copy failed');});
+      };
+      // Remember button
+      var remBtn=document.createElement('button');
+      remBtn.style.cssText='background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);color:#4a9eff;font-family:var(--mono);font-size:8px;padding:4px 10px;border-radius:4px;cursor:pointer;';
+      remBtn.textContent='🧠 REMEMBER';
       remBtn.onclick=function(){
         var key=prompt('Save as (e.g. strategy, insight, goal):');
         if(key){rememberFromChat(key.trim(),capturedText.substring(0,200),'note');toggleMemory();}
       };
-      bubble.appendChild(remBtn);
+      btnRow.appendChild(copyBtn);
+      btnRow.appendChild(remBtn);
+      bubble.appendChild(btnRow);
     }
   },6);
 }
