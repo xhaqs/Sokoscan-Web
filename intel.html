@@ -669,7 +669,7 @@ function generateReport(){
     }
   }
 
-  fetch('/api/tutor',{
+  fetch(window.location.protocol+'//'+window.location.host+'/api/tutor',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
@@ -747,17 +747,27 @@ function searchLanguage(){
   var query=document.getElementById('langSearchInput').value.trim();
   if(!query){toast('Enter a language name');return;}
   var results=document.getElementById('searchResults');
-  results.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;" class="dots">Searching intelligence database</div></div>';
+  results.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;" class="dots">Searching Glottolog database</div></div>';
 
-  fetch('/api/tutor',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      max_tokens:800,
-      system:'You are a linguistic intelligence database. When given a language name, return a JSON object with these exact fields: name, alternateNames (array), family, subfamily, isoCode, speakerCount (number), speakerCountFormatted (string), endangerment (one of: safe/vulnerable/endangered/critically_endangered/dormant/extinct), countries (array of country names), region, description (2 sentences), features (array of 4 linguistic features), relatedLanguages (array of 3), vitalityScore (0-100), dialects (array), writingSystem, culturalNotes. Return ONLY valid JSON, no other text.',
-      messages:[{role:'user',content:'Language: '+query}]
-    })
+  var BASE=window.location.protocol+'//'+window.location.host;
+  // Step 1 — Glottolog lookup
+  fetch(BASE+'/api/glottolog/search?q='+encodeURIComponent(query))
+  .then(function(r){return r.json();})
+  .then(function(glottolog){
+    var glottoMatch=glottolog&&glottolog.length?glottolog[0]:null;
+    var glottoCtx=glottoMatch?'Glottolog data: name='+glottoMatch.name+', glottocode='+glottoMatch.glottocode+', iso='+(glottoMatch.iso||'none')+', macroarea='+(glottoMatch.macroarea||'unknown')+', countries='+(glottoMatch.countries||'unknown')+', family='+glottoMatch.family_id+'.':'No Glottolog entry found.';
+    // Step 2 — AI enrichment
+    results.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;" class="dots">Enriching with AI intelligence</div></div>';
+    return fetch(BASE+'/api/tutor',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'llama-3.1-8b-instant',
+        max_tokens:600,
+        system:'You are a linguistic intelligence database. Return ONLY valid JSON, no other text, no markdown.',
+        messages:[{role:'user',content:'Language: '+query+'. '+glottoCtx+'\n\nReturn a JSON object with: name, alternateNames (array), family, subfamily, isoCode, speakerCount (number), speakerCountFormatted (string), endangerment (safe/vulnerable/endangered/critically_endangered/dormant/extinct), countries (array), region, description (2 sentences), features (array of 4), relatedLanguages (array of 3), vitalityScore (0-100), dialects (array), writingSystem, culturalNotes.'}]
+      })
+    });
   })
   .then(function(r){return r.json();})
   .then(function(data){
