@@ -217,9 +217,13 @@ select.intel-input option{background:var(--card);}
 /* LOADING DOTS */
 .dots::after{content:'...';animation:dots 1.5s infinite;}
 @keyframes dots{0%{content:'.';}33%{content:'..';}66%{content:'...';}100%{content:'.'}}
+
+/* WATERMARK */
+#watermark{position:fixed;bottom:50%;right:-55px;transform:translateY(50%) rotate(90deg);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.4em;color:rgba(14,165,176,0.07);pointer-events:none;z-index:0;white-space:nowrap;font-weight:700;}
 </style>
 </head>
 <body>
+<div id="watermark">RIAKOINE-EMPIRE</div>
 
 <!-- PASSKEY -->
 <div id="pkScreen">
@@ -853,9 +857,10 @@ function renderLanguageCard(lang,query){
     +'</div>':'')
 
     // Actions
-    +'<div style="display:flex;gap:8px;margin-top:4px;">'
+    +'<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">'
     +'<button class="btn btn-teal btn-sm" style="flex:1;" onclick="documentLanguage(\''+lang.name+'\')">📝 DOCUMENT</button>'
     +'<button class="btn btn-gold btn-sm" style="flex:1;" onclick="analyzeLanguage(\''+lang.name+'\')">🧠 DEEP ANALYSIS</button>'
+    +'<button class="btn btn-sm" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text2);" onclick="copyLangCard(\''+lang.name.replace(/'/g,"\\'")+'\')" id="copyLangBtn">📋 COPY</button>'
     +'</div>'
     +'</div>';
 
@@ -867,6 +872,17 @@ function documentLanguage(name){
   document.getElementById('fieldLang').value=name;
   switchPanel('field');
   toast('Ready to document '+name);
+}
+
+function copyLangCard(name){
+  var card=document.querySelector('#searchResults .card');
+  if(!card){toast('Nothing to copy');return;}
+  var text='BABEL INTEL — LANGUAGE PROFILE\nRIAKOINE-EMPIRE · '+new Date().toLocaleString()+'\n\n';
+  text+=card.innerText.replace(/📝 DOCUMENT|🧠 DEEP ANALYSIS|📋 COPY/g,'').trim();
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=document.getElementById('copyLangBtn');
+    if(btn){btn.textContent='✅ COPIED';setTimeout(function(){btn.textContent='📋 COPY';},2000);}
+  }).catch(function(){toast('Copy failed');});
 }
 
 function analyzeLanguage(name){
