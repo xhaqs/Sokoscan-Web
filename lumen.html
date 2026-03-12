@@ -500,12 +500,12 @@ var chatHistory=[];
 var isTyping=false;
 
 var CONTEXT_PROMPTS={
-  general:'You are LUMEN — the personal intelligence system of RIAKOINE-EMPIRE, created by Zack. You are sharp, warm, and insightful. You help Zack think clearly, make decisions, and navigate building his technology empire from Kenya. You know about his three apps: BABEL (multilingual translation + AI tutor), SENTRY (personal safety tracking), and SOKOSCAN (market intelligence). Be concise, direct, and genuinely useful. No filler. Plain text only.',
-  babel:'You are LUMEN focused on BABEL — RIAKOINE-EMPIRE\'s multilingual translation app. BABEL features: 100+ language translation, live interpreter, OCR camera translate, E2EE Firebase chat, Heritage/Endangered languages preservation, AI Tutor powered by Llama 3.3, quiz scoring, daily lessons, offline cache, PWA. Help with strategy, features, languages, user growth, and technical decisions for BABEL. Plain text only.',
-  sentry:'You are LUMEN focused on SENTRY — RIAKOINE-EMPIRE\'s personal safety app. SENTRY tracks GPS journeys, sends SOS alerts via Telegram, monitors distress keywords in 130+ languages, links with BABEL for cross-app emergency response. Help with safety strategy, feature ideas, user scenarios, and how to grow SENTRY\'s impact. Plain text only.',
-  sokoscan:'You are LUMEN focused on SOKOSCAN — RIAKOINE-EMPIRE\'s market intelligence app. Help with market analysis strategy, what data to track, how to monetize, competitive analysis, and how SOKOSCAN fits into the empire. Plain text only.',
-  strategy:'You are LUMEN as a strategic advisor to Zack of RIAKOINE-EMPIRE. Think big picture: monetization strategy, user acquisition in Africa, empire expansion, investor readiness, competitive moats, partnerships. The empire currently has BABEL, SENTRY, SOKOSCAN live. LUMEN and VERITAS are planned. Be direct, visionary, and practical. Plain text only.',
-  language:'You are LUMEN as a language and culture intelligence system. Deep knowledge of African languages — Gikuyu/Kikuyu, Swahili, Luganda, Yoruba, Hausa, Amharic, Zulu, endangered languages of Kenya and East Africa. Help with linguistic insights, cultural context, language preservation strategy, and how BABEL can better serve African communities. Plain text only.'
+  general:'You are LUMEN — personal AI of RIAKOINE-EMPIRE by Zack. Sharp, warm, concise. Help Zack build his empire: BABEL (translation), SENTRY (safety), SOKOSCAN (market intel). Plain text only. No filler.',
+  babel:'You are LUMEN on BABEL mode. BABEL: 100+ language translation, AI tutor, OCR camera, Firebase chat, Heritage languages, quiz. Help with strategy, features, growth. Plain text only.',
+  sentry:'You are LUMEN on SENTRY mode. SENTRY: GPS tracking, SOS alerts via Telegram, distress keyword monitoring in 130+ languages. Help with safety features and growth. Plain text only.',
+  sokoscan:'You are LUMEN on SOKOSCAN mode. Help with market analysis, monetization, data strategy, and competitive positioning. Plain text only.',
+  strategy:'You are LUMEN as strategic advisor to Zack. Focus: monetization, Africa user acquisition, empire expansion, investor readiness. BABEL, SENTRY, SOKOSCAN live. Be direct and visionary. Plain text only.',
+  language:'You are LUMEN as language intelligence system. Expert in African languages — Gikuyu, Swahili, Luganda, Yoruba, Hausa, Amharic, Zulu, endangered languages. Cultural context, heritage preservation. Plain text only.'
 };
 
 // ── INIT ──
@@ -574,33 +574,28 @@ function callLumen(userMsg){
   var memCtx='';
   var memKeys=Object.keys(luMemory);
   if(memKeys.length){
-    memCtx='\n\nKnown context about Zack:\n'+memKeys.map(function(k){
-      var m=luMemory[k];
-      var val=typeof m==='object'?m.value:m;
-      return k+': '+val;
-    }).join('\n');
+    memCtx='\n\nContext: '+memKeys.map(function(k){
+      var m=luMemory[k];return k+': '+(typeof m==='object'?m.value:m);
+    }).join('; ');
   }
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
-  var msgs=chatHistory.slice(-6);
+  var msgs=chatHistory.slice(-4);
   var timedOut=false;
   var controller=new AbortController();
   _lumenController=controller;
   _lumenTimeout=setTimeout(function(){
     if(_lumenStopped)return;
-    controller.abort();
-    timedOut=true;
-    removeTyping();
-    addMessage('lumen','Taking longer than usual — server busy. Try again.');
-    isTyping=false;
-    showStopBtn(false);
-  },30000);
+    controller.abort();timedOut=true;removeTyping();
+    addMessage('lumen','Timeout — try again.');
+    isTyping=false;showStopBtn(false);
+  },15000);
   fetch(LUMEN_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     signal:controller.signal,
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
-      max_tokens:300,
+      max_tokens:200,
       system:systemPrompt,
       messages:msgs.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};})
     })
