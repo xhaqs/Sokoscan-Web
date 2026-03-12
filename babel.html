@@ -387,7 +387,27 @@ body::after{
 }
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 
-/* ── CHANNELS ── */
+/* ── ICONS ── */
+.icon-cat-btn{
+  font-family:var(--mono);font-size:7px;padding:5px 8px;
+  border-radius:4px;border:1px solid rgba(201,168,76,0.15);
+  background:rgba(201,168,76,0.05);color:var(--dim);
+  cursor:pointer;letter-spacing:0.05em;white-space:nowrap;
+}
+.icon-cat-btn.active{
+  background:rgba(201,168,76,0.15);
+  border-color:rgba(201,168,76,0.35);
+  color:var(--gold);
+}
+.icon-symbol-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:8px;padding:10px 4px;cursor:pointer;gap:4px;
+  transition:background 0.15s;
+}
+.icon-symbol-btn:active{background:rgba(201,168,76,0.15);border-color:rgba(201,168,76,0.3);}
+.icon-symbol-btn span.sym{font-size:26px;line-height:1;}
+.icon-symbol-btn span.lbl{font-family:var(--mono);font-size:7px;color:var(--dim);text-align:center;line-height:1.2;}
 .ch-item{
   display:flex;align-items:center;gap:10px;
   padding:10px;border-radius:8px;
@@ -499,6 +519,9 @@ body::after{
     </div>
     <div class="tab" onclick="switchTab('channels')" id="tab-channels">
       <span class="tab-icon">📡</span>CHANNELS
+    </div>
+    <div class="tab" onclick="switchTab('icons')" id="tab-icons">
+      <span class="tab-icon">🔷</span>ICONS
     </div>
   </div>
 
@@ -1156,6 +1179,58 @@ body::after{
             You haven't joined any channels yet.
           </div>
         </div>
+      </div>
+
+    </div>
+
+    <!-- ── ICONS PANEL ── -->
+    <div class="panel" id="panel-icons">
+
+      <!-- MESSAGE BUILDER -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">🔷 BABEL ICONS</span>
+          <span class="card-tag">UNIVERSAL LANGUAGE</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:12px;">Speak without words. Tap symbols to build your message.</div>
+
+        <!-- BUILT MESSAGE -->
+        <div id="iconMsg" style="min-height:52px;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:10px;font-size:28px;letter-spacing:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:10px;">
+          <span style="font-family:var(--mono);font-size:8px;color:var(--dim);" id="iconMsgEmpty">Tap symbols below...</span>
+        </div>
+
+        <!-- ACTIONS -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <button class="btn btn-gold btn-sm" onclick="shareIconMsg()" style="flex:1;">↗ SHARE</button>
+          <button class="btn btn-cyan btn-sm" onclick="iconToChat()" style="flex:1;">💬 SEND TO CHAT</button>
+          <button class="btn btn-red btn-sm" onclick="clearIconMsg()">✕</button>
+        </div>
+
+        <!-- AI INTERPRET -->
+        <button class="btn btn-full" onclick="interpretIcons()" id="iconInterpretBtn"
+          style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:var(--purple2);font-family:var(--mono);font-size:9px;padding:10px;border-radius:6px;cursor:pointer;margin-bottom:14px;width:100%;">
+          🧠 AI INTERPRET — Translate symbols to text
+        </button>
+        <div id="iconInterpretResult" style="display:none;background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.15);border-radius:6px;padding:10px;font-family:var(--mono);font-size:10px;color:var(--purple2);margin-bottom:14px;line-height:1.6;"></div>
+      </div>
+
+      <!-- CATEGORY FILTERS -->
+      <div class="card" style="padding:10px;">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;" id="iconCatBtns">
+          <button class="icon-cat-btn active" onclick="showIconCat('survival')" data-cat="survival">🆘 SURVIVAL</button>
+          <button class="icon-cat-btn" onclick="showIconCat('trade')" data-cat="trade">🤝 TRADE</button>
+          <button class="icon-cat-btn" onclick="showIconCat('emotion')" data-cat="emotion">😊 EMOTION</button>
+          <button class="icon-cat-btn" onclick="showIconCat('travel')" data-cat="travel">✈️ TRAVEL</button>
+          <button class="icon-cat-btn" onclick="showIconCat('body')" data-cat="body">🏥 MEDICAL</button>
+          <button class="icon-cat-btn" onclick="showIconCat('nature')" data-cat="nature">🌍 NATURE</button>
+          <button class="icon-cat-btn" onclick="showIconCat('time')" data-cat="time">⏰ TIME</button>
+          <button class="icon-cat-btn" onclick="showIconCat('social')" data-cat="social">👥 SOCIAL</button>
+        </div>
+      </div>
+
+      <!-- SYMBOL GRID -->
+      <div class="card">
+        <div id="iconGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
       </div>
 
     </div>
@@ -3073,8 +3148,168 @@ function shareChannel(){
 // ── FOLLOWING SYSTEM ──
 var following=JSON.parse(localStorage.getItem('babel_following')||'[]');
 
-// Init channels
-renderMyChannels();
+// ── BABEL ICONS ──
+var ICON_SYMBOLS={
+  survival:[
+    {s:'🆘',l:'HELP'},{s:'🚨',l:'DANGER'},{s:'💧',l:'WATER'},{s:'🍚',l:'FOOD'},
+    {s:'🏠',l:'SHELTER'},{s:'🔥',l:'FIRE'},{s:'❄️',l:'COLD'},{s:'☀️',l:'HEAT'},
+    {s:'🧭',l:'LOST'},{s:'📍',l:'HERE'},{s:'🚑',l:'MEDIC'},{s:'🛑',l:'STOP'},
+    {s:'✅',l:'SAFE'},{s:'⚠️',l:'CAUTION'},{s:'🔊',l:'LOUD'},{s:'🤫',l:'QUIET'}
+  ],
+  trade:[
+    {s:'🤝',l:'DEAL'},{s:'💰',l:'MONEY'},{s:'📦',l:'GOODS'},{s:'⬆️',l:'MORE'},
+    {s:'⬇️',l:'LESS'},{s:'✅',l:'YES'},{s:'❌',l:'NO'},{s:'🔄',l:'EXCHANGE'},
+    {s:'⚖️',l:'FAIR'},{s:'🏪',l:'SHOP'},{s:'🚚',l:'DELIVER'},{s:'📋',l:'LIST'},
+    {s:'💎',l:'VALUE'},{s:'🎁',l:'GIFT'},{s:'🔑',l:'KEY'},{s:'📊',l:'PRICE'}
+  ],
+  emotion:[
+    {s:'😊',l:'HAPPY'},{s:'😢',l:'SAD'},{s:'😠',l:'ANGRY'},{s:'😨',l:'FEAR'},
+    {s:'🤢',l:'DISGUST'},{s:'😲',l:'SURPRISE'},{s:'😑',l:'CONTEMPT'},{s:'❤️',l:'LOVE'},
+    {s:'🙏',l:'PLEASE'},{s:'👍',l:'GOOD'},{s:'👎',l:'BAD'},{s:'😴',l:'TIRED'},
+    {s:'💪',l:'STRONG'},{s:'🤒',l:'SICK'},{s:'😰',l:'STRESS'},{s:'🥳',l:'JOY'}
+  ],
+  travel:[
+    {s:'✈️',l:'FLY'},{s:'🚌',l:'BUS'},{s:'🚂',l:'TRAIN'},{s:'🚗',l:'CAR'},
+    {s:'🚶',l:'WALK'},{s:'⬅️',l:'LEFT'},{s:'➡️',l:'RIGHT'},{s:'⬆️',l:'FORWARD'},
+    {s:'🗺️',l:'MAP'},{s:'🛂',l:'BORDER'},{s:'🏨',l:'HOTEL'},{s:'🚽',l:'TOILET'},
+    {s:'🅿️',l:'PARK'},{s:'⛽',l:'FUEL'},{s:'📍',l:'DEST.'},{s:'🔙',l:'BACK'}
+  ],
+  body:[
+    {s:'🤕',l:'HURT'},{s:'🤒',l:'FEVER'},{s:'💊',l:'MEDICINE'},{s:'🩺',l:'DOCTOR'},
+    {s:'🏥',l:'HOSPITAL'},{s:'🩸',l:'BLOOD'},{s:'💉',l:'INJECT'},{s:'🦷',l:'TEETH'},
+    {s:'👁️',l:'EYE'},{s:'👂',l:'EAR'},{s:'🫁',l:'BREATHE'},{s:'❤️',l:'HEART'},
+    {s:'🤰',l:'PREGNANT'},{s:'👶',l:'BABY'},{s:'🧓',l:'ELDER'},{s:'♿',l:'ACCESS'}
+  ],
+  nature:[
+    {s:'🌍',l:'EARTH'},{s:'🌊',l:'FLOOD'},{s:'🌪️',l:'STORM'},{s:'🌋',l:'VOLCANO'},
+    {s:'🐊',l:'WILDLIFE'},{s:'🌿',l:'PLANT'},{s:'🌾',l:'CROPS'},{s:'🐄',l:'LIVESTOCK'},
+    {s:'☔',l:'RAIN'},{s:'🌵',l:'DRY'},{s:'🏔️',l:'MOUNTAIN'},{s:'🏜️',l:'DESERT'},
+    {s:'🌙',l:'NIGHT'},{s:'🌅',l:'DAWN'},{s:'⛅',l:'CLOUD'},{s:'🌡️',l:'TEMP'}
+  ],
+  time:[
+    {s:'⏰',l:'NOW'},{s:'🌅',l:'MORNING'},{s:'🌆',l:'AFTERNOON'},{s:'🌙',l:'NIGHT'},
+    {s:'📅',l:'TODAY'},{s:'⏭️',l:'TOMORROW'},{s:'⏮️',l:'YESTERDAY'},{s:'⌛',l:'WAIT'},
+    {s:'⚡',l:'URGENT'},{s:'🔄',l:'AGAIN'},{s:'1️⃣',l:'ONE'},{s:'7️⃣',l:'SEVEN'},
+    {s:'📆',l:'DATE'},{s:'🕐',l:'HOUR'},{s:'✅',l:'DONE'},{s:'🚫',l:'NEVER'}
+  ],
+  social:[
+    {s:'👤',l:'ME'},{s:'👥',l:'US'},{s:'👨‍👩‍👧',l:'FAMILY'},{s:'👮',l:'POLICE'},
+    {s:'👨‍⚕️',l:'DOCTOR'},{s:'👨‍🏫',l:'TEACHER'},{s:'🧑‍💼',l:'LEADER'},{s:'👶',l:'CHILD'},
+    {s:'👴',l:'ELDER'},{s:'🤝',l:'FRIEND'},{s:'⚔️',l:'ENEMY'},{s:'🏘️',l:'VILLAGE'},
+    {s:'🕌',l:'WORSHIP'},{s:'🏫',l:'SCHOOL'},{s:'🏛️',l:'GOVT'},{s:'📞',l:'CALL'}
+  ]
+};
+
+var iconMessage=[];
+var currentIconCat='survival';
+
+function showIconCat(cat){
+  currentIconCat=cat;
+  document.querySelectorAll('.icon-cat-btn').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-cat')===cat);
+  });
+  renderIconGrid();
+}
+
+function renderIconGrid(){
+  var grid=document.getElementById('iconGrid');
+  var symbols=ICON_SYMBOLS[currentIconCat]||[];
+  grid.innerHTML=symbols.map(function(sym){
+    return '<button class="icon-symbol-btn" onclick="addIconSymbol(\''+sym.s+'\',\''+sym.l+'\')">'+
+      '<span class="sym">'+sym.s+'</span>'+
+      '<span class="lbl">'+sym.l+'</span>'+
+      '</button>';
+  }).join('');
+}
+
+function addIconSymbol(sym,label){
+  iconMessage.push({s:sym,l:label});
+  renderIconMessage();
+  // Haptic
+  if(navigator.vibrate)navigator.vibrate(30);
+}
+
+function renderIconMessage(){
+  var el=document.getElementById('iconMsg');
+  var empty=document.getElementById('iconMsgEmpty');
+  if(!iconMessage.length){
+    el.innerHTML='<span style="font-family:var(--mono);font-size:8px;color:var(--dim);" id="iconMsgEmpty">Tap symbols below...</span>';
+    return;
+  }
+  el.innerHTML=iconMessage.map(function(sym,i){
+    return '<span onclick="removeIconSymbol('+i+')" title="'+sym.l+'" style="cursor:pointer;font-size:28px;" >'+sym.s+'</span>';
+  }).join('');
+}
+
+function removeIconSymbol(idx){
+  iconMessage.splice(idx,1);
+  renderIconMessage();
+}
+
+function clearIconMsg(){
+  iconMessage=[];
+  renderIconMessage();
+  document.getElementById('iconInterpretResult').style.display='none';
+}
+
+function shareIconMsg(){
+  if(!iconMessage.length){toast('Build a message first');return;}
+  var text=iconMessage.map(function(s){return s.s;}).join(' ')+'\n'+iconMessage.map(function(s){return s.l;}).join(' · ');
+  if(navigator.share){
+    navigator.share({title:'BABEL ICONS',text:text});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){toast('Copied to clipboard');});
+  }
+}
+
+function iconToChat(){
+  if(!iconMessage.length){toast('Build a message first');return;}
+  var text=iconMessage.map(function(s){return s.s;}).join(' ');
+  // Switch to chat tab and pre-fill
+  switchTab('chat');
+  var chatInput=document.getElementById('chatInput');
+  if(chatInput)chatInput.value=text;
+  toast('Symbols added to chat');
+}
+
+function interpretIcons(){
+  if(!iconMessage.length){toast('Build a message first');return;}
+  var btn=document.getElementById('iconInterpretBtn');
+  var result=document.getElementById('iconInterpretResult');
+  btn.textContent='🧠 Interpreting...';
+  btn.disabled=true;
+  var symbolStr=iconMessage.map(function(s){return s.s+' ('+s.l+')';}).join(', ');
+  var prompt='A person has communicated using only these universal symbols in sequence: '+symbolStr+'. Interpret what they are most likely trying to communicate. Give a clear, concise interpretation in 1-2 sentences. Then suggest what they might need. Be empathetic and practical.';
+  fetch('/api/tutor',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.1-8b-instant',
+      max_tokens:200,
+      system:'You are a universal communication interpreter. You interpret sequences of universal symbols/emoji to understand what a person is trying to communicate, especially in situations where language is a barrier.',
+      messages:[{role:'user',content:prompt}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='🧠 AI INTERPRET — Translate symbols to text';
+    btn.disabled=false;
+    var text='';
+    if(data.choices&&data.choices[0])text=data.choices[0].message.content;
+    else text='Could not interpret. Try again.';
+    result.style.display='block';
+    result.textContent=text;
+  })
+  .catch(function(){
+    btn.textContent='🧠 AI INTERPRET — Translate symbols to text';
+    btn.disabled=false;
+    result.style.display='block';
+    result.textContent='Connection error. Try again.';
+  });
+}
+
+// Init icons
+showIconCat('survival');
 initFollowing();
 
 function initFollowing(){
