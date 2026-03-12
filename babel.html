@@ -1104,8 +1104,9 @@ body::after{
       <div class="card" id="chActiveCard" style="display:none;">
         <div class="card-head">
           <span class="card-title" id="chActiveName">CHANNEL</span>
-          <div style="display:flex;gap:6px;">
+          <div style="display:flex;gap:6px;align-items:center;">
             <span style="font-family:var(--mono);font-size:8px;color:var(--dim);" id="chActiveViews">👁 0</span>
+            <button class="btn btn-cyan btn-sm" id="chFollowBtn" onclick="toggleFollow()">＋ FOLLOW</button>
             <button class="btn btn-gold btn-sm" onclick="shareChannel()">↗ SHARE</button>
             <button class="btn btn-red btn-sm" onclick="leaveChannel()">✕ LEAVE</button>
           </div>
@@ -1114,7 +1115,8 @@ body::after{
         <div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:10px;">
           CODE: <span id="chActiveCode" style="color:var(--gold);letter-spacing:0.15em;"></span> · 
           LANG: <span id="chActiveLang"></span> · 
-          MEMBERS: <span id="chActiveMembers">—</span>
+          MEMBERS: <span id="chActiveMembers">—</span> ·
+          FOLLOWERS: <span id="chActiveFollowers">—</span>
         </div>
 
         <!-- POSTS FEED -->
@@ -1125,6 +1127,22 @@ body::after{
           <textarea class="babel-input" id="chPostInput" placeholder="Share a phrase, translation, or insight..." style="height:60px;flex:1;"></textarea>
         </div>
         <button class="btn btn-gold btn-full" style="margin-top:6px;" onclick="postToChannel()">📤 POST</button>
+      </div>
+
+      <!-- FOLLOWING FEED -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">📰 FOLLOWING FEED</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span class="card-tag" id="followingCount">0 FOLLOWING</span>
+            <button class="btn btn-gold btn-sm" onclick="loadFollowingFeed()">🔄</button>
+          </div>
+        </div>
+        <div id="followingFeed">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">
+            Follow channels to see their posts here.
+          </div>
+        </div>
       </div>
 
       <!-- MY CHANNELS -->
@@ -2442,32 +2460,7 @@ function installPWA(){
 }
 
 // Register service worker for offline support
-if('serviceWorker' in navigator){
-  var swCode=`
-self.addEventListener('install',function(e){self.skipWaiting();});
-self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});
-self.addEventListener('fetch',function(e){
-  if(e.request.method!=='GET')return;
-  e.respondWith(
-    caches.open('babel-v2').then(function(cache){
-      return fetch(e.request).then(function(response){
-        if(response&&response.status===200){
-          cache.put(e.request,response.clone());
-        }
-        return response;
-      }).catch(function(){
-        return caches.match(e.request);
-      });
-    })
-  );
-});
-`;
-  var blob=new Blob([swCode],{type:'application/javascript'});
-  var swUrl=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl,{scope:'/babel/'})
-    .then(function(){console.log('BABEL SW registered');})
-    .catch(function(e){console.log('SW registration failed:',e.message);});
-}
+// Service worker disabled - blob URLs not supported on this browser
 
 // ── VERITAS NATIVE LINK SCANNER ──
 function quickLinkCheck(url){
@@ -2933,6 +2926,8 @@ function openChannel(ch){
   var langName=LANGS.find(function(l){return l.c===ch.lang;});
   document.getElementById('chActiveLang').textContent=langName?langName.n:ch.lang;
   document.getElementById('chActiveCard').scrollIntoView({behavior:'smooth'});
+  updateFollowBtn();
+  updateFollowCount(ch.code);
   // Increment views
   fetch(CHANNELS_DB+'/'+ch.code+'/views.json')
     .then(function(r){return r.json();})
@@ -2971,10 +2966,11 @@ function loadChannelPosts(){
       feed.innerHTML=posts.map(function(p){
         var time=new Date(p.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
         var isMe=p.user===channelUser;
+        var postLangName=LANGS.find(function(l){return l.c===p.lang;});
         return '<div class="ch-post">'
           +'<div class="ch-post-user">'+(isMe?'YOU':p.user)+' · '+time+'</div>'
           +'<div class="ch-post-text" id="chpost_'+p.ts+'">'+p.text+'</div>'
-          +'<div class="ch-post-meta"><span>'+p.lang+'</span><span>👁 '+(p.views||1)+'</span></div>'
+          +'<div class="ch-post-meta"><span>'+(postLangName?postLangName.n:p.lang)+'</span><span>👁 '+(p.views||1)+'</span></div>'
           +'</div>';
       }).join('');
       feed.scrollTop=feed.scrollHeight;
@@ -3074,8 +3070,164 @@ function shareChannel(){
   }
 }
 
+// ── FOLLOWING SYSTEM ──
+var following=JSON.parse(localStorage.getItem('babel_following')||'[]');
+
 // Init channels
 renderMyChannels();
+initFollowing();
+
+function initFollowing(){
+  updateFollowingCount();
+  loadFollowingFeed();
+}
+
+function isFollowing(code){
+  return following.indexOf(code)!==-1;
+}
+
+function toggleFollow(){
+  if(!activeChannel)return;
+  var code=activeChannel.code;
+  var btn=document.getElementById('chFollowBtn');
+  if(isFollowing(code)){
+    // Unfollow
+    following=following.filter(function(c){return c!==code;});
+    localStorage.setItem('babel_following',JSON.stringify(following));
+    btn.textContent='＋ FOLLOW';
+    btn.className='btn btn-cyan btn-sm';
+    // Decrement Firebase followers
+    updateFirebaseFollowers(code,-1);
+    toast('Unfollowed '+activeChannel.name);
+  } else {
+    // Follow
+    following.push(code);
+    localStorage.setItem('babel_following',JSON.stringify(following));
+    btn.textContent='✓ FOLLOWING';
+    btn.className='btn btn-green btn-sm';
+    // Increment Firebase followers
+    updateFirebaseFollowers(code,1);
+    toast('Following '+activeChannel.name+'!');
+  }
+  updateFollowingCount();
+  loadFollowingFeed();
+}
+
+function updateFirebaseFollowers(code,delta){
+  fetch(CHANNELS_DB+'/'+code+'/followers.json')
+    .then(function(r){return r.json();})
+    .then(function(v){
+      var newVal=Math.max(0,(v||0)+delta);
+      fetch(CHANNELS_DB+'/'+code+'/followers.json',{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(newVal)
+      });
+      var el=document.getElementById('chActiveFollowers');
+      if(el)el.textContent=newVal;
+    }).catch(function(){});
+}
+
+function updateFollowCount(code){
+  fetch(CHANNELS_DB+'/'+code+'/followers.json')
+    .then(function(r){return r.json();})
+    .then(function(v){
+      var el=document.getElementById('chActiveFollowers');
+      if(el)el.textContent=v||0;
+    }).catch(function(){});
+}
+
+function updateFollowingCount(){
+  var el=document.getElementById('followingCount');
+  if(el)el.textContent=following.length+' FOLLOWING';
+}
+
+function updateFollowBtn(){
+  if(!activeChannel)return;
+  var btn=document.getElementById('chFollowBtn');
+  if(!btn)return;
+  if(isFollowing(activeChannel.code)){
+    btn.textContent='✓ FOLLOWING';
+    btn.className='btn btn-green btn-sm';
+  } else {
+    btn.textContent='＋ FOLLOW';
+    btn.className='btn btn-cyan btn-sm';
+  }
+}
+
+function loadFollowingFeed(){
+  var feed=document.getElementById('followingFeed');
+  if(!feed)return;
+  if(!following.length){
+    feed.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Follow channels to see their posts here.</div>';
+    return;
+  }
+  feed.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:8px;">Loading feed...</div>';
+  var allPosts=[];
+  var loaded=0;
+  function checkDone(){
+    loaded++;
+    if(loaded===following.length){
+      renderFollowingFeed(allPosts);
+    }
+  }
+  following.forEach(function(code){
+    fetch(CHANNELS_DB+'/'+code+'.json')
+      .then(function(r){return r.json();})
+      .then(function(chData){
+        if(chData&&chData.name){
+          var chName=chData.name||code;
+          var posts=chData.posts;
+          if(posts&&typeof posts==='object'){
+            Object.values(posts).forEach(function(p){
+              if(p&&p.text&&p.ts){
+                allPosts.push({
+                  channelName:chName,
+                  channelCode:code,
+                  text:p.text,
+                  user:p.user,
+                  ts:p.ts,
+                  lang:p.lang||'en'
+                });
+              }
+            });
+          }
+        }
+        checkDone();
+      }).catch(function(){checkDone();});
+  });
+}
+
+function renderFollowingFeed(posts){
+  var feed=document.getElementById('followingFeed');
+  if(!feed)return;
+  if(!posts.length){
+    feed.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No posts yet from channels you follow.</div>';
+    return;
+  }
+  posts.sort(function(a,b){return b.ts-a.ts;});
+  var myLang=langState.toLang||'en';
+  feed.innerHTML=posts.slice(0,20).map(function(p){
+    var time=new Date(p.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    var isMe=p.user===channelUser;
+    var langName=LANGS.find(function(l){return l.c===p.lang;});
+    return '<div class="ch-post" onclick="openChannelByCode(\''+p.channelCode+'\')" style="cursor:pointer;">'
+      +'<div style="font-family:var(--mono);font-size:7px;color:var(--gold);margin-bottom:2px;">📡 '+p.channelName+'</div>'
+      +'<div class="ch-post-user">'+(isMe?'YOU':p.user)+' · '+time+'</div>'
+      +'<div class="ch-post-text" id="fp_'+p.ts+'">'+p.text+'</div>'
+      +'<div class="ch-post-meta"><span>'+(langName?langName.n:p.lang)+'</span></div>'
+      +'</div>';
+  }).join('');
+  // Auto-translate
+  posts.slice(0,20).forEach(function(p){
+    if(p.lang&&p.lang!==myLang){
+      callGoogleTranslate(p.text,p.lang,myLang,function(trans){
+        var el=document.getElementById('fp_'+p.ts);
+        if(el&&trans)el.textContent=trans;
+      });
+    }
+  });
+}
 </script>
 </body>
 </html>
