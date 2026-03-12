@@ -397,7 +397,8 @@ body{
     <textarea id="msgInput" rows="1" placeholder="Ask LUMEN anything..."
       oninput="autoResize(this)"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
-    <button class="send-btn" onclick="sendMsg()">➤</button>
+    <button class="send-btn" id="stopBtn" onclick="stopLumen()" style="display:none;background:rgba(255,59,48,0.2);border-color:rgba(255,59,48,0.4);color:#ff3b30;">■</button>
+    <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
   </div>
 
   <!-- EMPIRE NAV -->
@@ -545,9 +546,29 @@ function quickSend(text){
 }
 
 // ── CALL LUMEN AI ──
+var _lumenTimeout=null;
+var _lumenStopped=false;
+
+function stopLumen(){
+  _lumenStopped=true;
+  if(_lumenTimeout)clearTimeout(_lumenTimeout);
+  removeTyping();
+  isTyping=false;
+  showStopBtn(false);
+  addMessage('lumen','Stopped.');
+}
+
+function showStopBtn(show){
+  var stop=document.getElementById('stopBtn');
+  var send=document.getElementById('sendBtn');
+  if(stop)stop.style.display=show?'flex':'none';
+  if(send)send.style.display=show?'none':'flex';
+}
+
 function callLumen(userMsg){
   isTyping=true;
-  // Build memory context
+  _lumenStopped=false;
+  showStopBtn(true);
   var memCtx='';
   var memKeys=Object.keys(luMemory);
   if(memKeys.length){
@@ -558,34 +579,47 @@ function callLumen(userMsg){
     }).join('\n');
   }
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
-  // Keep last 10 messages for context
-  var msgs=chatHistory.slice(-10);
+  var msgs=chatHistory.slice(-6);
+  var timedOut=false;
+  _lumenTimeout=setTimeout(function(){
+    if(_lumenStopped)return;
+    timedOut=true;
+    removeTyping();
+    addMessage('lumen','Taking longer than usual — server busy. Try again.');
+    isTyping=false;
+    showStopBtn(false);
+  },15000);
   fetch(LUMEN_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
-      max_tokens:800,
+      max_tokens:500,
       system:systemPrompt,
       messages:msgs
     })
   })
   .then(function(r){return r.json();})
   .then(function(data){
+    if(timedOut||_lumenStopped)return;
+    clearTimeout(_lumenTimeout);
     removeTyping();
+    showStopBtn(false);
     var text='';
     if(data.choices&&data.choices[0]){
       text=data.choices[0].message.content;
     } else if(data.error){
-      text='Connection issue: '+( data.error.message||'Try again');
+      text='Error: '+(data.error.message||'Try again');
     }
     chatHistory.push({role:'assistant',content:text});
     streamMessage(text);
-    // Auto-extract memory hints
     extractMemory(userMsg,text);
   })
   .catch(function(){
+    if(timedOut||_lumenStopped)return;
+    clearTimeout(_lumenTimeout);
     removeTyping();
+    showStopBtn(false);
     addMessage('lumen','Connection lost. Check your network and try again.');
     isTyping=false;
   });
