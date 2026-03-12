@@ -373,7 +373,7 @@ body::after{
 <script>
 // ── PASSKEY ──
 (function(){
-  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
+  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return (h>>>0).toString(16);}
   var HASH=hc('SOKOSCAN2025');
   var SK='empire_sk1';
   window.checkPK=function(){
