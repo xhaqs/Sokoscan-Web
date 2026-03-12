@@ -3284,9 +3284,9 @@ function interpretIcons(){
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'llama-3.1-8b-instant',
+      model:'llama-3.3-70b-versatile',
       max_tokens:200,
-      system:'You are a universal communication interpreter. You interpret sequences of universal symbols/emoji to understand what a person is trying to communicate, especially in situations where language is a barrier.',
+      system:'You are a universal communication interpreter. You interpret sequences of universal symbols/emoji to understand what a person is trying to communicate, especially in situations where language is a barrier. Be brief, clear and empathetic.',
       messages:[{role:'user',content:prompt}]
     })
   })
@@ -3296,11 +3296,12 @@ function interpretIcons(){
     btn.disabled=false;
     var text='';
     if(data.choices&&data.choices[0])text=data.choices[0].message.content;
+    else if(data.error)text='Error: '+(data.error.message||'Try again');
     else text='Could not interpret. Try again.';
     result.style.display='block';
     result.textContent=text;
   })
-  .catch(function(){
+  .catch(function(e){
     btn.textContent='🧠 AI INTERPRET — Translate symbols to text';
     btn.disabled=false;
     result.style.display='block';
