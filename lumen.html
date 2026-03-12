@@ -651,8 +651,9 @@ function streamMessage(text){
   var i=0;
   var interval=setInterval(function(){
     if(i<text.length){
-      bubble.insertBefore(document.createTextNode(text[i]),cursor);
-      i++;
+      var chunk=text.slice(i,i+4);
+      bubble.insertBefore(document.createTextNode(chunk),cursor);
+      i+=4;
       area.scrollTop=area.scrollHeight;
     } else {
       clearInterval(interval);
@@ -669,7 +670,7 @@ function streamMessage(text){
       };
       bubble.appendChild(remBtn);
     }
-  },8);
+  },6);
 }
 
 // ── ADD MESSAGE ──
