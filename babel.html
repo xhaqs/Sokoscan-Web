@@ -777,7 +777,7 @@ body::after{
       <div id="ocrCameraOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:#000;flex-direction:column;">
         <!-- VIDEO -->
         <div style="position:relative;flex:1;overflow:hidden;">
-          <video id="ocrVideo" style="width:100%;height:100%;object-fit:cover;display:block;" autoplay playsinline muted></video>
+          <video id="ocrVideo" style="width:100%;height:100%;object-fit:cover;display:block;transform-origin:center center;" autoplay playsinline muted></video>
           <!-- SCAN FRAME -->
           <div id="ocrScanFrame" style="position:absolute;inset:0;pointer-events:none;">
             <!-- Dark vignette -->
@@ -820,8 +820,18 @@ body::after{
         <div style="background:rgba(5,3,8,0.95);padding:16px 20px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,0.06);">
           <!-- Flash -->
           <button id="ocrFlashBtn" onclick="toggleOCRFlash()" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;">⚡</button>
-          <!-- CAPTURE — big gold shutter -->
-          <button onclick="captureOCR()" style="width:72px;height:72px;border-radius:50%;background:var(--gold);border:4px solid rgba(201,168,76,0.4);box-shadow:0 0 24px rgba(201,168,76,0.4);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">📷</button>
+          <!-- MAIN SHUTTER — changes based on mode -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <!-- Photo/Video mode toggle -->
+            <div style="display:flex;gap:0;border:1px solid rgba(255,255,255,0.15);border-radius:12px;overflow:hidden;">
+              <button id="ocrModePhoto" onclick="setOCRMode('photo')" style="font-family:var(--mono);font-size:8px;padding:3px 10px;background:var(--gold);color:#000;border:none;cursor:pointer;letter-spacing:1px;">📷 PHOTO</button>
+              <button id="ocrModeVideo" onclick="setOCRMode('video')" style="font-family:var(--mono);font-size:8px;padding:3px 10px;background:transparent;color:rgba(255,255,255,0.5);border:none;cursor:pointer;letter-spacing:1px;">🎬 VIDEO</button>
+            </div>
+            <!-- Shutter button -->
+            <button id="ocrShutterBtn" onclick="ocrShutterPress()" style="width:72px;height:72px;border-radius:50%;background:var(--gold);border:4px solid rgba(201,168,76,0.4);box-shadow:0 0 24px rgba(201,168,76,0.4);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;">📷</button>
+            <!-- Recording timer -->
+            <div id="ocrRecTimer" style="display:none;font-family:var(--mono);font-size:10px;color:#ef4444;letter-spacing:2px;">⏺ 00:00</div>
+          </div>
           <!-- Flip camera -->
           <button onclick="flipOCRCamera()" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;">🔄</button>
         </div>
@@ -869,6 +879,19 @@ body::after{
             <button class="btn btn-sm" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:8px;" onclick="enhanceOCRImage('bw')">◑ B&W</button>
             <button class="btn btn-sm" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:8px;" onclick="enhanceOCRImage('reset')">↺ RESET</button>
           </div>
+        </div>
+      </div>
+
+      <!-- VIDEO RESULT -->
+      <div class="card" id="ocrVideoResultCard" style="display:none;margin-top:4px;">
+        <div class="card-head">
+          <span class="card-title">🎬 RECORDED VIDEO</span>
+          <button class="btn btn-red btn-sm" onclick="clearOCRVideo()">✕ CLEAR</button>
+        </div>
+        <video id="ocrVideoPlayback" controls style="width:100%;border-radius:4px;background:#000;display:block;"></video>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn btn-gold btn-sm" onclick="downloadOCRVideo()">💾 SAVE VIDEO</button>
+          <span id="ocrVideoSize" style="font-family:var(--mono);font-size:8px;color:var(--dim);align-self:center;margin-left:4px;"></span>
         </div>
       </div>
 
@@ -2303,6 +2326,10 @@ function startOCRCamera(){
 }
 
 function stopOCRCamera(){
+  if(ocrMediaRecorder&&ocrMediaRecorder.state==='recording'){
+    stopOCRVideo();
+    return; // onstop will close camera
+  }
   if(ocrStream){ocrStream.getTracks().forEach(function(t){t.stop();});ocrStream=null;}
   ocrActive=false;
   ocrFlashOn=false;
@@ -2331,25 +2358,26 @@ var ocrPinchStartDist=0;
 var ocrPinchStartZoom=1;
 
 function setOCRZoom(zoom){
-  ocrZoomLevel=Math.min(5,Math.max(1,zoom));
+  ocrZoomLevel=Math.min(5,Math.max(1,parseFloat(zoom)));
+  var video=document.getElementById('ocrVideo');
   // Try native camera zoom first
   if(ocrStream){
     var track=ocrStream.getVideoTracks()[0];
     if(track){
-      var caps=track.getCapabilities&&track.getCapabilities();
+      var caps=track.getCapabilities?track.getCapabilities():null;
       if(caps&&caps.zoom){
         var min=caps.zoom.min||1;
         var max=caps.zoom.max||5;
         var z=min+(ocrZoomLevel-1)*(max-min)/4;
-        try{track.applyConstraints({advanced:[{zoom:z}]});}catch(e){}
-      } else {
-        // CSS zoom fallback on video element
-        var video=document.getElementById('ocrVideo');
-        video.style.transform='scale('+ocrZoomLevel+')';
-        video.style.transformOrigin='center center';
+        try{track.applyConstraints({advanced:[{zoom:z}]});
+        }catch(e){}
       }
     }
   }
+  // CSS zoom always applied for visual feedback
+  video.style.transform='scale('+ocrZoomLevel+')';
+  video.style.transformOrigin='center center';
+  video.style.transition='transform 0.15s ease';
   var slider=document.getElementById('ocrZoomSlider');
   var label=document.getElementById('ocrZoomLabel');
   if(slider)slider.value=ocrZoomLevel;
@@ -2788,7 +2816,118 @@ function renderChatMessages(){
 }
 
 // ── HERITAGE / ENDANGERED LANGUAGES ──
-// ── HERITAGE ──
+// ── VIDEO RECORDING ──
+var ocrCameraMode='photo';
+var ocrMediaRecorder=null;
+var ocrVideoChunks=[];
+var ocrRecInterval=null;
+var ocrRecSeconds=0;
+var ocrVideoBlob=null;
+
+function setOCRMode(mode){
+  ocrCameraMode=mode;
+  var photoBtn=document.getElementById('ocrModePhoto');
+  var videoBtn=document.getElementById('ocrModeVideo');
+  var shutter=document.getElementById('ocrShutterBtn');
+  if(mode==='photo'){
+    photoBtn.style.background='var(--gold)';photoBtn.style.color='#000';
+    videoBtn.style.background='transparent';videoBtn.style.color='rgba(255,255,255,0.5)';
+    shutter.style.background='var(--gold)';
+    shutter.style.boxShadow='0 0 24px rgba(201,168,76,0.4)';
+    shutter.textContent='📷';
+  } else {
+    videoBtn.style.background='#ef4444';videoBtn.style.color='#fff';
+    photoBtn.style.background='transparent';photoBtn.style.color='rgba(255,255,255,0.5)';
+    shutter.style.background='#ef4444';
+    shutter.style.boxShadow='0 0 24px rgba(239,68,68,0.4)';
+    shutter.textContent='⏺';
+  }
+}
+
+function ocrShutterPress(){
+  if(ocrCameraMode==='photo'){
+    captureOCR();
+  } else {
+    if(ocrMediaRecorder&&ocrMediaRecorder.state==='recording'){
+      stopOCRVideo();
+    } else {
+      startOCRVideo();
+    }
+  }
+}
+
+function startOCRVideo(){
+  if(!ocrStream){toast('Start camera first');return;}
+  ocrVideoChunks=[];
+  var mimeType='video/webm;codecs=vp9';
+  if(!MediaRecorder.isTypeSupported(mimeType))mimeType='video/webm';
+  if(!MediaRecorder.isTypeSupported(mimeType))mimeType='';
+  try{
+    ocrMediaRecorder=new MediaRecorder(ocrStream,mimeType?{mimeType:mimeType}:{});
+    ocrMediaRecorder.ondataavailable=function(e){
+      if(e.data&&e.data.size>0)ocrVideoChunks.push(e.data);
+    };
+    ocrMediaRecorder.onstop=function(){
+      ocrVideoBlob=new Blob(ocrVideoChunks,{type:mimeType||'video/webm'});
+      var url=URL.createObjectURL(ocrVideoBlob);
+      var playback=document.getElementById('ocrVideoPlayback');
+      playback.src=url;
+      document.getElementById('ocrVideoResultCard').style.display='block';
+      var kb=Math.round(ocrVideoBlob.size/1024);
+      document.getElementById('ocrVideoSize').textContent=kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB';
+      stopOCRCamera();
+      toast('Video saved — tap SAVE VIDEO to download');
+    };
+    ocrMediaRecorder.start(100);
+    // Update UI
+    var shutter=document.getElementById('ocrShutterBtn');
+    shutter.textContent='⏹';
+    shutter.style.animation='pulse 1s ease-in-out infinite';
+    document.getElementById('ocrRecTimer').style.display='block';
+    ocrRecSeconds=0;
+    ocrRecInterval=setInterval(function(){
+      ocrRecSeconds++;
+      var m=Math.floor(ocrRecSeconds/60);
+      var s=ocrRecSeconds%60;
+      document.getElementById('ocrRecTimer').textContent='⏺ '+
+        (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    },1000);
+    if(navigator.vibrate)navigator.vibrate(50);
+    toast('Recording started');
+  }catch(e){
+    toast('Video recording not supported on this device');
+  }
+}
+
+function stopOCRVideo(){
+  if(ocrMediaRecorder&&ocrMediaRecorder.state!=='inactive'){
+    ocrMediaRecorder.stop();
+  }
+  clearInterval(ocrRecInterval);
+  document.getElementById('ocrRecTimer').style.display='none';
+  var shutter=document.getElementById('ocrShutterBtn');
+  shutter.textContent='⏺';
+  shutter.style.animation='';
+  if(navigator.vibrate)navigator.vibrate([50,30,50]);
+}
+
+function downloadOCRVideo(){
+  if(!ocrVideoBlob){toast('No video to save');return;}
+  var url=URL.createObjectURL(ocrVideoBlob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='babel-video-'+Date.now()+'.webm';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  toast('Saving video...');
+}
+
+function clearOCRVideo(){
+  document.getElementById('ocrVideoResultCard').style.display='none';
+  document.getElementById('ocrVideoPlayback').src='';
+  ocrVideoBlob=null;
+  ocrVideoChunks=[];
+}
 var heritageRegion='all';
 
 function filterHeritage(region){
