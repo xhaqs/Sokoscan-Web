@@ -579,7 +579,7 @@ function callLumen(userMsg){
     }).join('\n');
   }
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
-  var msgs=[{role:'system',content:systemPrompt}].concat(chatHistory.slice(-6));
+  var msgs=chatHistory.slice(-6);
   var timedOut=false;
   _lumenTimeout=setTimeout(function(){
     if(_lumenStopped)return;
@@ -595,6 +595,7 @@ function callLumen(userMsg){
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       max_tokens:500,
+      system:systemPrompt,
       messages:msgs
     })
   })
