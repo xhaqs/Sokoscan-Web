@@ -548,10 +548,12 @@ function quickSend(text){
 // ── CALL LUMEN AI ──
 var _lumenTimeout=null;
 var _lumenStopped=false;
+var _lumenController=null;
 
 function stopLumen(){
   _lumenStopped=true;
   if(_lumenTimeout)clearTimeout(_lumenTimeout);
+  if(_lumenController)_lumenController.abort();
   removeTyping();
   isTyping=false;
   showStopBtn(false);
@@ -581,8 +583,11 @@ function callLumen(userMsg){
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
   var msgs=chatHistory.slice(-6);
   var timedOut=false;
+  var controller=new AbortController();
+  _lumenController=controller;
   _lumenTimeout=setTimeout(function(){
     if(_lumenStopped)return;
+    controller.abort();
     timedOut=true;
     removeTyping();
     addMessage('lumen','Taking longer than usual — server busy. Try again.');
@@ -592,6 +597,7 @@ function callLumen(userMsg){
   fetch(LUMEN_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
+    signal:controller.signal,
     body:JSON.stringify({
       model:'llama-3.1-8b-instant',
       max_tokens:300,
