@@ -387,6 +387,19 @@ body::after{
 }
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 
+/* ── HERITAGE REGION BUTTONS ── */
+.heritage-region-btn{
+  font-family:var(--mono);font-size:7px;padding:5px 8px;
+  border-radius:4px;border:1px solid rgba(201,168,76,0.15);
+  background:rgba(201,168,76,0.05);color:var(--dim);
+  cursor:pointer;letter-spacing:0.05em;white-space:nowrap;
+}
+.heritage-region-btn.active{
+  background:rgba(201,168,76,0.15);
+  border-color:rgba(201,168,76,0.35);
+  color:var(--gold);
+}
+
 /* ── ICONS ── */
 .icon-cat-btn{
   font-family:var(--mono);font-size:7px;padding:5px 8px;
@@ -907,14 +920,60 @@ body::after{
           <span class="e2ee-badge" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold);">🌿 ARK</span>
         </div>
         <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;margin-bottom:10px;">
-          BABEL is an ark for languages the world is losing. Every phrase saved here is a language kept alive. These are the voices at risk of disappearing.
+          BABEL is an ark for languages the world is losing. Every phrase saved here is a language kept alive.
+        </div>
+        <!-- STATS -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
+          <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px;text-align:center;">
+            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);" id="heritageTotalLangs">40+</div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">LANGUAGES</div>
+          </div>
+          <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px;text-align:center;">
+            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);" id="heritageTotalPhrases">0</div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">PHRASES SAVED</div>
+          </div>
+          <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px;text-align:center;">
+            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);" id="heritageCommunity">0</div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">COMMUNITY</div>
+          </div>
+        </div>
+        <!-- REGION FILTER -->
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button class="heritage-region-btn active" onclick="filterHeritage('all')" data-region="all">🌍 ALL</button>
+          <button class="heritage-region-btn" onclick="filterHeritage('east-africa')" data-region="east-africa">🇰🇪 E.AFRICA</button>
+          <button class="heritage-region-btn" onclick="filterHeritage('west-africa')" data-region="west-africa">🌍 W.AFRICA</button>
+          <button class="heritage-region-btn" onclick="filterHeritage('americas')" data-region="americas">🌎 AMERICAS</button>
+          <button class="heritage-region-btn" onclick="filterHeritage('asia')" data-region="asia">🌏 ASIA</button>
+          <button class="heritage-region-btn" onclick="filterHeritage('pacific')" data-region="pacific">🏝️ PACIFIC</button>
+          <button class="heritage-region-btn" onclick="filterHeritage('europe')" data-region="europe">🇪🇺 EUROPE</button>
         </div>
       </div>
 
-      <!-- Language cards -->
+      <!-- LANGUAGE OF THE WEEK -->
+      <div class="card" id="langOfWeekCard">
+        <div class="card-head">
+          <span class="card-title">🌟 LANGUAGE OF THE WEEK</span>
+          <span class="card-tag" id="langOfWeekTag">FEATURED</span>
+        </div>
+        <div id="langOfWeekContent"></div>
+      </div>
+
+      <!-- LANGUAGE CARDS -->
       <div id="endangeredList"></div>
 
-      <!-- Contribute -->
+      <!-- COMMUNITY PHRASE WALL -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">🌐 COMMUNITY PHRASE WALL</span>
+          <button class="btn btn-gold btn-sm" onclick="loadCommunityPhrases()">🔄</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">Phrases submitted by the BABEL community worldwide.</div>
+        <div id="communityPhraseWall">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Loading community phrases...</div>
+        </div>
+      </div>
+
+      <!-- CONTRIBUTE -->
       <div class="card" style="margin-top:4px;">
         <div class="card-head">
           <span class="card-title">CONTRIBUTE A PHRASE</span>
@@ -927,6 +986,15 @@ body::after{
         <input class="babel-input" id="endPhrase" placeholder="Phrase in the heritage language" style="height:auto;padding:10px;margin-bottom:6px;">
         <input class="babel-input" id="endMeaning" placeholder="Meaning in English" style="height:auto;padding:10px;margin-bottom:6px;">
         <input class="babel-input" id="endContext" placeholder="Context / usage (optional)" style="height:auto;padding:10px;margin-bottom:8px;">
+        <select class="babel-input" id="endRegion" style="height:auto;padding:10px;margin-bottom:8px;">
+          <option value="east-africa">East Africa</option>
+          <option value="west-africa">West Africa</option>
+          <option value="americas">Americas</option>
+          <option value="asia">Asia</option>
+          <option value="pacific">Pacific</option>
+          <option value="europe">Europe</option>
+          <option value="other">Other</option>
+        </select>
         <button class="btn btn-gold btn-full" onclick="submitEndangered()">🌿 SUBMIT PHRASE</button>
       </div>
     </div>
@@ -1410,23 +1478,104 @@ var _modalTarget = null;
 var LANGS_WITH_AUTO = [{c:'auto',n:'Auto Detect'}].concat(LANGS);
 
 var ENDANGERED_LANGS = [
-  {name:'Ogiek',region:'Kenya — Mau Forest',speakers:'~30,000',status:'Critically Endangered',phrases:[
-    {p:'Oo pa',m:'Hello / Peace be with you'},{p:'Aang meek',m:'I am hungry'},{p:'Toret',m:'Forest / Home'}
+  // EAST AFRICA
+  {name:'Ogiek',region:'Kenya — Mau Forest',speakers:'~30,000',status:'Critically Endangered',area:'east-africa',family:'Cushitic',phrases:[
+    {p:'Oo pa',m:'Hello / Peace be with you'},{p:'Aang meek',m:'I am hungry'},{p:'Toret',m:'Forest / Home'},{p:'Meeyu',m:'Water'},{p:'Nkare orak',m:'The river flows'},{p:'Tii maa',m:'Come with me'}
   ]},
-  {name:'Elmolo',region:'Kenya — Lake Turkana',speakers:'~700',status:'Nearly Extinct',phrases:[
-    {p:'Ashe oleng',m:'Thank you very much'},{p:'Nabo',m:'Water'},{p:'Iyiom',m:'Fish'}
+  {name:'Elmolo',region:'Kenya — Lake Turkana',speakers:'~700',status:'Nearly Extinct',area:'east-africa',family:'Cushitic',phrases:[
+    {p:'Ashe oleng',m:'Thank you very much'},{p:'Nabo',m:'Water'},{p:'Iyiom',m:'Fish'},{p:'Lotu',m:'Lake'},{p:'Aberu',m:'Sun'},{p:'Esiankiki',m:'Young woman'}
   ]},
-  {name:'Dahalo',region:'Kenya — Tana River',speakers:'~400',status:'Nearly Extinct',phrases:[
-    {p:'Hako',m:'Come here'},{p:'Kala',m:'Food / Eat'},{p:'Mto',m:'River'}
+  {name:'Dahalo',region:'Kenya — Tana River',speakers:'~400',status:'Nearly Extinct',area:'east-africa',family:'Cushitic',phrases:[
+    {p:'Hako',m:'Come here'},{p:'Kala',m:'Food / Eat'},{p:'Mto',m:'River'},{p:'Nyumba',m:'House'},{p:'Gari',m:'Go'},{p:'Siku njema',m:'Good day'}
   ]},
-  {name:'Omotik',region:'Kenya — Narok',speakers:'~50',status:'Moribund',phrases:[
-    {p:'Sopa',m:'Greeting'},{p:'Apa',m:'Father'},{p:'Enkare',m:'Water'}
+  {name:'Omotik',region:'Kenya — Narok',speakers:'~50',status:'Moribund',area:'east-africa',family:'Nilotic',phrases:[
+    {p:'Sopa',m:'Greeting'},{p:'Apa',m:'Father'},{p:'Enkare',m:'Water'},{p:'Osotua',m:'Peace / Friendship'},{p:'Enkai',m:'God / Sky'}
   ]},
-  {name:'Sengwer',region:'Kenya — Cherangany Hills',speakers:'~4,000',status:'Endangered',phrases:[
-    {p:'Chamgei',m:'How are you'},{p:'Somok',m:'Forest'},{p:'Cheseret',m:'River'}
+  {name:'Sengwer',region:'Kenya — Cherangany Hills',speakers:'~4,000',status:'Endangered',area:'east-africa',family:'Nilotic',phrases:[
+    {p:'Chamgei',m:'How are you'},{p:'Somok',m:'Forest'},{p:'Cheseret',m:'River'},{p:'Kapkoros',m:'Elder'},{p:'Sirikwa',m:'Ancient people'},{p:'Tilet',m:'Rain'}
   ]},
-  {name:'Yaaku (Mukogodo)',region:'Kenya — Laikipia',speakers:'~100',status:'Nearly Extinct',phrases:[
-    {p:'Tuko',m:'We are here / We exist'},{p:'Nkare',m:'Water'},{p:'Mbogo',m:'Buffalo'}
+  {name:'Yaaku (Mukogodo)',region:'Kenya — Laikipia',speakers:'~100',status:'Nearly Extinct',area:'east-africa',family:'Cushitic',phrases:[
+    {p:'Tuko',m:'We are here / We exist'},{p:'Nkare',m:'Water'},{p:'Mbogo',m:'Buffalo'},{p:'Oloibon',m:'Healer'},{p:'Enkiama',m:'Child'}
+  ]},
+  {name:"Ongota (Birale)",region:'Ethiopia — Omo River',speakers:'~12',status:'Nearly Extinct',area:'east-africa',family:'Afro-Asiatic',phrases:[
+    {p:"Asa'e",m:'Water'},{p:'Habara',m:'Come'},{p:'Kuta',m:'Go'},{p:'Inta',m:'Person'}
+  ]},
+  {name:'Zay',region:'Ethiopia — Lake Ziway',speakers:'~6,000',status:'Endangered',area:'east-africa',family:'Semitic',phrases:[
+    {p:'Egziabher yimesgen',m:'Thanks be to God'},{p:'Wha',m:'Water'},{p:'Bet',m:'House'},{p:'Lijoch',m:'Children'}
+  ]},
+  // WEST AFRICA
+  {name:'Bung',region:'Cameroon — Bui Division',speakers:'~200',status:'Nearly Extinct',area:'west-africa',family:'Bantoid',phrases:[
+    {p:'Mbom',m:'Good morning'},{p:'Ndi',m:'Water'},{p:'Fon',m:'Chief / Leader'}
+  ]},
+  {name:'Bikya',region:'Cameroon — Northwest',speakers:'~1',status:'Nearly Extinct',area:'west-africa',family:'Bantoid',phrases:[
+    {p:'Ke',m:'I / Me'},{p:'Wu',m:'You'},{p:'Mbi',m:'Water'}
+  ]},
+  {name:'Ajawa',region:'Nigeria — Plateau State',speakers:'~500',status:'Critically Endangered',area:'west-africa',family:'Afro-Asiatic',phrases:[
+    {p:'Iri',m:'Water'},{p:'Tsom',m:'Food'},{p:'Aba',m:'Father'}
+  ]},
+  {name:"Njerep",region:'Cameroon/Nigeria border',speakers:'~4',status:'Nearly Extinct',area:'west-africa',family:'Bantoid',phrases:[
+    {p:'Mbi',m:'Water'},{p:'Ne',m:'Mother'},{p:'Ba',m:'Father'}
+  ]},
+  {name:'Bassa-Kontagora',region:'Nigeria — Niger State',speakers:'~5,000',status:'Endangered',area:'west-africa',family:'Niger-Congo',phrases:[
+    {p:'E doo',m:'Good morning'},{p:'Omi',m:'Water'},{p:'Ile',m:'House'},{p:'Oba',m:'King'}
+  ]},
+  // AMERICAS
+  {name:'Kawésqar',region:'Chile — Patagonia',speakers:'~8',status:'Nearly Extinct',area:'americas',family:'Isolate',phrases:[
+    {p:'Akainás',m:'Hello'},{p:'Aksánas',m:'Water'},{p:'Qar',m:'Ice'}
+  ]},
+  {name:'Selknam (Ona)',region:'Argentina/Chile — Tierra del Fuego',speakers:'0',status:'Dormant',area:'americas',family:'Isolate',phrases:[
+    {p:'Haruwen',m:'I am here'},{p:'Shóort',m:'Man'},{p:'Ken',m:'Woman'},{p:'Oon',m:'Fire'}
+  ]},
+  {name:'Waorani',region:'Ecuador — Amazon',speakers:'~2,000',status:'Vulnerable',area:'americas',family:'Isolate',phrases:[
+    {p:'Bai',m:'Hello'},{p:'Meme',m:'Water'},{p:'Obe',m:'Forest'},{p:'Wao',m:'People / Human'}
+  ]},
+  {name:'Tzeltal',region:'Mexico — Chiapas',speakers:'~590,000',status:'Vulnerable',area:'americas',family:'Mayan',phrases:[
+    {p:'Kuxlejal',m:'Life / Living well'},{p:'Jich',m:'Like this'},{p:'Lum',m:'Earth / Land'},{p:"Ich'el ta muk'",m:'Respect / Honor'}
+  ]},
+  {name:'Michif',region:'Canada/USA — Métis Nation',speakers:'~1,000',status:'Critically Endangered',area:'americas',family:'Mixed Creole',phrases:[
+    {p:'Tawnshi',m:'Hello'},{p:"Aen li'vr",m:'The book'},{p:'Nimishoomis',m:'My grandfather'},{p:'Li payii',m:'The country'}
+  ]},
+  // ASIA
+  {name:'Ainu',region:'Japan — Hokkaido',speakers:'~10',status:'Critically Endangered',area:'asia',family:'Isolate',phrases:[
+    {p:'Irankarapte',m:'Hello / I touch your heart gently'},{p:'Iyayraykere',m:'Thank you'},{p:'Wakka',m:'Water'},{p:'Nupuri',m:'Mountain'},{p:'Kamuy',m:'Spirit / God'}
+  ]},
+  {name:'Tofalar',region:'Russia — Siberia',speakers:'~30',status:'Nearly Extinct',area:'asia',family:'Turkic',phrases:[
+    {p:'Эки',m:'Good / Well'},{p:'Суг',m:'Water'},{p:'Таг',m:'Mountain'},{p:'Ий',m:'Forest'}
+  ]},
+  {name:'Kusunda',region:'Nepal — Hills',speakers:'~1',status:'Nearly Extinct',area:'asia',family:'Isolate',phrases:[
+    {p:'Aŋ',m:'I'},{p:'Miŋ',m:'You'},{p:'Chi',m:'Water'},{p:'Gi',m:'House'}
+  ]},
+  {name:'Vedda',region:'Sri Lanka — Forest',speakers:'~300',status:'Nearly Extinct',area:'asia',family:'Isolate',phrases:[
+    {p:'Vannakam',m:'Greetings'},{p:'Watura',m:'Water'},{p:'Gaha',m:'Tree'},{p:'Kanda',m:'Mountain'}
+  ]},
+  {name:'Yagnobi',region:'Tajikistan — Yagnob Valley',speakers:'~12,000',status:'Endangered',area:'asia',family:'Iranian',phrases:[
+    {p:'Salom',m:'Peace / Hello'},{p:'Ob',m:'Water'},{p:'Kuh',m:'Mountain'},{p:'Dehi',m:'Village'}
+  ]},
+  // PACIFIC
+  {name:'Norf\'k',region:"Norfolk Island (Australia territory)",speakers:'~900',status:'Endangered',area:'pacific',family:'Creole',phrases:[
+    {p:"Watiwas?",m:'How are you?'},{p:'Aorlyi',m:'All right / OK'},{p:'Dem tull',m:'Those people'},{p:'Es gwen',m:'It is going'}
+  ]},
+  {name:"Yagua",region:'Peru/Colombia — Amazon',speakers:'~6,000',status:'Vulnerable',area:'pacific',family:'Peba-Yaguan',phrases:[
+    {p:'Nuu',m:'Water'},{p:'Daachii',m:'Forest'},{p:'Ramu',m:'Fish'},{p:'Niimüü',m:'Person'}
+  ]},
+  {name:'Liki',region:'Indonesia — Papua',speakers:'~11',status:'Nearly Extinct',area:'pacific',family:'Austronesian',phrases:[
+    {p:'Yo',m:'I'},{p:'Ani',m:'Water'},{p:'Rumu',m:'House'}
+  ]},
+  {name:'Chamorro',region:'Guam/Northern Mariana Islands',speakers:'~58,000',status:'Vulnerable',area:'pacific',family:'Austronesian',phrases:[
+    {p:"Håfa Adai",m:'Hello / Welcome'},{p:'Si Yu\'us Ma\'åse',m:'Thank you'},{p:'Hågo',m:'You'},{p:'Tåno',m:'Land / Earth'}
+  ]},
+  // EUROPE
+  {name:'Cornish',region:'UK — Cornwall',speakers:'~3,000',status:'Revitalizing',area:'europe',family:'Celtic',phrases:[
+    {p:'Dydh da',m:'Good day'},{p:'Meur ras',m:'Thank you'},{p:'Dowr',m:'Water'},{p:'Lowen',m:'Happy'},{p:'Kernow bys vyken',m:'Cornwall forever'}
+  ]},
+  {name:'Aromanian',region:'Balkans — Greece/Romania/N.Macedonia',speakers:'~300,000',status:'Endangered',area:'europe',family:'Romance',phrases:[
+    {p:'Bun dzua',m:'Good day'},{p:'Apã',m:'Water'},{p:'Munte',m:'Mountain'},{p:'Oamini',m:'People'}
+  ]},
+  {name:'Livonian',region:'Latvia — Courland',speakers:'~20',status:'Nearly Extinct',area:'europe',family:'Finnic',phrases:[
+    {p:'Tēriņtš',m:'Hello'},{p:'Vesi',m:'Water'},{p:'Mõtsā',m:'Forest'},{p:'Jõgi',m:'River'}
+  ]},
+  {name:'Wymysorys',region:'Poland — Wilamowice',speakers:'~70',status:'Critically Endangered',area:'europe',family:'Germanic',phrases:[
+    {p:'Guot tag',m:'Good day'},{p:'Waser',m:'Water'},{p:'Hojm',m:'Home'},{p:'Bresła',m:'Wrocław'}
   ]},
 ];
 
@@ -2458,30 +2607,107 @@ function renderChatMessages(){
 }
 
 // ── HERITAGE / ENDANGERED LANGUAGES ──
+// ── HERITAGE ──
+var heritageRegion='all';
+
+function filterHeritage(region){
+  heritageRegion=region;
+  document.querySelectorAll('.heritage-region-btn').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-region')===region);
+  });
+  renderEndangered();
+}
+
+function renderLangOfWeek(){
+  // Pick language of week based on week number
+  var weekNum=Math.floor(Date.now()/(7*24*60*60*1000));
+  var lang=ENDANGERED_LANGS[weekNum%ENDANGERED_LANGS.length];
+  var card=document.getElementById('langOfWeekCard');
+  var content=document.getElementById('langOfWeekContent');
+  var tag=document.getElementById('langOfWeekTag');
+  if(!lang||!card)return;
+  tag.textContent=lang.name.toUpperCase();
+  var statusColor=lang.status.includes('Extinct')||lang.status.includes('Moribund')?'var(--red)':lang.status.includes('Endangered')||lang.status.includes('Critical')?'var(--gold)':'var(--green)';
+  content.innerHTML='<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">'+lang.region+' · '+lang.speakers+' speakers · <span style="color:'+statusColor+';">'+lang.status+'</span></div>'
+    +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:10px;">'+(lang.family?'Family: '+lang.family:'')+'</div>'
+    +'<div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-bottom:8px;">Essential phrases:</div>'
+    +lang.phrases.slice(0,4).map(function(ph){
+      var safeP=ph.p.replace(/'/g,'&#39;');
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+        +'<div style="font-family:var(--mono);font-size:12px;color:var(--gold);flex:1;">'+ph.p+'</div>'
+        +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);flex:1;">'+ph.m+'</div>'
+        +'<button class="btn btn-gold btn-sm" style="padding:3px 8px;font-size:9px;" onclick="speakTTS(\''+safeP+'\',\'en\')">🔊</button>'
+        +'</div>';
+    }).join('');
+}
+
 function renderEndangered(){
   var list=document.getElementById('endangeredList');
   var userPhrases=JSON.parse(localStorage.getItem('babel_endangered')||'[]');
-  var all=ENDANGERED_LANGS.concat(
-    userPhrases.reduce(function(acc,p){
-      var existing=acc.find(function(e){return e.name.toLowerCase()===p.lang.toLowerCase();});
-      if(existing){existing.phrases.push({p:p.phrase,m:p.meaning,context:p.context});}
-      else{acc.push({name:p.lang,region:'Community contributed',speakers:'Unknown',status:'Documented by community',phrases:[{p:p.phrase,m:p.meaning,context:p.context}]});}
-      return acc;
-    },[])
-  );
-  list.innerHTML=all.map(function(lang){
-    var statusColor=lang.status.includes('Extinct')?'var(--red)':lang.status.includes('Endangered')||lang.status.includes('Moribund')?'var(--gold)':'var(--green)';
+
+  // Merge user phrases into langs
+  var extra=[];
+  userPhrases.forEach(function(p){
+    var existing=ENDANGERED_LANGS.find(function(e){return e.name.toLowerCase()===p.lang.toLowerCase();});
+    if(existing){
+      if(!existing._userPhrases)existing._userPhrases=[];
+      existing._userPhrases.push({p:p.phrase,m:p.meaning,context:p.context});
+    } else {
+      var ex=extra.find(function(e){return e.name.toLowerCase()===p.lang.toLowerCase();});
+      if(ex){ex.phrases.push({p:p.phrase,m:p.meaning});}
+      else{extra.push({name:p.lang,region:'Community contributed',speakers:'Unknown',status:'Community Documented',area:p.region||'other',family:'Unknown',phrases:[{p:p.phrase,m:p.meaning}]});}
+    }
+  });
+
+  var all=ENDANGERED_LANGS.concat(extra);
+
+  // Filter by region
+  var filtered=heritageRegion==='all'?all:all.filter(function(l){return l.area===heritageRegion;});
+
+  // Update counts
+  var totalPhrases=0;
+  all.forEach(function(l){totalPhrases+=l.phrases.length+(l._userPhrases?l._userPhrases.length:0);});
+  var totalEl=document.getElementById('heritageTotalPhrases');
+  var totalLangEl=document.getElementById('heritageTotalLangs');
+  var communityEl=document.getElementById('heritageCommunity');
+  if(totalEl)totalEl.textContent=totalPhrases;
+  if(totalLangEl)totalLangEl.textContent=filtered.length;
+  if(communityEl)communityEl.textContent=userPhrases.length;
+
+  if(!filtered.length){
+    list.innerHTML='<div class="card"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">No languages in this region yet. Be the first to contribute!</div></div>';
+    return;
+  }
+
+  var statusColors={
+    'Nearly Extinct':'var(--red)',
+    'Moribund':'var(--red)',
+    'Critically Endangered':'var(--gold)',
+    'Endangered':'var(--gold)',
+    'Vulnerable':'#f59e0b',
+    'Revitalizing':'var(--green)',
+    'Community Documented':'var(--cyan)',
+  };
+
+  list.innerHTML=filtered.map(function(lang){
+    var statusColor=statusColors[lang.status]||'var(--dim)';
+    var allPhrases=lang.phrases.concat(lang._userPhrases||[]);
     return '<div class="card" style="margin-bottom:8px;">'
       +'<div class="card-head">'
       +'<span class="card-title" style="color:var(--gold);">🌿 '+lang.name+'</span>'
       +'<span style="font-family:var(--mono);font-size:7px;color:'+statusColor+';letter-spacing:1px;">'+lang.status+'</span>'
       +'</div>'
-      +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">'+lang.region+' · ~'+lang.speakers+' speakers</div>'
-      +lang.phrases.map(function(ph){
+      +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:4px;">'+lang.region+' · '+lang.speakers+' speakers</div>'
+      +(lang.family?'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:8px;">Family: '+lang.family+'</div>':'')
+      +allPhrases.map(function(ph){
+        var safeP=(ph.p||'').replace(/'/g,'&#39;').replace(/\\/g,'\\\\');
         return '<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
           +'<div style="font-family:var(--mono);font-size:11px;color:var(--gold);flex:1;">'+ph.p+'</div>'
-          +'<div style="font-family:var(--mono);font-size:10px;color:var(--text2);flex:1;">'+ph.m+'</div>'
-          +'<button class="btn btn-cyan btn-sm" style="font-size:9px;padding:3px 8px;" onclick="speakTTS(\''+ph.p+'\',\'en\')">🔊</button>'
+          +'<div style="flex:1;">'
+          +'<div style="font-family:var(--mono);font-size:10px;color:var(--text2);">'+ph.m+'</div>'
+          +(ph.context?'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);">'+ph.context+'</div>':'')
+          +'</div>'
+          +'<button class="btn btn-gold btn-sm" style="font-size:9px;padding:3px 8px;flex-shrink:0;" onclick="speakTTS(\''+safeP+'\',\'en\')">🔊</button>'
           +'</div>';
       }).join('')
       +'</div>';
@@ -2493,16 +2719,52 @@ function submitEndangered(){
   var phrase=document.getElementById('endPhrase').value.trim();
   var meaning=document.getElementById('endMeaning').value.trim();
   var context=document.getElementById('endContext').value.trim();
+  var region=document.getElementById('endRegion').value;
   if(!lang||!phrase||!meaning){toast('Fill in language, phrase and meaning');return;}
   var db=JSON.parse(localStorage.getItem('babel_endangered')||'[]');
-  db.push({lang:lang,phrase:phrase,meaning:meaning,context:context,ts:Date.now()});
+  db.push({lang:lang,phrase:phrase,meaning:meaning,context:context,region:region,ts:Date.now(),user:channelUser});
   localStorage.setItem('babel_endangered',JSON.stringify(db));
+  // Also save to Firebase community wall
+  var entry={lang:lang,phrase:phrase,meaning:meaning,context:context,region:region,ts:Date.now(),user:channelUser};
+  fetch(FIREBASE_DB_URL+'/babel_heritage.json',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(entry)
+  }).catch(function(){});
   document.getElementById('endLangName').value='';
   document.getElementById('endPhrase').value='';
   document.getElementById('endMeaning').value='';
   document.getElementById('endContext').value='';
   renderEndangered();
-  toast('Phrase preserved — thank you');
+  loadCommunityPhrases();
+  toast('Phrase preserved — Asante sana 🌿');
+}
+
+function loadCommunityPhrases(){
+  var wall=document.getElementById('communityPhraseWall');
+  fetch(FIREBASE_DB_URL+'/babel_heritage.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data||typeof data!=='object'){
+        wall.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No community phrases yet. Be the first!</div>';
+        var communityEl=document.getElementById('heritageCommunity');
+        return;
+      }
+      var phrases=Object.values(data).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+      var communityEl=document.getElementById('heritageCommunity');
+      if(communityEl)communityEl.textContent=phrases.length;
+      wall.innerHTML=phrases.slice(0,20).map(function(p){
+        var time=new Date(p.ts||Date.now()).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+        return '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+          +'<div style="font-family:var(--mono);font-size:7px;color:var(--teal,#06b6d4);margin-bottom:3px;">🌿 '+p.lang+(p.region?' · '+p.region:'')+' · '+time+'</div>'
+          +'<div style="font-family:var(--mono);font-size:12px;color:var(--gold);">'+p.phrase+'</div>'
+          +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);">'+p.meaning+'</div>'
+          +(p.context?'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);">'+p.context+'</div>':'')
+          +'</div>';
+      }).join('');
+    }).catch(function(){
+      wall.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Could not load community phrases.</div>';
+    });
 }
 
 // ── PWA INSTALL ──
@@ -3311,6 +3573,10 @@ function interpretIcons(){
 
 // Init icons
 showIconCat('survival');
+// Init heritage
+renderLangOfWeek();
+renderEndangered();
+loadCommunityPhrases();
 initFollowing();
 
 function initFollowing(){
