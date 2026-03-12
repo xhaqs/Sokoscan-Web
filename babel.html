@@ -3229,7 +3229,8 @@ function endQuiz(){
 
 // Silent AI call — no streaming, just callback
 function runTutorAISilent(prompt, cb){
-  fetch('/api/tutor',{
+  var TUTOR_API=window.location.protocol+'//'+window.location.host+'/api/tutor';
+  fetch(TUTOR_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
@@ -3358,24 +3359,23 @@ function runTutorAI(prompt, mode){
   document.getElementById('tutorResponseCard').style.display='block';
   var responseEl=document.getElementById('tutorResponse');
   responseEl.innerHTML='<span class="spinner"></span> Thinking...';
-  // Scroll to response
   setTimeout(function(){responseEl.scrollIntoView({behavior:'smooth',block:'start'});},100);
-
-  fetch('/api/tutor',{
+  var GEMINI_API=window.location.protocol+'//'+window.location.host+'/api/gemini';
+  var systemPrompt='You are BABEL AI Tutor — built by RIAKOINE-EMPIRE, created by Zack. You are warm, sharp, and deeply knowledgeable about languages and cultures worldwide, especially African languages including Gikuyu, Swahili, Luganda, Yoruba, Hausa and endangered languages. Your job is language learning, cultural context, pronunciation, dialects, and heritage preservation. If someone asks something off-topic like news, politics, or current events, kindly redirect them: tell them BABEL is your language and culture companion, not a news feed — then offer to teach them something fascinating about a language instead. Never be robotic. Always be human and encouraging. Plain text only — no markdown, no asterisks, no bullet symbols.';
+  fetch(GEMINI_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      max_tokens:1000,
-      system:'You are BABEL AI Tutor — built by RIAKOINE-EMPIRE, created by Zack. You are warm, sharp, and deeply knowledgeable about languages and cultures worldwide, especially African languages including Gikuyu, Swahili, Luganda, Yoruba, Hausa and endangered languages. Your job is language learning, cultural context, pronunciation, dialects, and heritage preservation. If someone asks something off-topic like news, politics, or current events, kindly redirect them: tell them BABEL is your language and culture companion, not a news feed — then offer to teach them something fascinating about a language instead. Never be robotic. Always be human and encouraging. Plain text only — no markdown, no asterisks, no bullet symbols.',
-      messages:[{role:'user',content:prompt}]
+      system_instruction:{parts:[{text:systemPrompt}]},
+      contents:[{role:'user',parts:[{text:prompt}]}],
+      generationConfig:{maxOutputTokens:600,temperature:0.7}
     })
   })
   .then(function(r){return r.json();})
   .then(function(data){
     var text='';
-    if(data.choices&&data.choices[0]&&data.choices[0].message){
-      text=data.choices[0].message.content;
+    if(data.candidates&&data.candidates[0]&&data.candidates[0].content){
+      text=data.candidates[0].content.parts[0].text;
     } else if(data.error){
       text='Tutor unavailable: '+(data.error.message||JSON.stringify(data.error));
     }
@@ -3861,15 +3861,16 @@ function interpretIcons(){
   btn.textContent='🧠 Interpreting...';
   btn.disabled=true;
   var symbolStr=iconMessage.map(function(s){return s.s+' ('+s.l+')';}).join(', ');
-  var prompt='A person has communicated using only these universal symbols in sequence: '+symbolStr+'. Interpret what they are most likely trying to communicate. Give a clear, concise interpretation in 1-2 sentences. Then suggest what they might need. Be empathetic and practical.';
-  fetch('/api/tutor',{
+  var systemPrompt='You are a universal communication interpreter. Interpret sequences of universal symbols to understand what a person is trying to communicate, especially where language is a barrier. Be brief, clear and empathetic.';
+  var userPrompt='A person has communicated using only these universal symbols in sequence: '+symbolStr+'. Interpret what they are most likely trying to communicate in 1-2 sentences. Then suggest what they might need.';
+  var GEMINI_API=window.location.protocol+'//'+window.location.host+'/api/gemini';
+  fetch(GEMINI_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      max_tokens:200,
-      system:'You are a universal communication interpreter. You interpret sequences of universal symbols/emoji to understand what a person is trying to communicate, especially in situations where language is a barrier. Be brief, clear and empathetic.',
-      messages:[{role:'user',content:prompt}]
+      system_instruction:{parts:[{text:systemPrompt}]},
+      contents:[{role:'user',parts:[{text:userPrompt}]}],
+      generationConfig:{maxOutputTokens:200,temperature:0.7}
     })
   })
   .then(function(r){return r.json();})
@@ -3877,9 +3878,13 @@ function interpretIcons(){
     btn.textContent='🧠 AI INTERPRET — Translate symbols to text';
     btn.disabled=false;
     var text='';
-    if(data.choices&&data.choices[0])text=data.choices[0].message.content;
-    else if(data.error)text='Error: '+(data.error.message||'Try again');
-    else text='Could not interpret. Try again.';
+    if(data.candidates&&data.candidates[0]&&data.candidates[0].content){
+      text=data.candidates[0].content.parts[0].text;
+    } else if(data.error){
+      text='Error: '+(data.error.message||'Try again');
+    } else {
+      text='Could not interpret. Try again.';
+    }
     result.style.display='block';
     result.textContent=text;
   })
