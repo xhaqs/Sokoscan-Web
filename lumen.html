@@ -495,7 +495,7 @@ body{
 })();
 
 // ── STATE ──
-var LUMEN_API=window.location.protocol+'//'+window.location.host+'/api/gemini';
+var LUMEN_API=window.location.protocol+'//'+window.location.host+'/api/tutor';
 var chatHistory=[];
 var isTyping=false;
 
@@ -599,11 +599,10 @@ function callLumen(userMsg){
     headers:{'Content-Type':'application/json'},
     signal:controller.signal,
     body:JSON.stringify({
-      system_instruction:{parts:[{text:systemPrompt}]},
-      contents:msgs.map(function(m){
-        return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};
-      }),
-      generationConfig:{maxOutputTokens:300,temperature:0.7}
+      model:'llama-3.3-70b-versatile',
+      max_tokens:300,
+      system:systemPrompt,
+      messages:msgs.map(function(m){return {role:m.role==='assistant'?'assistant':'user',content:m.content};})
     })
   })
   .then(function(r){
@@ -616,8 +615,8 @@ function callLumen(userMsg){
     removeTyping();
     showStopBtn(false);
     var text='';
-    if(data.candidates&&data.candidates[0]&&data.candidates[0].content){
-      text=data.candidates[0].content.parts[0].text;
+    if(data.choices&&data.choices[0]&&data.choices[0].message){
+      text=data.choices[0].message.content;
     } else if(data.error){
       text='API Error: '+(data.error.message||JSON.stringify(data.error));
     } else {
