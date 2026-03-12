@@ -494,7 +494,7 @@ body{
 })();
 
 // ── STATE ──
-var currentContext='general';
+var LUMEN_API='http://5.180.181.125:3000/api/tutor';
 var chatHistory=[];
 var isTyping=false;
 
@@ -560,7 +560,7 @@ function callLumen(userMsg){
   var systemPrompt=CONTEXT_PROMPTS[currentContext]+memCtx;
   // Keep last 10 messages for context
   var msgs=chatHistory.slice(-10);
-  fetch('/api/tutor',{
+  fetch(LUMEN_API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
