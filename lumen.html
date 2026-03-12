@@ -599,7 +599,10 @@ function callLumen(userMsg){
       messages:msgs
     })
   })
-  .then(function(r){return r.json();})
+  .then(function(r){
+    if(!r.ok){throw new Error('HTTP '+r.status);}
+    return r.json();
+  })
   .then(function(data){
     if(timedOut||_lumenStopped)return;
     clearTimeout(_lumenTimeout);
@@ -609,18 +612,20 @@ function callLumen(userMsg){
     if(data.choices&&data.choices[0]){
       text=data.choices[0].message.content;
     } else if(data.error){
-      text='Error: '+(data.error.message||'Try again');
+      text='API Error: '+(data.error.message||JSON.stringify(data.error));
+    } else {
+      text='Unexpected response: '+JSON.stringify(data).substring(0,100);
     }
     chatHistory.push({role:'assistant',content:text});
     streamMessage(text);
     extractMemory(userMsg,text);
   })
-  .catch(function(){
+  .catch(function(err){
     if(timedOut||_lumenStopped)return;
     clearTimeout(_lumenTimeout);
     removeTyping();
     showStopBtn(false);
-    addMessage('lumen','Connection lost. Check your network and try again.');
+    addMessage('lumen','Error: '+(err.message||'Connection failed. Check network.'));
     isTyping=false;
   });
 }
