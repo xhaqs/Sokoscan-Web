@@ -965,7 +965,14 @@ function aiAnalyseTopResult(){
 }
 
 function openPolymarketBySlug(slug){
-  var url=slug?'https://polymarket.com/event/'+slug:'https://polymarket.com';
+  if(!slug){window.open('https://polymarket.com','_blank');return;}
+  slug=slug.replace(/^https?:\/\/[^\/]+/,'').replace(/^\//,'');
+  var url='';
+  if(slug.indexOf('event/')===0||slug.indexOf('market/')===0){
+    url='https://polymarket.com/'+slug;
+  } else {
+    url='https://polymarket.com/event/'+slug;
+  }
   window.open(url,'_blank');
 }
 
@@ -1204,17 +1211,17 @@ function closeDetail(){document.getElementById('detailOverlay').classList.remove
 
 function openPolymarket(){
   if(!currentMarket)return;
+  var slug=currentMarket.slug||currentMarket.marketSlug||'';
+  slug=slug.replace(/^https?:\/\/[^\/]+/,'').replace(/^\//,'');
   var url='';
-  // Try all known URL patterns
-  if(currentMarket.slug){
-    url='https://polymarket.com/event/'+currentMarket.slug;
-  } else if(currentMarket.marketSlug){
-    url='https://polymarket.com/event/'+currentMarket.marketSlug;
-  } else if(currentMarket.conditionId){
-    url='https://polymarket.com/market/'+currentMarket.conditionId;
+  if(slug){
+    if(slug.indexOf('event/')===0||slug.indexOf('market/')===0){
+      url='https://polymarket.com/'+slug;
+    } else {
+      url='https://polymarket.com/event/'+slug;
+    }
   } else {
-    // Fallback — search by question
-    url='https://polymarket.com/markets?q='+encodeURIComponent(currentMarket.question.substring(0,50));
+    url='https://polymarket.com/?s='+encodeURIComponent((currentMarket.question||'').substring(0,60));
   }
   window.open(url,'_blank');
   toast('Opening Polymarket...');
