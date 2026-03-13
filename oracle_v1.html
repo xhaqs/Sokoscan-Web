@@ -289,7 +289,7 @@ body::after{content:'';position:fixed;inset:0;
         </div>
         <div style="display:flex;gap:8px;margin-bottom:10px;">
           <input class="field-input" id="searchQuery" placeholder="e.g. Liverpool, Bitcoin, Trump..." style="flex:1;" onkeydown="if(event.key==='Enter')searchMarkets()">
-          <button class="btn btn-teal" onclick="searchMarkets()" id="searchBtn" style="background:rgba(14,165,176,0.12);border:1px solid rgba(14,165,176,0.3);color:var(--teal2);white-space:nowrap;">SEARCH</button>
+          <button onclick="searchMarkets()" id="searchBtn" style="background:rgba(14,165,176,0.15);border:1px solid rgba(14,165,176,0.4);color:var(--teal2);font-family:var(--mono);font-size:10px;padding:10px 16px;border-radius:5px;cursor:pointer;white-space:nowrap;letter-spacing:0.1em;flex-shrink:0;">SEARCH</button>
         </div>
         <div class="chip-row" id="searchSuggestions">
           <div class="chip" onclick="quickSearch('Bitcoin')">Bitcoin</div>
@@ -513,6 +513,24 @@ body::after{content:'';position:fixed;inset:0;
         <div class="card-head"><span class="card-title">COMPOUNDING LOG</span></div>
         <div id="compoundLog"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No entries yet.</div></div>
       </div>
+
+      <!-- ROI DASHBOARD -->
+      <div class="card" style="border-color:rgba(201,168,76,0.2);">
+        <div class="card-head">
+          <span class="card-title">📈 ROI DASHBOARD</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadROI()">↻</button>
+        </div>
+        <div class="stats-row" id="roiStats">
+          <div class="stat-box"><div class="stat-val" id="roiPnl" style="color:var(--gold2);">$0</div><div class="stat-lbl">TOTAL P&L</div></div>
+          <div class="stat-box"><div class="stat-val" id="roiWinRate" style="color:var(--green2);">0%</div><div class="stat-lbl">WIN RATE</div></div>
+          <div class="stat-box"><div class="stat-val" id="roiROI" style="color:var(--purple2);">0%</div><div class="stat-lbl">ROI</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div class="stat-box"><div class="stat-val" id="roiWins" style="font-size:16px;color:var(--green2);">0</div><div class="stat-lbl">WINS</div></div>
+          <div class="stat-box"><div class="stat-val" id="roiLosses" style="font-size:16px;color:var(--red2);">0</div><div class="stat-lbl">LOSSES</div></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:7px;color:var(--dim);text-align:center;margin-top:8px;" id="roiNote">Mark positions as WIN/LOSS in the Positions tab to track ROI</div>
+      </div>
     </div>
 
     <!-- SETTINGS -->
@@ -542,6 +560,9 @@ body::after{content:'';position:fixed;inset:0;
         <div style="display:flex;gap:8px;">
           <button class="btn btn-gold" style="flex:1;" onclick="saveSettings()">💾 SAVE</button>
           <button class="btn btn-purple" id="testTgBtn" style="flex:1;" onclick="testTelegram()">📱 TEST ALERT</button>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-green btn-full" onclick="sendDailySummary()">📊 SEND SUMMARY NOW</button>
         </div>
       </div>
 
@@ -709,6 +730,7 @@ function initOracle(){
   renderPositions();
   renderBankroll();
   renderAlerts();
+  loadROI();
 }
 
 // ── LOCAL STORAGE ──
@@ -1342,6 +1364,51 @@ function renderBankroll(){
         +'</div></div>';
     }).join('');
   }
+}
+
+// ── ROI DASHBOARD ──
+function loadROI(){
+  // Calculate from local positions
+  var closed=positions.filter(function(p){return p.status==='closed';});
+  var wins=closed.filter(function(p){return p.pnl>0;}).length;
+  var losses=closed.filter(function(p){return p.pnl<=0;}).length;
+  var totalPnl=closed.reduce(function(s,p){return s+p.pnl;},0);
+  var totalStaked=closed.reduce(function(s,p){return s+p.stake;},0);
+  var roi=totalStaked>0?((totalPnl/totalStaked)*100).toFixed(1):'0.0';
+  var winRate=closed.length>0?((wins/closed.length)*100).toFixed(0):'0';
+  document.getElementById('roiPnl').textContent=(totalPnl>=0?'+':'')+'$'+Math.abs(totalPnl).toFixed(2);
+  document.getElementById('roiPnl').style.color=totalPnl>=0?'var(--green2)':'var(--red2)';
+  document.getElementById('roiWinRate').textContent=winRate+'%';
+  document.getElementById('roiROI').textContent=(parseFloat(roi)>=0?'+':'')+roi+'%';
+  document.getElementById('roiROI').style.color=parseFloat(roi)>=0?'var(--green2)':'var(--red2)';
+  document.getElementById('roiWins').textContent=wins;
+  document.getElementById('roiLosses').textContent=losses;
+  if(closed.length>0){
+    document.getElementById('roiNote').textContent=closed.length+' closed bets · $'+totalStaked.toFixed(2)+' total staked';
+  }
+}
+
+// ── DAILY SUMMARY ──
+function sendDailySummary(){
+  var tgId=document.getElementById('settingsTgId').value.trim();
+  if(!tgId){toast('Enter Telegram Chat ID in settings first');return;}
+  var btn=event.target;
+  btn.disabled=true;btn.textContent='SENDING...';
+  var token='';try{token=sessionStorage.getItem(SK)||'';}catch(e){}
+  fetch(BASE+'/api/oracle/daily-summary',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-keystone-token':token},
+    body:JSON.stringify({tgChatId:tgId})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    btn.disabled=false;btn.textContent='📊 SEND SUMMARY NOW';
+    toast(d.ok?'✅ Summary sent — '+d.count+' edges found':'❌ Failed: '+(d.error||'unknown'));
+  })
+  .catch(function(){
+    btn.disabled=false;btn.textContent='📊 SEND SUMMARY NOW';
+    toast('❌ Connection error');
+  });
 }
 
 // ── KELLY CRITERION ──
