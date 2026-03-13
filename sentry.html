@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#020a06">
+<title>SENTRY</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --safe:#00ff88;--watch:#ffcc00;--sos:#ff2244;--gold:#c9a84c;
+  --bg:#020a06;--card:#071510;--border:#0d2b1a;
+  --text:#c8ffe0;--dim:#7abf9a;
+  --mono:'Share Tech Mono',monospace;
+  --cond:'Barlow Condensed',sans-serif;
+  --body:'Rajdhani',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--body);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
+#app{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+
+/* TOPBAR */
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 7px;border-bottom:1px solid var(--border);background:rgba(2,10,6,0.97);flex-shrink:0;}
+.logo-wrap{display:flex;flex-direction:column;}
+.logo{font-family:var(--cond);font-size:22px;font-weight:900;letter-spacing:6px;color:var(--safe);text-shadow:0 0 20px rgba(0,255,136,0.5);line-height:1;}
+.empire{font-family:var(--cond);font-size:8px;font-weight:700;letter-spacing:2.5px;color:var(--gold);text-shadow:0 0 12px rgba(201,168,76,0.6);margin-top:1px;}
+.badge-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.nav-zack{font-family:var(--cond);font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--gold);opacity:0.8;}
+#statusBadge{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;padding:3px 8px;border-radius:2px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:var(--safe);display:flex;align-items:center;gap:5px;}
+.pulse-dot{width:5px;height:5px;border-radius:50%;background:var(--safe);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.8);}}
+
+/* BODY SCROLL */
+#body{flex:1;overflow-y:auto;padding:10px 10px 74px;}
+#body::-webkit-scrollbar{width:2px;}
+#body::-webkit-scrollbar-thumb{background:var(--border);}
+.panel{display:none;}.panel.active{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.card-safe::before{background:linear-gradient(90deg,var(--safe),transparent);}
+.card-watch::before{background:linear-gradient(90deg,var(--watch),transparent);}
+.card-sos::before{background:linear-gradient(90deg,var(--sos),transparent);}
+.card-gold::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.card-neutral::before{background:linear-gradient(90deg,rgba(0,255,136,0.25),transparent);}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.card-title{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--safe);}
+.card-tag{font-family:var(--mono);font-size:7px;letter-spacing:1px;color:var(--dim);padding:2px 5px;border:1px solid var(--border);border-radius:2px;}
+
+/* MODE BUTTONS */
+#modeSelector{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.mode-btn{padding:10px 4px;border-radius:4px;border:1px solid;cursor:pointer;text-align:center;transition:all 0.2s;background:rgba(4,15,8,0.8);}
+.mode-safe{border-color:rgba(0,255,136,0.2);}.mode-safe.active{border-color:var(--safe);box-shadow:0 0 12px rgba(0,255,136,0.2);}
+.mode-watch{border-color:rgba(255,204,0,0.2);}.mode-watch.active{border-color:var(--watch);box-shadow:0 0 12px rgba(255,204,0,0.2);}
+.mode-sos{border-color:rgba(255,34,68,0.2);}.mode-sos.active{border-color:var(--sos);box-shadow:0 0 12px rgba(255,34,68,0.2);}
+.mode-icon{font-size:16px;margin-bottom:2px;display:block;}
+.mode-label{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:block;}
+.mode-safe .mode-label{color:var(--safe);}.mode-watch .mode-label{color:var(--watch);}.mode-sos .mode-label{color:var(--sos);}
+.mode-sub{font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:1px;display:block;}
+
+/* SOS BUTTON */
+#sosRing{width:130px;height:130px;border-radius:50%;margin:4px auto 10px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+#sosRing::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,34,68,0.2);animation:ringPulse 2.5s infinite;}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:0.6;}50%{transform:scale(1.05);opacity:0.2;}}
+#sosBtn{width:114px;height:114px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3a0010,#1a000a);border:2px solid rgba(255,34,68,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;box-shadow:0 0 24px rgba(255,34,68,0.2);transition:all 0.15s;position:relative;z-index:2;}
+#sosBtn:active{transform:scale(0.95);}
+.sos-label{font-family:var(--cond);font-size:26px;font-weight:900;letter-spacing:5px;color:var(--sos);text-shadow:0 0 20px rgba(255,34,68,0.8);line-height:1;}
+.sos-sub{font-family:var(--mono);font-size:7px;color:rgba(255,34,68,0.5);letter-spacing:2px;}
+
+/* CHECKIN */
+.checkin-time{font-family:var(--mono);font-size:24px;color:var(--safe);text-shadow:0 0 12px rgba(0,255,136,0.4);letter-spacing:2px;}
+.checkin-bar{height:3px;background:var(--border);border-radius:2px;margin:6px 0 4px;}
+.checkin-fill{height:100%;border-radius:2px;background:var(--safe);transition:width 1s linear;}
+
+/* EMERGENCY */
+.emrg-btn{background:rgba(255,34,68,0.06);border:1px solid rgba(255,34,68,0.2);border-radius:3px;padding:8px 4px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.emrg-btn:active{background:rgba(255,34,68,0.15);}
+.emrg-number{font-family:var(--mono);font-size:14px;color:var(--sos);text-shadow:0 0 8px rgba(255,34,68,0.5);display:block;}
+.emrg-label{font-family:var(--cond);font-size:7px;color:var(--dim);letter-spacing:1px;margin-top:1px;display:block;}
+
+/* TOGGLE */
+.toggle{width:36px;height:19px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:rgba(0,255,136,0.25);border:1px solid rgba(0,255,136,0.3);}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--dim);transition:all 0.2s;}
+.toggle.on .toggle-thumb{left:19px;background:var(--safe);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(13,43,26,0.6);}
+.setting-row:last-child{border-bottom:none;}
+.setting-label{font-family:var(--body);font-size:13px;font-weight:500;color:var(--text);}
+.setting-sub{font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:1px;letter-spacing:1px;}
+
+/* MAP */
+#mapLeaflet{height:300px;width:100%;border-radius:3px;overflow:hidden;border:1px solid var(--border);margin-bottom:8px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.info-box{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;}
+.info-label{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px;}
+.info-val{font-family:var(--mono);font-size:11px;color:var(--text);}
+
+/* COMPASS */
+#compassWrap{position:relative;width:160px;height:160px;flex-shrink:0;}
+#compassSvg{width:160px;height:160px;}
+#compassRing{transform-origin:80px 80px;transition:transform 0.15s ease-out;}
+
+/* SIGNAL */
+.sig-bar{width:8px;border-radius:2px 2px 0 0;background:var(--border);transition:all 0.3s;}
+.sig-bar.active{background:var(--safe);}
+.sig-bar.watch{background:var(--watch);}
+.sig-bar.dead{background:var(--sos);}
+
+/* CONTACT */
+.contact-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(13,43,26,0.7);}
+.contact-row:last-child{border-bottom:none;}
+.contact-avatar{width:28px;height:28px;border-radius:50%;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.contact-name{font-family:var(--body);font-size:13px;font-weight:600;color:var(--text);}
+.contact-channels{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-top:1px;}
+.contact-dot{width:6px;height:6px;border-radius:50%;background:var(--safe);box-shadow:0 0 6px rgba(0,255,136,0.6);}
+
+/* BOTTOM NAV */
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:grid;grid-template-columns:repeat(6,1fr);background:rgba(2,10,6,0.98);border-top:1px solid var(--border);z-index:99999;padding-bottom:env(safe-area-inset-bottom);}
+.nav-btn{padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent;position:relative;z-index:99999;}
+.nav-icon{font-size:16px;}
+.nav-label{font-family:var(--cond);font-size:7px;font-weight:700;letter-spacing:1.5px;color:var(--dim);}
+.nav-btn.active .nav-label{color:var(--safe);}
+
+/* SOS MODAL */
+#sosModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:24px;}
+#sosModal.open{display:flex;}
+.sos-box{background:#0a0205;border:1px solid rgba(255,34,68,0.4);border-radius:6px;padding:24px 20px;width:100%;max-width:340px;text-align:center;}
+.sos-modal-title{font-family:var(--cond);font-size:20px;font-weight:900;letter-spacing:4px;color:var(--sos);margin-bottom:4px;}
+.sos-modal-sub{font-family:var(--mono);font-size:8px;color:rgba(255,34,68,0.6);letter-spacing:1px;margin-bottom:14px;line-height:1.6;}
+.sos-countdown{font-family:var(--mono);font-size:50px;color:var(--sos);text-shadow:0 0 30px rgba(255,34,68,0.8);margin-bottom:14px;line-height:1;}
+.modal-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.btn-cancel{padding:10px;border-radius:3px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;}
+.btn-confirm{padding:10px;border-radius:3px;background:rgba(255,34,68,0.15);border:1px solid rgba(255,34,68,0.4);color:var(--sos);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;}
+
+/* END JOURNEY MODAL */
+#endModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;padding:24px;}
+#endModal.open{display:flex;}
+.end-box{background:var(--card);border:1px solid rgba(255,204,0,0.3);border-radius:6px;padding:24px 20px;width:100%;max-width:320px;text-align:center;}
+
+/* TOAST */
+#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:3px;font-family:var(--mono);font-size:9px;letter-spacing:1px;z-index:99998;transition:transform 0.25s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="passkeyScreen" style="position:fixed;inset:0;background:#020a06;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+<div style="font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;letter-spacing:8px;color:#00ff88;text-shadow:0 0 24px rgba(0,255,136,0.5);margin-bottom:4px;">SENTRY</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:#c9a84c;margin-bottom:32px;">BY RIAKOINE-EMPIRE</div>
+<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#7abf9a;letter-spacing:2px;margin-bottom:12px;">ENTER ACCESS CODE</div>
+<input id="passkeyInput" type="password" maxlength="32"
+  style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.25);color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:16px;letter-spacing:4px;padding:14px 20px;border-radius:4px;outline:none;text-align:center;width:100%;max-width:280px;margin-bottom:12px;"
+  placeholder="&#xB7; &#xB7; &#xB7; &#xB7; &#xB7; &#xB7; &#xB7; &#xB7;"
+  onkeydown="if(event.key==='Enter')checkPasskey();">
+<div id="passkeyError" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff2244;letter-spacing:2px;margin-bottom:12px;min-height:14px;"></div>
+<button onclick="checkPasskey()"
+  style="background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.4);color:#00ff88;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;padding:12px 32px;border-radius:4px;cursor:pointer;width:100%;max-width:280px;">
+  ENTER
+</button>
+<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#3a5a3a;margin-top:32px;letter-spacing:1px;">SECURE PERSONAL SAFETY SYSTEM</div>
+</div>
+<script>
+// ── KEYSTONE AUTH ──
+(function(){
+  var APP_ID='sentry';
+  var SK='sentry_sk1';
+  var BASE=window.location.protocol+'//'+window.location.host;
+  var SCREEN_ID='passkeyScreen';
+  var INPUT_ID='passkeyInput';
+  var ERROR_ID='passkeyError';
+  function showApp(){ document.getElementById('passkeyScreen').style.display='none'; }
+  function mobileFixFocus(){
+    var pk=document.getElementById(SCREEN_ID);
+    var inp=document.getElementById(INPUT_ID);
+    if(pk&&inp){
+      pk.addEventListener('touchstart',function(e){
+        if(e.target!==inp&&e.target.tagName!=='BUTTON'){e.preventDefault();inp.focus();}
+      },{passive:false});
+      setTimeout(function(){inp.focus();},300);
+    }
+  }
+  window.checkPasskey=function(){
+    var v=document.getElementById(INPUT_ID).value.trim();
+    var errEl=document.getElementById(ERROR_ID);
+    if(!v){errEl.textContent='PASSWORD REQUIRED';return;}
+    errEl.textContent='';
+    var btn=document.querySelector('#'+SCREEN_ID+' button');
+    if(btn){btn.textContent='VERIFYING...';btn.disabled=true;}
+    fetch(BASE+'/api/keystone/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:v,app:APP_ID})
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
+      if(d.ok&&d.token){
+        try{sessionStorage.setItem(SK,d.token);}catch(e){}
+        document.getElementById(SCREEN_ID).style.display='none';
+        showApp();
+      } else {
+        errEl.textContent=d.error==='Access denied for this application'?'ACCESS NOT GRANTED':d.error||'INVALID PASSWORD';
+        document.getElementById(INPUT_ID).value='';
+        document.getElementById(INPUT_ID).focus();
+      }
+    })
+    .catch(function(){
+      if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
+      errEl.textContent='CONNECTION ERROR — TRY AGAIN';
+    });
+  };
+  try{
+    var saved=sessionStorage.getItem(SK);
+    if(saved){
+      fetch(BASE+'/api/keystone/verify',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-keystone-token':saved},
+        body:JSON.stringify({app:APP_ID})
+      })
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){document.getElementById(SCREEN_ID).style.display='none';showApp();}
+        else{sessionStorage.removeItem(SK);mobileFixFocus();}
+      }).catch(function(){mobileFixFocus();});
+    } else {mobileFixFocus();}
+  }catch(e){mobileFixFocus();}
+})();
+</script>
+<div id="app">
+  <div id="topbar">
+    <div class="logo-wrap">
+      <div class="logo">SENTRY</div>
+      <div class="empire">✦ RIAKOINE-EMPIRE ✦</div>
+    </div>
+    <div class="badge-wrap">
+      <div class="nav-zack">Navigate with Zack</div>
+      <div id="statusBadge"><div class="pulse-dot" id="pulseDot"></div><span id="statusText">SAFE MODE</span></div>
+    </div>
+  </div>
+
+  <div id="body">
+
+    <!-- HOME -->
+    <div class="panel active" id="panel-home">
+      <div id="modeSelector">
+        <div class="mode-btn mode-safe active" onclick="setMode('safe',this)"><span class="mode-icon">🟢</span><span class="mode-label">Safe</span><span class="mode-sub">All clear</span></div>
+        <div class="mode-btn mode-watch" onclick="setMode('watch',this)"><span class="mode-icon">🟡</span><span class="mode-label">Watch</span><span class="mode-sub">Alert</span></div>
+        <div class="mode-btn mode-sos" onclick="triggerSOS()"><span class="mode-icon">🔴</span><span class="mode-label">SOS</span><span class="mode-sub">Alert</span></div>
+      </div>
+
+      <div id="sosRing"><div id="sosBtn" onclick="triggerSOS()"><span class="sos-label">SOS</span><span class="sos-sub">HOLD TO SEND</span></div></div>
+
+      <!-- Check-in + GPS combined -->
+      <div class="card card-watch">
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;">
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">NEXT CHECK-IN</div>
+            <div class="checkin-time" id="checkinTime">30:00</div>
+            <div class="checkin-bar"><div class="checkin-fill" id="checkinFill" style="width:100%;"></div></div>
+          </div>
+          <div style="flex:1;border-left:1px solid var(--border);padding-left:8px;">
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">GPS POSITION</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--safe);" id="homeLat">Acquiring...</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--safe);" id="homeLng"></div>
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:2px;" id="homeAcc"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button onclick="resetCheckin()" style="flex:1;padding:8px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);color:var(--safe);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">✓ I'M OK</button>
+          <div style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:3px;padding:8px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">TOWN</div>
+            <div style="font-family:var(--cond);font-size:11px;font-weight:700;color:var(--text);" id="homeTown">---</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather -->
+      <div class="card card-neutral" id="wxCard">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);">Acquiring GPS for weather...</div>
+      </div>
+
+      <!-- Journey -->
+      <div class="card card-watch">
+        <div class="card-head"><span class="card-title">Journey Tracker</span><span class="card-tag" id="journeyTag" style="color:var(--dim);">INACTIVE</span></div>
+        <div id="journeyEndedMsg" style="display:none;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:4px;padding:10px;margin-bottom:8px;text-align:center;">
+          <div style="font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--safe);margin-bottom:3px;">&#x2713; JOURNEY COMPLETED SAFELY</div>
+          <div id="journeyEndedName" style="font-family:var(--mono);font-size:9px;color:var(--dim);"></div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px;">Tracking link is now inactive</div>
+        </div>
+        <div id="journeyInactive">
+          <input id="journeyName" type="text" placeholder="e.g. Kiserian to Rongai" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:3px;font-family:var(--mono);font-size:10px;outline:none;margin-bottom:7px;">
+          <button onclick="startJourney()" style="width:100%;padding:10px;background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.25);color:var(--watch);font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;">▶ START JOURNEY</button>
+        </div>
+        <div id="journeyActive" style="display:none;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
+            <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:7px;text-align:center;"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--watch);" id="jDistVal">0.00</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">KM</div></div>
+            <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:7px;text-align:center;"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--safe);" id="jTimeVal">00:00</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">HH:MM</div></div>
+            <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:7px;text-align:center;"><div style="font-family:var(--cond);font-size:18px;font-weight:900;color:var(--dim);" id="jPtsVal">0</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">PTS</div></div>
+          </div>
+          <div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.12);border-radius:3px;padding:7px;margin-bottom:7px;"><div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:2px;">LIVE LINK</div><div style="font-family:var(--mono);font-size:8px;color:var(--safe);word-break:break-all;" id="trackingLink">---</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <button onclick="dropWaypoint()" style="padding:8px;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.18);color:var(--safe);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">+ WPT</button>
+            <button id="jPauseBtn" onclick="pauseResumeJourney()" style="padding:8px;background:rgba(255,204,0,0.06);border:1px solid rgba(255,204,0,0.25);color:var(--watch);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">PAUSE</button>
+            <button onclick="showEndConfirm()" style="padding:8px;background:rgba(255,34,68,0.06);border:1px solid rgba(255,34,68,0.18);color:var(--sos);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">STOP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stopwatch -->
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Stopwatch</span><span class="card-tag" id="swTag" style="color:var(--dim);">READY</span></div>
+        <!-- Main display -->
+        <div style="text-align:center;padding:12px 0 8px;">
+          <div style="font-family:var(--mono);font-size:42px;font-weight:900;color:var(--safe);letter-spacing:2px;line-height:1;" id="swDisplay">00:00:00</div>
+          <div style="font-family:var(--mono);font-size:16px;color:var(--dim);margin-top:2px;" id="swMs">.000</div>
+        </div>
+        <!-- Controls -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;">
+          <button id="swStartBtn" onclick="swStartStop()" style="padding:10px;background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.35);color:var(--safe);font-family:var(--cond);font-size:12px;font-weight:900;letter-spacing:2px;border-radius:3px;cursor:pointer;">START</button>
+          <button onclick="swLap()" style="padding:10px;background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.25);color:var(--watch);font-family:var(--cond);font-size:12px;font-weight:900;letter-spacing:2px;border-radius:3px;cursor:pointer;">LAP</button>
+          <button onclick="swReset()" style="padding:10px;background:rgba(255,34,68,0.06);border:1px solid rgba(255,34,68,0.2);color:var(--sos);font-family:var(--cond);font-size:12px;font-weight:900;letter-spacing:2px;border-radius:3px;cursor:pointer;">RESET</button>
+        </div>
+        <!-- Split display -->
+        <div id="swSplitRow" style="display:none;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:7px;margin-bottom:7px;text-align:center;">
+          <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px;">LAST SPLIT</div>
+          <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--watch);" id="swLastSplit">--</div>
+        </div>
+        <!-- Laps list -->
+        <div id="swLapsList" style="max-height:160px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- Emergency -->
+      <div class="card card-sos">
+        <div class="card-head"><span class="card-title" style="color:var(--sos);">Emergency</span><span class="card-tag" id="countryTag">DETECTING</span></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:7px;" id="countryName">Detecting region...</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;" id="emergencyGrid">
+          <div class="emrg-btn" onclick="callNumber('112')"><span class="emrg-number">112</span><span class="emrg-label">UNIVERSAL</span></div>
+          <div class="emrg-btn" onclick="callNumber('999')"><span class="emrg-number">999</span><span class="emrg-label">POLICE</span></div>
+          <div class="emrg-btn" onclick="callNumber('911')"><span class="emrg-number">911</span><span class="emrg-label">INTL</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div class="panel" id="panel-map">
+      <div class="card card-safe" style="padding:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span class="card-title">Live Map</span>
+          <div style="display:flex;gap:5px;">
+            <button onclick="centerMap()" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--safe);padding:4px 10px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;">ME</button>
+            <button onclick="toggleMapStyle()" id="mapStyleBtn" style="background:rgba(13,43,26,0.8);border:1px solid var(--border);color:var(--dim);padding:4px 10px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;">SAT</button>
+          </div>
+        </div>
+        <div id="mapLeaflet"></div>
+      </div>
+
+      <!-- Compass + Info -->
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Compass</span><span class="card-tag" id="compassTag">CALIBRATING</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div id="compassWrap">
+            <svg id="compassSvg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              <!-- Outer bezel -->
+              <circle cx="80" cy="80" r="78" fill="#040f08" stroke="#1a3a28" stroke-width="2"/>
+              <circle cx="80" cy="80" r="74" fill="none" stroke="#0d2b1a" stroke-width="1"/>
+              <!-- Degree ring — rotates with heading -->
+              <g id="compassRing">
+                <!-- Tick marks every 10deg -->
+                <g stroke="#2a5a3a" stroke-width="1">
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(0,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(10,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(20,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(30,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(40,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(50,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(60,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(70,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(80,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(90,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(100,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(110,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(120,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(130,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(140,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(150,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(160,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(170,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(180,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(190,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(200,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(210,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(220,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(230,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(240,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(250,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(260,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(270,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(280,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(290,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(300,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(310,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(320,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="16" transform="rotate(330,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(340,80,80)"/>
+                  <line x1="80" y1="8" x2="80" y2="14" transform="rotate(350,80,80)"/>
+                </g>
+                <!-- Cardinal labels — rotate with ring -->
+                <text x="80" y="26" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="13" font-weight="900" fill="#ff2244">N</text>
+                <text x="80" y="152" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="11" font-weight="700" fill="#2a6a4a" transform="rotate(180,80,80)">S</text>
+                <text x="80" y="152" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="11" font-weight="700" fill="#2a6a4a" transform="rotate(90,80,80)">E</text>
+                <text x="80" y="152" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="11" font-weight="700" fill="#2a6a4a" transform="rotate(270,80,80)">W</text>
+                <!-- Intercardinals -->
+                <text x="80" y="30" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="8" fill="#1a4a2a" transform="rotate(45,80,80)">NE</text>
+                <text x="80" y="30" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="8" fill="#1a4a2a" transform="rotate(135,80,80)">SE</text>
+                <text x="80" y="30" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="8" fill="#1a4a2a" transform="rotate(225,80,80)">SW</text>
+                <text x="80" y="30" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="8" fill="#1a4a2a" transform="rotate(315,80,80)">NW</text>
+              </g>
+              <!-- Fixed lubber line (top = your heading) -->
+              <polygon points="80,12 77,22 83,22" fill="#ffcc00" opacity="0.9"/>
+              <!-- Inner dial -->
+              <circle cx="80" cy="80" r="46" fill="#030b06" stroke="#0d2b1a" stroke-width="1.5"/>
+              <!-- Fixed needle — always points up (you face where needle points) -->
+              <polygon points="80,38 76,80 84,80" fill="#ff2244"/>
+              <polygon points="80,122 76,80 84,80" fill="#00ff88"/>
+              <!-- Center cap -->
+              <circle cx="80" cy="80" r="6" fill="#0d2b1a" stroke="#2a5a3a" stroke-width="1.5"/>
+              <circle cx="80" cy="80" r="2.5" fill="#00ff88"/>
+            </svg>
+          </div>
+          <div style="width:100%;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;">
+              <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px;">HEADING</div>
+                <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--text);line-height:1;" id="headingVal">---</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--safe);" id="headingDir">--</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px;">ELEVATION</div>
+                <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--watch);line-height:1;" id="elevVal">---</div>
+                <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">metres</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px;">DIRECTION</div>
+                <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--safe);line-height:1;" id="headingDirLarge">--</div>
+                <div style="font-family:var(--mono);font-size:7px;color:var(--dim);">cardinal</div>
+              </div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;">
+              <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">NEAREST TOWN</div>
+              <div style="font-family:var(--body);font-size:14px;font-weight:600;color:var(--text);" id="townVal">Locating...</div>
+              <div style="font-family:var(--mono);font-size:8px;color:var(--dim);" id="townDist"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Position</span></div>
+        <div class="info-grid">
+          <div class="info-box"><div class="info-label">LATITUDE</div><div class="info-val" id="mapLatVal">---</div></div>
+          <div class="info-box"><div class="info-label">LONGITUDE</div><div class="info-val" id="mapLngVal">---</div></div>
+          <div class="info-box"><div class="info-label">ELEVATION</div><div class="info-val" id="gpsAltVal">--- m</div></div>
+          <div class="info-box"><div class="info-label">ACCURACY</div><div class="info-val" id="mapAccVal">---</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNAL -->
+    <div class="panel" id="panel-signal">
+      <div class="card card-safe">
+        <div class="card-head"><span class="card-title">Signal Strength</span><span class="card-tag" id="sigTag">SCANNING</span></div>
+        <div style="display:flex;align-items:flex-end;gap:4px;height:50px;margin-bottom:10px;" id="sigBars">
+          <div class="sig-bar" style="height:20%;"></div>
+          <div class="sig-bar" style="height:40%;"></div>
+          <div class="sig-bar" style="height:60%;"></div>
+          <div class="sig-bar" style="height:80%;"></div>
+          <div class="sig-bar" style="height:100%;"></div>
+        </div>
+        <div class="info-grid" style="margin-bottom:10px;">
+          <div class="info-box"><div class="info-label">STRENGTH</div><div class="info-val" id="sigStrength">--</div></div>
+          <div class="info-box"><div class="info-label">TYPE</div><div class="info-val" id="sigType">--</div></div>
+          <div class="info-box"><div class="info-label">STATUS</div><div class="info-val" id="sigStatus">--</div></div>
+          <div class="info-box"><div class="info-label">QUEUE</div><div class="info-val" id="sigQueue">0</div></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:6px;">RECENT READINGS</div>
+        <div id="sigLog" style="max-height:160px;overflow-y:auto;"></div>
+      </div>
+
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Signal Heat Map</span><span class="card-tag" id="sigMapTag">RECORDING</span></div>
+        <div id="sigMap" style="height:240px;border-radius:3px;overflow:hidden;border:1px solid var(--border);"></div>
+        <div style="display:flex;gap:10px;margin-top:7px;justify-content:center;">
+          <div style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:7px;color:var(--dim);"><div style="width:8px;height:8px;border-radius:50%;background:var(--safe);"></div>STRONG</div>
+          <div style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:7px;color:var(--dim);"><div style="width:8px;height:8px;border-radius:50%;background:var(--watch);"></div>WEAK</div>
+          <div style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:7px;color:var(--dim);"><div style="width:8px;height:8px;border-radius:50%;background:var(--sos);"></div>DEAD</div>
+        </div>
+      </div>
+
+      <div class="card card-watch">
+        <div class="card-head"><span class="card-title">Offline Queue</span><span class="card-tag" id="queueTag">0 PENDING</span></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.8;">SOS alerts captured offline are queued here and sent automatically when signal returns.</div>
+        <div id="queueList" style="margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div class="panel" id="panel-contacts">
+      <div class="card card-safe">
+        <div class="card-head">
+          <span class="card-title">Alert Contacts</span>
+          <button onclick="openAddContact()" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--safe);padding:4px 12px;border-radius:2px;font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;">+ ADD</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;line-height:1.6;">Contacts receive alerts on their preferred channels. All channels require the contact to have the relevant app or API key set up.</div>
+        <div id="contactList"><div style="text-align:center;padding:20px;font-family:var(--mono);font-size:9px;color:var(--dim);">No contacts yet — tap + ADD</div></div>
+      </div>
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Test Alerts</span></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;">Send a test alert to all contacts to verify channels are working.</div>
+        <button onclick="testAllContacts()" style="width:100%;padding:10px;background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.25);color:var(--watch);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;">SEND TEST ALERT</button>
+      </div>
+    </div>
+
+    <!-- ADD CONTACT MODAL -->
+    <div id="addContactModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:999999;overflow-y:auto;padding:16px;">
+      <div style="max-width:420px;margin:0 auto;padding-bottom:60px;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-family:var(--cond);font-size:20px;font-weight:900;letter-spacing:3px;color:var(--safe);" id="contactModalTitle">ADD CONTACT</div>
+        </div>
+        <input type="hidden" id="editContactId">
+        <!-- Name -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">NAME *</div>
+          <input id="cName" type="text" placeholder="e.g. Ken" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--mono);font-size:11px;outline:none;">
+        </div>
+        <!-- Relation -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">RELATION</div>
+          <input id="cRelation" type="text" placeholder="e.g. Friend, Family, Emergency" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--mono);font-size:11px;outline:none;">
+        </div>
+        <!-- Phone -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">PHONE (with country code)</div>
+          <input id="cPhone" type="tel" placeholder="e.g. +254712345678" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--mono);font-size:11px;outline:none;">
+        </div>
+        <!-- Telegram -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">TELEGRAM CHAT ID</div>
+          <input id="cTelegram" type="text" placeholder="e.g. 123456789 (from @userinfobot)" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--mono);font-size:11px;outline:none;">
+        </div>
+        <!-- WhatsApp -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">WHATSAPP NUMBER (digits only)</div>
+          <input id="cWhatsapp" type="tel" placeholder="e.g. 16145989253" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--mono);font-size:11px;outline:none;">
+        </div>
+        <!-- CallMeBot Key -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">CALLMEBOT API KEY (for WhatsApp)</div>
+          <input id="cCallmebot" type="text" placeholder="e.g. 1234567 (contact must activate first)" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--mono);font-size:11px;outline:none;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:3px;">Contact saves +34 644 65 21 69 → sends "I allow callmebot to send me messages" → gets key</div>
+        </div>
+        <!-- Alert types -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;">ALERT TYPES — select what this contact receives</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="alertTypeGrid">
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertSOS" checked style="accent-color:#ff2244;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--sos);">SOS ALERT</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Emergency distress</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertDeadzone" checked style="accent-color:#ffcc00;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--watch);">DEAD ZONE</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Signal lost 10min+</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertJourneyStart" style="accent-color:#00ff88;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--safe);">JOURNEY START</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Walk begun + link</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertJourneyEnd" style="accent-color:#00ff88;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--safe);">JOURNEY END</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Arrived safe + summary</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertCheckin" style="accent-color:#00ff88;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--safe);">CHECK-IN</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Regular I'm OK pings</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertBuddy" style="accent-color:#00ff88;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--safe);">BUDDY CHECK</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">They can ping you</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertLowBatt" style="accent-color:#ffcc00;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--watch);">LOW BATTERY</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Battery below 15%</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="checkbox" id="cAlertTest" checked style="accent-color:#00ff88;">
+              <div><div style="font-family:var(--cond);font-size:10px;font-weight:700;color:var(--dim);">TEST ALERTS</div><div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Manual test sends</div></div>
+            </label>
+          </div>
+        </div>
+        <!-- Preferred channel -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;">PRIMARY CHANNEL</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+            <label style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="radio" name="cChannel" value="telegram" checked style="accent-color:#00ff88;">
+              <span style="font-family:var(--cond);font-size:9px;color:var(--text);">TELEGRAM</span>
+            </label>
+            <label style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="radio" name="cChannel" value="whatsapp" style="accent-color:#00ff88;">
+              <span style="font-family:var(--cond);font-size:9px;color:var(--text);">WHATSAPP</span>
+            </label>
+            <label style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;">
+              <input type="radio" name="cChannel" value="sms" style="accent-color:#00ff88;">
+              <span style="font-family:var(--cond);font-size:9px;color:var(--text);">SMS</span>
+            </label>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button onclick="closeAddContact()" style="padding:12px;background:rgba(255,34,68,0.06);border:1px solid rgba(255,34,68,0.2);color:var(--sos);font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;">CANCEL</button>
+          <button onclick="saveContact()" style="padding:12px;background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.4);color:var(--safe);font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;">SAVE</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- CAMERA -->
+    <div class="panel" id="panel-camera">
+      <div class="card card-safe" style="padding:10px;">
+        <div class="card-head">
+          <span class="card-title">Camera</span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="flipCamera()" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--safe);padding:4px 10px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;">FLIP</button>
+            <button onclick="stopCamera()" style="background:rgba(255,34,68,0.08);border:1px solid rgba(255,34,68,0.2);color:var(--sos);padding:4px 10px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;">STOP</button>
+          </div>
+        </div>
+        <div style="position:relative;border-radius:3px;overflow:hidden;background:#000;margin-bottom:8px;">
+          <video id="camVideo" autoplay playsinline style="width:100%;display:block;max-height:320px;object-fit:cover;"></video>
+          <canvas id="camOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
+          <div style="position:absolute;bottom:8px;left:8px;font-family:var(--mono);font-size:8px;color:rgba(0,255,136,0.8);text-shadow:0 0 4px #000;" id="camGpsOverlay">NO GPS</div>
+          <div style="position:absolute;bottom:8px;right:8px;font-family:var(--mono);font-size:8px;color:rgba(0,255,136,0.8);text-shadow:0 0 4px #000;" id="camTimeOverlay"></div>
+        </div>
+        <!-- Zoom controls -->
+        <div style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:1px;">ZOOM</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--safe);" id="zoomVal">1.0x</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="setZoom(1)" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--safe);padding:4px 8px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;white-space:nowrap;">1x</button>
+            <input type="range" id="zoomSlider" min="1" max="5" step="0.1" value="1" oninput="setZoom(this.value)" style="flex:1;accent-color:#00ff88;height:4px;cursor:pointer;">
+            <button onclick="setZoom(2)" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--safe);padding:4px 8px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;white-space:nowrap;">2x</button>
+            <button onclick="setZoom(5)" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--safe);padding:4px 8px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;white-space:nowrap;">5x</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <button onclick="capturePhoto()" style="padding:10px;background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.4);color:var(--safe);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">📷 PHOTO</button>
+          <button id="videoRecBtn" onclick="toggleVideo()" style="padding:10px;background:rgba(255,204,0,0.08);border:2px solid rgba(255,204,0,0.35);color:var(--watch);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">⏺ VIDEO</button>
+          <button onclick="captureSOS()" style="padding:10px;background:rgba(255,34,68,0.1);border:2px solid rgba(255,34,68,0.4);color:var(--sos);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;border-radius:3px;cursor:pointer;">🚨 SOS</button>
+        </div>
+        <!-- Recording indicator -->
+        <div id="recIndicator" style="display:none;text-align:center;padding:6px;margin-top:6px;background:rgba(255,34,68,0.1);border:1px solid rgba(255,34,68,0.3);border-radius:3px;">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--sos);letter-spacing:2px;">⏺ RECORDING — </span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--sos);" id="recTimer">00:00</span>
+        </div>
+      </div>
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Media Gallery</span><span class="card-tag" id="photoCount">0 ITEMS</span></div>
+        <div id="photoGallery" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Settings</span></div>
+        <div class="setting-row"><div><div class="setting-label">Silent Mode</div><div class="setting-sub">ALERTS WITHOUT SCREEN WAKE</div></div><div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div></div>
+        <div class="setting-row"><div><div class="setting-label">Movement Detection</div><div class="setting-sub">AUTO-SOS IF STILL 30MIN</div></div><div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div></div>
+        <div class="setting-row"><div><div class="setting-label">Low Power Mode</div><div class="setting-sub">PING EVERY 15MIN</div></div><div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div></div>
+      </div>
+      <div class="card card-neutral">
+        <div class="card-head"><span class="card-title">Identity</span></div>
+        <div class="setting-row"><div><div class="setting-label">Callsign</div><div class="setting-sub" id="callsignDisplay">NOT SET</div></div><button onclick="setCallsign()" style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.18);color:var(--safe);padding:5px 10px;border-radius:2px;font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;">EDIT</button></div>
+        <div class="setting-row"><div><div class="setting-label">Blood Type</div><div class="setting-sub">SENT IN EMERGENCIES</div></div><select id="bloodSelect" onchange="localStorage.setItem('sentry_blood',this.value)" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:2px;font-family:var(--mono);font-size:10px;outline:none;"><option>--</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+      </div>
+      <div class="card" style="border-color:rgba(255,34,68,0.2);">
+        <div class="card-head"><span class="card-title" style="color:var(--sos);">Test + Reset</span></div>
+        <button onclick="sendTestSOS()" style="width:100%;padding:10px;background:rgba(255,34,68,0.06);border:1px solid rgba(255,34,68,0.2);color:var(--sos);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;margin-bottom:7px;">TEST ALERT</button>
+        <button onclick="if(window.confirm('Reset all data?')){localStorage.clear();location.reload();}" style="width:100%;padding:9px;background:transparent;border:1px solid var(--border);color:var(--dim);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:2px;border-radius:3px;cursor:pointer;">RESET ALL</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NAV -->
+<div id="nav">
+  <button class="nav-btn active" onclick="switchPanel('home',this)"><span class="nav-icon">🛡</span><span class="nav-label">HOME</span></button>
+  <button class="nav-btn" onclick="switchPanel('map',this)"><span class="nav-icon">🗺</span><span class="nav-label">MAP</span></button>
+  <button class="nav-btn" onclick="switchPanel('signal',this)"><span class="nav-icon">📶</span><span class="nav-label">SIGNAL</span></button>
+  <button class="nav-btn" onclick="switchPanel('contacts',this)"><span class="nav-icon">👥</span><span class="nav-label">CONTACTS</span></button>
+  <button class="nav-btn" onclick="switchPanel('camera',this)"><span class="nav-icon">📷</span><span class="nav-label">CAMERA</span></button>
+  <button class="nav-btn" onclick="switchPanel('settings',this)"><span class="nav-icon">⚙</span><span class="nav-label">SETTINGS</span></button>
+</div>
+
+<!-- SOS MODAL -->
+<div id="sosModal">
+  <div class="sos-box">
+    <div class="sos-modal-title">SOS ALERT</div>
+    <div class="sos-modal-sub">Sending location to all contacts<br>via Telegram</div>
+    <div class="sos-countdown" id="sosCountdown">5</div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cancelSOS()">CANCEL</button>
+      <button class="btn-confirm" onclick="confirmSOS()">SEND NOW</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- JOURNEY SUMMARY MODAL -->
+<div id="summaryModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:999999;overflow-y:auto;padding:16px;">
+  <div style="max-width:420px;margin:0 auto;padding-bottom:40px;">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-family:var(--cond);font-size:22px;font-weight:900;letter-spacing:4px;color:#ffcc00;">JOURNEY COMPLETE</div>
+      <div style="font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:2px;" id="sumJourneyName"></div>
+    </div>
+    <!-- Big stats row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;text-align:center;">
+        <div style="font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">DISTANCE</div>
+        <div style="font-size:22px;font-weight:900;color:var(--safe);" id="sumDist">0.00</div>
+        <div style="font-size:8px;color:var(--dim);">km</div>
+      </div>
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;text-align:center;">
+        <div style="font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">TIME</div>
+        <div style="font-size:22px;font-weight:900;color:var(--safe);" id="sumTime">0:00</div>
+        <div style="font-size:8px;color:var(--dim);">h:min</div>
+      </div>
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;text-align:center;">
+        <div style="font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">PACE</div>
+        <div style="font-size:22px;font-weight:900;color:var(--safe);" id="sumPace">0:00</div>
+        <div style="font-size:8px;color:var(--dim);">min/km</div>
+      </div>
+    </div>
+    <!-- Secondary stats -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:10px;">
+        <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">WAYPOINTS</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);" id="sumWaypoints">0</div>
+      </div>
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:10px;">
+        <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">TRAIL POINTS</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);" id="sumPoints">0</div>
+      </div>
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:10px;">
+        <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">STARTED</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text);" id="sumStart">--</div>
+      </div>
+      <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:10px;">
+        <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">ENDED</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text);" id="sumEnd">--</div>
+      </div>
+    </div>
+    <!-- Route towns -->
+    <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;">ROUTE — TOWNS PASSED</div>
+      <div id="sumTowns" style="font-size:11px;color:var(--text);line-height:1.8;word-break:break-word;">--</div>
+    </div>
+    <!-- Elevation -->
+    <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;">ELEVATION PROFILE</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div style="text-align:center;">
+          <div style="font-size:7px;color:var(--dim);margin-bottom:2px;">MIN</div>
+          <div style="font-size:15px;font-weight:700;color:var(--safe);" id="sumElevMin">-- m</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:7px;color:var(--dim);margin-bottom:2px;">MAX</div>
+          <div style="font-size:15px;font-weight:700;color:var(--watch);" id="sumElevMax">-- m</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:7px;color:var(--dim);margin-bottom:2px;">GAIN</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);" id="sumElevGain">-- m</div>
+        </div>
+      </div>
+    </div>
+    <!-- Dead zones -->
+    <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:6px;">SIGNAL DEAD ZONES</div>
+      <div id="sumDeadZones" style="font-size:11px;color:var(--text);line-height:1.8;">--</div>
+    </div>
+    <!-- Trail map -->
+    <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:6px;">TRAIL MAP</div>
+      <div id="sumMapContainer" style="height:200px;border-radius:3px;overflow:hidden;"></div>
+    </div>
+    <!-- Calories -->
+    <div style="background:#071510;border:1px solid #0d2b1a;border-radius:4px;padding:12px;margin-bottom:16px;">
+      <div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:3px;">EST. CALORIES BURNED</div>
+      <div style="font-size:18px;font-weight:700;color:var(--watch);" id="sumCals">0</div>
+      <div style="font-size:7px;color:var(--dim);">based on 70kg body weight</div>
+    </div>
+    <button onclick="closeSummary()" style="width:100%;padding:14px;background:rgba(0,255,136,0.1);border:2px solid rgba(0,255,136,0.4);color:var(--safe);font-family:var(--cond);font-size:14px;font-weight:900;letter-spacing:3px;border-radius:3px;cursor:pointer;">CLOSE</button>
+  </div>
+</div>
+
+<!-- END JOURNEY MODAL -->
+<div id="endModal">
+  <div class="end-box">
+    <div style="font-family:var(--cond);font-size:18px;font-weight:900;letter-spacing:3px;color:var(--watch);margin-bottom:6px;">END JOURNEY?</div>
+    <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:18px;line-height:1.7;">Route and distance will be saved.</div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="document.getElementById('endModal').classList.remove('open');">CANCEL</button>
+      <button style="padding:10px;border-radius:3px;background:rgba(255,204,0,0.12);border:1px solid rgba(255,204,0,0.35);color:var(--watch);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;" onclick="document.getElementById('endModal').classList.remove('open');endJourney();">END</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var SERVER=window.location.protocol+'//'+window.location.host,TOKEN=sessionStorage.getItem('sentry_sk1')||'';
+var S={mode:'safe',lat:null,lng:null,accuracy:null,altitude:null,sosCountdown:5,sosTimer:null,checkinTotal:1800,checkinRemain:1800};
+var J={active:false,startTime:null,distance:0,points:0,pingInterval:null,timerInterval:null,callsign:null};
+var SIG={readings:[],recording:false};
+var EMERGENCY={
+  KE:{name:'Kenya',numbers:[{n:'999',l:'POLICE'},{n:'112',l:'UNIVERSAL'},{n:'0800720601',l:'AMBULANCE'}]},
+  TZ:{name:'Tanzania',numbers:[{n:'111',l:'POLICE'},{n:'112',l:'UNIVERSAL'},{n:'114',l:'AMBULANCE'}]},
+  UG:{name:'Uganda',numbers:[{n:'999',l:'POLICE'},{n:'112',l:'UNIVERSAL'},{n:'0800100066',l:'AMBULANCE'}]},
+  ZA:{name:'South Africa',numbers:[{n:'10111',l:'POLICE'},{n:'112',l:'UNIVERSAL'},{n:'10177',l:'AMBULANCE'}]},
+  US:{name:'USA',numbers:[{n:'911',l:'ALL'},{n:'911',l:'POLICE'},{n:'911',l:'AMBULANCE'}]},
+  GB:{name:'UK',numbers:[{n:'999',l:'ALL'},{n:'112',l:'UNIVERSAL'},{n:'999',l:'AMBULANCE'}]},
+  DEFAULT:{name:'Unknown',numbers:[{n:'112',l:'UNIVERSAL'},{n:'999',l:'INTL'},{n:'911',l:'INTL'}]}
+};
+
+window.addEventListener('load',function(){
+  startGPS();
+  startCheckin();
+  detectCountry();
+  loadSaved();
+  initCompass();
+  setTimeout(fetchWeather,3000);
+  setTimeout(fetchElevationAndTown,6000);
+  setInterval(fetchElevationAndTown,120000);
+  setInterval(scanSignal,10000);
+  scanSignal();
+  drainQueue();
+  updateQueueDisplay();
+  try{
+    var _je=JSON.parse(localStorage.getItem('sentry_j_ended')||'null');
+    if(_je && (Date.now()-new Date(_je.t).getTime())<600000){
+      var _jem=document.getElementById('journeyEndedMsg');
+      var _jen=document.getElementById('journeyEndedName');
+      if(_jem)_jem.style.display='block';
+      if(_jen)_jen.textContent=_je.n;
+    } else if(_je){
+      localStorage.removeItem('sentry_j_ended');
+    }
+  }catch(e){}
+});
+window.addEventListener('online',function(){
+  // Small delay — navigator.onLine fires before network is truly ready
+  toast('Back online  -  checking queue...');
+  setTimeout(function(){
+    var q=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+    if(q.length>0){
+      toast('Sending '+q.length+' queued alert(s)...');
+      drainQueue();
+    } else {
+      toast('Back online  -  no queued alerts');
+    }
+  },2500);
+});
+
+// Also poll every 30 seconds in case online event was missed (airplane mode edge case)
+setInterval(function(){
+  if(navigator.onLine){
+    var q=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+    if(q.length>0)drainQueue();
+  }
+},30000);
+
+function switchPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='map')setTimeout(initMap,100);
+  if(id==='signal')setTimeout(initSigMap,100);
+  if(id==='camera')setTimeout(startCamera,100);
+  if(id!=='camera')stopCamera();
+}
+
+function getBattery(cb){
+  if(navigator.getBattery){
+    navigator.getBattery().then(function(b){cb(Math.round(b.level*100));});
+  } else { cb(null); }
+}
+function startGPS(){
+  if(!navigator.geolocation){toast('GPS not available');return;}
+  navigator.geolocation.watchPosition(function(pos){
+    S.lat=pos.coords.latitude;
+    S.lng=pos.coords.longitude;
+    S.accuracy=pos.coords.accuracy;
+    S.altitude=pos.coords.altitude;
+    getBattery(function(b){
+      if(b!=null){
+        var prev=S.battery;
+        S.battery=b;
+        if(b<=15&&(prev==null||prev>15)){
+          notifyContacts('lowBatt',{mode:'LOW_BATTERY',message:'Battery critical: '+b+'%'});
+          toast('Battery low: '+b+'% - contacts notified');
+        }
+      }
+    });
+    var la=document.getElementById('homeLat'),ln=document.getElementById('homeLng'),ac=document.getElementById('homeAcc');
+    if(la)la.textContent=S.lat.toFixed(5);
+    if(ln)ln.textContent=S.lng.toFixed(5);
+    if(ac)ac.textContent='Acc: +-'+Math.round(S.accuracy)+'m';
+    updateMapDot();
+    var a=document.getElementById('mapLatVal'),b=document.getElementById('mapLngVal'),c=document.getElementById('mapAccVal');
+    if(a)a.textContent=S.lat.toFixed(6);
+    if(b)b.textContent=S.lng.toFixed(6);
+    if(c)c.textContent='+-'+Math.round(S.accuracy)+'m';
+  },function(err){
+    var la=document.getElementById('homeLat');
+    if(la)la.textContent='GPS: '+err.message;
+  },{enableHighAccuracy:true,maximumAge:10000});
+}
+
+function setMode(mode,el){
+  S.mode=mode;
+  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active');});
+  if(el)el.classList.add('active');
+  var labels={safe:'SAFE MODE',watch:'WATCH MODE',sos:'SOS ACTIVE'};
+  var colors={safe:'var(--safe)',watch:'var(--watch)',sos:'var(--sos)'};
+  var dot=document.getElementById('pulseDot'),text=document.getElementById('statusText');
+  if(dot)dot.style.background=colors[mode];
+  if(text)text.textContent=labels[mode];
+}
+
+function triggerSOS(){
+  document.getElementById('sosModal').classList.add('open');
+  S.sosCountdown=5;
+  document.getElementById('sosCountdown').textContent=5;
+  clearInterval(S.sosTimer);
+  S.sosTimer=setInterval(function(){
+    S.sosCountdown--;
+    document.getElementById('sosCountdown').textContent=S.sosCountdown;
+    if(S.sosCountdown<=0){clearInterval(S.sosTimer);confirmSOS();}
+  },1000);
+}
+function cancelSOS(){
+  clearInterval(S.sosTimer);
+  document.getElementById('sosModal').classList.remove('open');
+  toast('SOS cancelled');
+}
+function confirmSOS(){
+  clearInterval(S.sosTimer);
+  document.getElementById('sosModal').classList.remove('open');
+  setMode('sos',null);
+  getBattery(function(bat){
+    var payload={
+      callsign:localStorage.getItem('sentry_callsign')||'SENTRY USER',
+      blood:localStorage.getItem('sentry_blood')||'UNKNOWN',
+      lat:S.lat,lng:S.lng,accuracy:S.accuracy,
+      battery:bat,mode:'SOS',timestamp:new Date().toISOString()
+    };
+    if(!navigator.onLine){queueAlert(payload);toast('Offline  -  SOS queued');return;}
+    fetch(SERVER+'/sentry/sos',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json();})
+    .then(function(d){toast(d.ok?'SOS SENT  -  Telegram OK':'Error: '+d.error);})
+    .catch(function(){queueAlert(payload);toast('Offline  -  SOS queued');});
+  });
+}
+function sendTestSOS(){
+  toast('Sending test...');
+  var payload={
+    callsign:localStorage.getItem('sentry_callsign')||'SENTRY USER',
+    blood:localStorage.getItem('sentry_blood')||'UNKNOWN',
+    lat:S.lat,lng:S.lng,accuracy:S.accuracy,
+    mode:'TEST',message:'TEST ALERT - IGNORE',timestamp:new Date().toISOString()
+  };
+  fetch(SERVER+'/sentry/sos',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify(payload)
+  }).then(function(r){return r.json();})
+  .then(function(d){toast(d.ok?'Test sent  -  check Telegram':'Error: '+d.error);})
+  .catch(function(e){toast('Error: '+e.message);});
+}
+
+function startCheckin(){
+  setInterval(function(){
+    S.checkinRemain--;
+    if(S.checkinRemain<=0){S.checkinRemain=0;triggerSOS();}
+    var m=Math.floor(S.checkinRemain/60),s=S.checkinRemain%60;
+    var el=document.getElementById('checkinTime');
+    if(el)el.textContent=('0'+m).slice(-2)+':'+('0'+s).slice(-2);
+    var pct=(S.checkinRemain/S.checkinTotal)*100;
+    var fill=document.getElementById('checkinFill');
+    if(fill){fill.style.width=pct+'%';fill.style.background=pct>50?'var(--safe)':pct>25?'var(--watch)':'var(--sos)';}
+  },1000);
+}
+function resetCheckin(){S.checkinRemain=S.checkinTotal;toast('Check-in confirmed  -  all good');}
+
+function startJourney(){
+  var name=document.getElementById('journeyName').value.trim()||'Journey '+new Date().toLocaleDateString();
+  J.callsign=localStorage.getItem('sentry_callsign')||'SENTRY';
+  J.active=true;J.startTime=Date.now();J.distance=0;J.points=0;
+  J.towns=[];J.lastTownTime=0;J.journeyName=name;
+  J.startElev=S.altitude||null;J.minElev=null;J.maxElev=null;
+  J.deadZones=[];J.lastSignalTime=Date.now();J.lastSignalGood=true;
+  fetch(SERVER+'/sentry/journey/start',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify({callsign:J.callsign,name:name})
+  }).catch(function(){});
+  document.getElementById('journeyInactive').style.display='none';
+  document.getElementById('journeyActive').style.display='block';
+  document.getElementById('journeyTag').textContent='ACTIVE';
+  document.getElementById('journeyTag').style.color='var(--watch)';
+  document.getElementById('trackingLink').textContent=SERVER+'/sentry/track/'+J.callsign;
+  localStorage.removeItem('sentry_j_ended');
+  J.pingInterval=setInterval(pingJourney,60000);
+  pingJourney();
+  J.timerInterval=setInterval(updateJourneyTimer,1000);
+  setMode('watch',document.querySelector('.mode-watch'));
+  toast('Journey started  -  '+name);
+  notifyContacts('journeyStart',{mode:'JOURNEY_START',message:'Journey started: '+name+' | Track: '+SERVER+'/sentry/track/'+J.callsign});
+}
+function pauseResumeJourney(){
+  if(!J.active)return;
+  if(!J.paused){
+    // PAUSE  -  stop pinging, stop timer
+    J.paused=true;
+    J.pauseTime=Date.now();
+    clearInterval(J.pingInterval);
+    clearInterval(J.timerInterval);
+    document.getElementById('jPauseBtn').textContent='RESUME';
+    document.getElementById('jPauseBtn').style.color='var(--safe)';
+    document.getElementById('jPauseBtn').style.borderColor='rgba(0,255,136,0.35)';
+    document.getElementById('journeyTag').textContent='PAUSED';
+    document.getElementById('journeyTag').style.color='var(--watch)';
+    toast('Journey paused');
+  } else {
+    // RESUME  -  account for paused time, restart
+    J.paused=false;
+    var pausedFor=Date.now()-J.pauseTime;
+    J.startTime+=pausedFor; // shift start time forward so elapsed stays correct
+    J.pingInterval=setInterval(pingJourney,60000);
+    J.timerInterval=setInterval(updateJourneyTimer,1000);
+    document.getElementById('jPauseBtn').textContent='PAUSE';
+    document.getElementById('jPauseBtn').style.color='var(--watch)';
+    document.getElementById('jPauseBtn').style.borderColor='rgba(255,204,0,0.25)';
+    document.getElementById('journeyTag').textContent='ACTIVE';
+    document.getElementById('journeyTag').style.color='var(--watch)';
+    toast('Journey resumed');
+  }
+}
+function pingJourney(){
+  if(!S.lat||!J.active)return;
+  fetch(SERVER+'/sentry/journey/ping',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify({callsign:J.callsign,lat:S.lat,lng:S.lng,accuracy:S.accuracy,battery:S.battery})
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok){
+      J.distance=d.totalDistance||0;J.points=d.points||0;
+      var dv=document.getElementById('jDistVal'),pv=document.getElementById('jPtsVal');
+      if(dv)dv.textContent=(J.distance/1000).toFixed(2);
+      if(pv)pv.textContent=J.points;
+    }
+  }).catch(function(){});
+  // Track elevation
+  if(S.altitude!=null){
+    if(J.minElev===null||S.altitude<J.minElev)J.minElev=Math.round(S.altitude);
+    if(J.maxElev===null||S.altitude>J.maxElev)J.maxElev=Math.round(S.altitude);
+  }
+  // Track signal dead zones
+  var now=Date.now();
+  var sigGood=navigator.onLine&&(S.accuracy!=null&&S.accuracy<100);
+  if(!sigGood&&J.lastSignalGood){
+    // Signal just dropped
+    J.lastSignalGood=false;
+    J.lastSignalLostTime=now;
+    J.lastSignalLostLat=S.lat;J.lastSignalLostLng=S.lng;
+  } else if(sigGood&&!J.lastSignalGood){
+    // Signal restored  -  log dead zone
+    J.lastSignalGood=true;
+    var dur=Math.round((now-J.lastSignalLostTime)/60000);
+    if(dur>0&&J.lastSignalLostLat){
+      J.deadZones.push({
+        lat:J.lastSignalLostLat,lng:J.lastSignalLostLng,
+        duration:dur,time:new Date(J.lastSignalLostTime).toISOString()
+      });
+    }
+  }
+  // Log town every 5 minutes
+  if(now-J.lastTownTime>300000){
+    J.lastTownTime=now;
+    logCurrentTown();
+  }
+}
+function logCurrentTown(){
+  if(!S.lat||!S.lng)return;
+  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+S.lat+'&lon='+S.lng,
+    {headers:{'User-Agent':'SentryApp/1.0'}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var addr=d.address||{};
+    var town=addr.town||addr.city||addr.village||addr.suburb||addr.county||addr.state_district||'';
+    if(!town)return;
+    // Only add if different from last logged town
+    if(!J.towns||J.towns.length===0||J.towns[J.towns.length-1]!==town){
+      if(!J.towns)J.towns=[];
+      J.towns.push(town);
+    }
+  }).catch(function(){});
+}
+function dropWaypoint(){
+  var name=prompt('Waypoint name:');
+  if(!name)return;
+  if(!S.lat){toast('No GPS fix');return;}
+  fetch(SERVER+'/sentry/journey/waypoint',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify({callsign:J.callsign,lat:S.lat,lng:S.lng,name:name})
+  }).then(function(){toast('Waypoint saved: '+name);})
+  .catch(function(){toast('Could not save waypoint');});
+}
+function showEndConfirm(){
+  document.getElementById('endModal').classList.add('open');
+}
+function endJourney(){
+  localStorage.setItem('sentry_j_ended', JSON.stringify({t:new Date().toISOString(),n:J.journeyName||'Journey'}));
+  clearInterval(J.pingInterval);clearInterval(J.timerInterval);
+  // Capture final state before clearing
+  var finalDist=J.distance||0;
+  var finalTime=J.startTime?Date.now()-J.startTime:0;
+  var finalPoints=J.points||0;
+  var finalTowns=J.towns?J.towns.slice():[];
+  var finalName=J.journeyName||'Journey';
+  var finalStart=J.startTime;
+  var finalWaypoints=J.waypoints||0;
+  var finalMinElev=J.minElev;
+  var finalMaxElev=J.maxElev;
+  var finalStartElev=J.startElev;
+  var finalDeadZones=J.deadZones?J.deadZones.slice():[];
+  var finalTrailPts=trailPts?trailPts.slice():[];
+  J.active=false;
+  // Log final town
+  logCurrentTown();
+  fetch(SERVER+'/sentry/journey/end',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify({callsign:J.callsign})
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok){
+      var sm=d.summary;
+      showJourneySummary({
+        name:finalName,
+        distance:sm.distance||finalDist,
+        duration:sm.duration||(finalTime/60000),
+        points:sm.points||finalPoints,
+        waypoints:sm.waypoints||finalWaypoints,
+        towns:finalTowns,
+        startTime:sm.startTime||(finalStart?new Date(finalStart).toISOString():null),
+        endTime:sm.endTime||new Date().toISOString(),
+        minElev:finalMinElev,maxElev:finalMaxElev,startElev:finalStartElev,
+        deadZones:finalDeadZones,trail:finalTrailPts
+      });
+    }
+  }).catch(function(){
+    // Show with local data if server fails
+    showJourneySummary({
+      name:finalName,distance:finalDist,duration:finalTime/60000,
+      points:finalPoints,waypoints:0,towns:finalTowns,
+      startTime:finalStart?new Date(finalStart).toISOString():null,
+      endTime:new Date().toISOString(),
+      minElev:finalMinElev,maxElev:finalMaxElev,startElev:finalStartElev,
+      deadZones:finalDeadZones,trail:finalTrailPts
+    });
+  });
+  document.getElementById('journeyInactive').style.display='block';
+  document.getElementById('journeyActive').style.display='none';
+  document.getElementById('journeyTag').textContent='INACTIVE';
+  document.getElementById('journeyTag').style.color='var(--dim)';
+  document.getElementById('jDistVal').textContent='0.00';
+  document.getElementById('jTimeVal').textContent='00:00';
+  document.getElementById('jPtsVal').textContent='0';
+  document.getElementById('journeyName').value='';
+  document.getElementById('trackingLink').textContent='---';
+  J.startTime=null;J.distance=0;J.points=0;J.towns=[];J.lastTownTime=0;J.paused=false;J.pauseTime=0;J.startElev=null;J.minElev=null;J.maxElev=null;J.deadZones=[];J.lastSignalGood=true;
+  setMode('safe',document.querySelector('.mode-safe'));
+}
+function showJourneySummary(s){
+  var distKm=(s.distance/1000).toFixed(2);
+  var durMin=Math.round(s.duration);
+  var h=Math.floor(durMin/60),m=durMin%60;
+  var paceMin=s.distance>0?Math.round(durMin/(s.distance/1000)):0;
+  var paceSec=Math.round((durMin/(s.distance/1000)-Math.floor(durMin/(s.distance/1000)))*60);
+  var cals=Math.round((s.distance/1000)*60);
+  var startStr=s.startTime?new Date(s.startTime).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'}):'--';
+  var endStr=s.endTime?new Date(s.endTime).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'}):'--';
+  // Towns string  -  deduplicated, arrow separated
+  var townsStr='--';
+  if(s.towns&&s.towns.length>0){
+    // Deduplicate while preserving order
+    var seen={},unique=[];
+    s.towns.forEach(function(t){if(!seen[t]){seen[t]=true;unique.push(t);}});
+    townsStr=unique.join(' → ');
+  }
+  document.getElementById('sumJourneyName').textContent=s.name;
+  document.getElementById('sumDist').textContent=distKm;
+  document.getElementById('sumTime').textContent=h+':'+('0'+m).slice(-2);
+  document.getElementById('sumPace').textContent=paceMin+':'+('0'+paceSec).slice(-2);
+  document.getElementById('sumWaypoints').textContent=s.waypoints||0;
+  document.getElementById('sumPoints').textContent=s.points||0;
+  document.getElementById('sumStart').textContent=startStr+' EAT';
+  document.getElementById('sumEnd').textContent=endStr+' EAT';
+  document.getElementById('sumTowns').textContent=townsStr;
+  document.getElementById('sumCals').textContent=cals+' kcal';
+  // Elevation
+  var eMin=document.getElementById('sumElevMin');
+  var eMax=document.getElementById('sumElevMax');
+  var eGain=document.getElementById('sumElevGain');
+  if(eMin)eMin.textContent=s.minElev!=null?s.minElev+' m':'-- m';
+  if(eMax)eMax.textContent=s.maxElev!=null?s.maxElev+' m':'-- m';
+  if(eGain){
+    var gain=s.maxElev!=null&&s.minElev!=null?(s.maxElev-s.minElev):null;
+    eGain.textContent=gain!=null?'+'+gain+' m':'-- m';
+  }
+  // Dead zones
+  var dzEl=document.getElementById('sumDeadZones');
+  if(dzEl){
+    if(s.deadZones&&s.deadZones.length>0){
+      dzEl.innerHTML=s.deadZones.map(function(z,i){
+        var t=new Date(z.time).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'});
+        var mapsUrl='https://maps.google.com/?q='+z.lat+','+z.lng;
+        return '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+          +'<span style="color:var(--sos);font-size:10px;">⚠ Zone '+(i+1)+'</span>'
+          +' <span style="color:var(--dim);font-size:9px;">'+t+'  -  '+z.duration+'min</span>'
+          +' <a href="'+mapsUrl+'" target="_blank" style="color:var(--safe);font-size:9px;text-decoration:none;">MAP</a>'
+          +'</div>';
+      }).join('');
+    } else {
+      dzEl.innerHTML='<span style="color:var(--safe);font-size:10px;">✓ No dead zones detected</span>';
+    }
+  }
+  // Trail map snapshot
+  setTimeout(function(){
+    var mc=document.getElementById('sumMapContainer');
+    if(!mc)return;
+    if(s.trail&&s.trail.length>1){
+      var sumMap=L.map('sumMapContainer',{zoomControl:false,attributionControl:false});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(sumMap);
+      var pts=s.trail.map(function(p){return[p[0]||p.lat,p[1]||p.lng];});
+      var poly=L.polyline(pts,{color:'#00ff88',weight:3,opacity:0.9}).addTo(sumMap);
+      // Start marker
+      L.circleMarker(pts[0],{radius:7,fillColor:'#00ff88',fillOpacity:1,color:'#020a06',weight:2}).addTo(sumMap).bindPopup('START');
+      // End marker
+      L.circleMarker(pts[pts.length-1],{radius:7,fillColor:'#ff2244',fillOpacity:1,color:'#020a06',weight:2}).addTo(sumMap).bindPopup('END');
+      sumMap.fitBounds(poly.getBounds(),{padding:[10,10]});
+    } else {
+      mc.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-family:var(--mono);font-size:9px;color:var(--dim);">NOT ENOUGH TRAIL DATA</div>';
+    }
+  },300);
+  document.getElementById('summaryModal').style.display='block';
+}
+function closeSummary(){
+  document.getElementById('summaryModal').style.display='none';
+}
+function updateJourneyTimer(){
+  if(!J.startTime)return;
+  var e=Date.now()-J.startTime,h=Math.floor(e/3600000),m=Math.floor((e%3600000)/60000);
+  var tv=document.getElementById('jTimeVal');
+  if(tv)tv.textContent=('0'+h).slice(-2)+':'+('0'+m).slice(-2);
+}
+
+var mapInstance=null,mapMarker=null,mapTrail=null,trailPts=[],mapSat=false,osmL,satL;
+function initMap(){
+  if(mapInstance){centerMap();return;}
+  var center=S.lat?[S.lat,S.lng]:[-1.286389,36.817223];
+  mapInstance=L.map('mapLeaflet',{zoomControl:true,attributionControl:false}).setView(center,15);
+  osmL=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19});
+  satL=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
+  osmL.addTo(mapInstance);
+  if(S.lat){
+    mapMarker=L.circleMarker([S.lat,S.lng],{radius:10,fillColor:'#00ff88',fillOpacity:1,color:'#020a06',weight:3}).addTo(mapInstance);
+    mapTrail=L.polyline([],{color:'#00ff88',weight:3,opacity:0.7}).addTo(mapInstance);
+  }
+  setInterval(updateMapDot,5000);
+}
+function updateMapDot(){
+  if(!S.lat||!mapInstance)return;
+  var pos=[S.lat,S.lng];
+  if(mapMarker)mapMarker.setLatLng(pos);
+  else mapMarker=L.circleMarker(pos,{radius:10,fillColor:'#00ff88',fillOpacity:1,color:'#020a06',weight:3}).addTo(mapInstance);
+  trailPts.push(pos);if(trailPts.length>1000)trailPts.shift();
+  if(mapTrail)mapTrail.setLatLngs(trailPts);
+}
+function centerMap(){if(mapInstance&&S.lat)mapInstance.setView([S.lat,S.lng],16);}
+function toggleMapStyle(){
+  if(!mapInstance)return;mapSat=!mapSat;
+  var btn=document.getElementById('mapStyleBtn');
+  if(mapSat){mapInstance.removeLayer(osmL);satL.addTo(mapInstance);if(btn)btn.textContent='MAP';}
+  else{mapInstance.removeLayer(satL);osmL.addTo(mapInstance);if(btn)btn.textContent='SAT';}
+}
+
+function initCompass(){
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(function(r){
+      if(r==='granted')window.addEventListener('deviceorientationabsolute',onOrientation,true);
+    }).catch(function(){});
+  } else {
+    window.addEventListener('deviceorientationabsolute',onOrientation,true);
+    window.addEventListener('deviceorientation',onOrientation,true);
+  }
+}
+function onOrientation(e){
+  var h=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0));
+  if(h==null)return;h=Math.round(h)%360;
+  // Rotate the RING opposite to heading so N always aligns with needle
+  var ring=document.getElementById('compassRing');
+  var hv=document.getElementById('headingVal'),hd=document.getElementById('headingDir'),tag=document.getElementById('compassTag');
+  if(ring)ring.setAttribute('transform','rotate('+-h+',80,80)');
+  if(hv)hv.textContent=h+'°';
+  var dir=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(h/22.5)%16];
+  if(hd)hd.textContent=dir;
+  var hdl=document.getElementById('headingDirLarge');
+  if(hdl)hdl.textContent=dir;
+  if(tag){tag.textContent='LIVE';tag.style.color='var(--safe)';}
+}
+
+function fetchElevationAndTown(){
+  if(!S.lat)return;
+  fetch('https://api.open-meteo.com/v1/elevation?latitude='+S.lat+'&longitude='+S.lng)
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var el=d.elevation?Math.round(d.elevation[0]):null;
+    if(el!=null){
+      var a=document.getElementById('elevVal'),b=document.getElementById('gpsAltVal');
+      if(a)a.textContent=el+' m';if(b)b.textContent=el+' m ASL';
+    }
+  }).catch(function(){});
+  fetch('https://nominatim.openstreetmap.org/reverse?lat='+S.lat+'&lon='+S.lng+'&format=json&zoom=10',{
+    headers:{'Accept-Language':'en','User-Agent':'SentryApp/1.0'}
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    var addr=d.address||{};
+    var town=addr.town||addr.city||addr.village||addr.suburb||addr.county||'Unknown';
+    var district=addr.state_district||addr.county||addr.state||'';
+    var tv=document.getElementById('townVal'),td=document.getElementById('townDist'),ht=document.getElementById('homeTown');
+    if(tv)tv.textContent=town;
+    if(td)td.textContent=district;
+    if(ht)ht.textContent=town;
+  }).catch(function(){});
+}
+
+var WX_CODES={0:'Clear',1:'Mainly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',51:'Lt Drizzle',53:'Drizzle',55:'Hvy Drizzle',61:'Lt Rain',63:'Rain',65:'Hvy Rain',80:'Showers',81:'Hvy Showers',95:'Thunderstorm'};
+var WX_ICONS={0:'[SUN]',1:'[PCLOUD]',2:'[CLOUD]',3:'[OCAST]',45:'[FOG]',51:'[DRIZ]',53:'[RAIN]',55:'[RAIN]',61:'[RAIN]',63:'[RAIN]',65:'[RAIN]',80:'[SHWR]',81:'[SHWR]',95:'[STORM]'};
+function fetchWeather(){
+  if(!S.lat){setTimeout(fetchWeather,5000);return;}
+  fetch('https://api.open-meteo.com/v1/forecast?latitude='+S.lat+'&longitude='+S.lng+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&hourly=temperature_2m,precipitation_probability,weather_code&forecast_days=1&timezone=Africa%2FNairobi')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var c=d.current;
+    var temp=Math.round(c.temperature_2m),feels=Math.round(c.apparent_temperature),wind=c.wind_speed_10m,hum=c.relative_humidity_2m,code=c.weather_code;
+    var icon=WX_ICONS[code]||'[WX]',desc=WX_CODES[code]||'Unknown';
+    var nowH=new Date().getHours();
+    var hrs=d.hourly.time,tmps=d.hourly.temperature_2m,prbs=d.hourly.precipitation_probability,cds=d.hourly.weather_code;
+    var fH='',cnt=0;
+    for(var i=0;i<hrs.length&&cnt<6;i++){
+      var h=new Date(hrs[i]).getHours();if(h<nowH)continue;
+      var rc=prbs[i]>60?'#ff2244':prbs[i]>30?'#ffcc00':'#4a8060';
+      fH+='<div style="text-align:center;flex:1;min-width:0;">';
+      fH+='<div style="font-size:7px;color:#7abf9a;">'+('0'+h).slice(-2)+'h</div>';
+      fH+='<div style="font-family:var(--mono);font-size:7px;color:var(--text);margin:2px 0;">'+Math.round(tmps[i])+'</div>';
+      fH+='<div style="font-size:7px;color:'+rc+';">'+prbs[i]+'%</div>';
+      fH+='</div>';cnt++;
+    }
+    var wx=document.getElementById('wxCard');
+    if(!wx)return;
+    wx.innerHTML='<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(0,255,136,0.25),transparent);"></div>';
+    wx.innerHTML+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span class="card-title">Weather</span><span class="card-tag">'+desc.toUpperCase()+'</span></div>';
+    wx.innerHTML+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">';
+    wx.innerHTML+='<div style="font-family:var(--mono);font-size:11px;color:var(--dim);padding:6px 8px;border:1px solid var(--border);border-radius:3px;">'+icon+'</div>';
+    wx.innerHTML+='<div><div style="font-family:var(--cond);font-size:28px;font-weight:900;color:var(--text);line-height:1;">'+temp+'<span style="font-size:11px;color:var(--dim);">C</span></div>';
+    wx.innerHTML+='<div style="font-family:var(--mono);font-size:7px;color:var(--dim);">Feels '+feels+'C | Wind '+wind+'km/h | Hum '+hum+'%</div></div></div>';
+    wx.innerHTML+='<div style="display:flex;gap:3px;border-top:1px solid var(--border);padding-top:7px;">'+fH+'</div>';
+    wx.innerHTML+='<div style="font-family:var(--mono);font-size:7px;color:var(--dim);text-align:right;margin-top:3px;">% = rain probability</div>';
+    if([51,53,55,61,63,65,80,81,82,95,96,99].indexOf(code)>-1)toast('Rain at your location  -  stay dry');
+    setTimeout(fetchWeather,900000);
+  }).catch(function(){setTimeout(fetchWeather,30000);});
+}
+
+function scanSignal(){
+  var online=navigator.onLine;
+  var conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  var strength=0,type='UNKNOWN',statusStr='';
+  if(!online){strength=0;type='OFFLINE';statusStr='NO SIGNAL';}
+  else if(conn){
+    type=(conn.effectiveType||conn.type||'UNKNOWN').toUpperCase();
+    var smap={'slow-2g':1,'2g':1,'3g':2,'4g':4,'wifi':4,'ethernet':4};
+    strength=smap[conn.effectiveType]||smap[conn.type]||2;
+    var rtt=conn.rtt||0;
+    statusStr=rtt<100?'EXCELLENT':rtt<300?'GOOD':rtt<600?'FAIR':'POOR';
+  } else {
+    strength=online?3:0;type=online?'ONLINE':'OFFLINE';statusStr=online?'CONNECTED':'NO SIGNAL';
+  }
+  var bars=document.querySelectorAll('.sig-bar');
+  bars.forEach(function(b,i){
+    b.classList.remove('active','watch','dead');
+    if(i<strength)b.classList.add(strength>=4?'active':strength>=2?'watch':'dead');
+  });
+  var sv=document.getElementById('sigStrength'),st=document.getElementById('sigType'),ss=document.getElementById('sigStatus'),tag=document.getElementById('sigTag');
+  var labels=['NONE','WEAK','FAIR','GOOD','STRONG'];
+  if(sv)sv.textContent=labels[strength]||'--';
+  if(st)st.textContent=type;
+  if(ss)ss.textContent=statusStr;
+  if(tag){tag.textContent=labels[strength]||'SCAN';tag.style.color=strength>=3?'var(--safe)':strength>=2?'var(--watch)':'var(--sos)';}
+  var q=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+  var sq=document.getElementById('sigQueue');if(sq)sq.textContent=q.length;
+  var reading={time:new Date().toISOString(),strength:strength,type:type,statusStr:statusStr,lat:S.lat,lng:S.lng};
+  SIG.readings.push(reading);if(SIG.readings.length>200)SIG.readings.shift();
+  updateSigLog(reading);
+  if(S.lat&&sigMapInstance)plotSigPoint(reading);
+  if(strength===0&&!online)toast('No signal  -  SOS will be queued');
+  updateQueueDisplay();
+}
+
+var sigMapInstance=null;
+function initSigMap(){
+  if(sigMapInstance)return;
+  var center=S.lat?[S.lat,S.lng]:[-1.286389,36.817223];
+  sigMapInstance=L.map('sigMap',{zoomControl:true,attributionControl:false}).setView(center,14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(sigMapInstance);
+  SIG.readings.forEach(function(r){plotSigPoint(r);});
+}
+function plotSigPoint(r){
+  if(!sigMapInstance||!r.lat)return;
+  var colors=['#ff2244','#ff2244','#ffcc00','#00ff88','#00ff88'];
+  L.circleMarker([r.lat,r.lng],{radius:6,fillColor:colors[r.strength]||'#4a8060',fillOpacity:0.8,color:'transparent',weight:0})
+  .addTo(sigMapInstance)
+  .bindPopup(r.statusStr+' | '+r.type);
+}
+function updateSigLog(r){
+  var log=document.getElementById('sigLog');if(!log)return;
+  var colors=['var(--sos)','var(--sos)','var(--watch)','var(--safe)','var(--safe)'];
+  var row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(13,43,26,0.5);';
+  var time=new Date(r.time).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'});
+  row.innerHTML='<span style="font-family:var(--mono);font-size:8px;color:var(--dim);white-space:nowrap;">'+time+'</span>';
+  row.innerHTML+='<div style="width:6px;height:6px;border-radius:50%;background:'+colors[r.strength]+';margin-top:3px;flex-shrink:0;"></div>';
+  row.innerHTML+='<span style="font-family:var(--mono);font-size:8px;color:rgba(200,255,224,0.7);">'+r.statusStr+' | '+r.type+(r.lat?' | '+r.lat.toFixed(3)+','+r.lng.toFixed(3):'')+'</span>';
+  log.insertBefore(row,log.firstChild);
+  if(log.children.length>20)log.removeChild(log.lastChild);
+}
+
+function queueAlert(payload){
+  var q=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+  q.push(Object.assign({},payload,{queued:new Date().toISOString()}));
+  localStorage.setItem('sentry_queue',JSON.stringify(q));
+  updateQueueDisplay();
+}
+function drainQueue(){
+  if(!navigator.onLine)return;
+  var q=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+  if(!q.length)return;
+  // Send one at a time — wait for each to succeed before removing from queue
+  function sendNext(index){
+    if(index>=q.length)return;
+    var p=q[index];
+    fetch(SERVER+'/sentry/sos',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+      body:JSON.stringify(Object.assign({},p,{message:'[QUEUED] '+(p.message||'')}))
+    }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){
+        // Remove this specific item from queue
+        var current=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+        current.splice(index,1);
+        localStorage.setItem('sentry_queue',JSON.stringify(current));
+        updateQueueDisplay();
+        toast('Queued SOS delivered');
+        sendNext(0); // restart from top after splice
+      } else {
+        sendNext(index+1);
+      }
+    }).catch(function(){
+      // Network not truly ready yet — retry this item in 5 seconds
+      setTimeout(function(){drainQueue();},5000);
+    });
+  }
+  sendNext(0);
+}
+function updateQueueDisplay(){
+  var q=JSON.parse(localStorage.getItem('sentry_queue')||'[]');
+  var tag=document.getElementById('queueTag'),list=document.getElementById('queueList');
+  if(tag)tag.textContent=q.length+' PENDING';
+  if(!list)return;
+  if(!q.length){list.innerHTML='<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px;">Queue empty</div>';return;}
+  list.innerHTML=q.map(function(p){
+    return '<div style="font-family:var(--mono);font-size:8px;color:rgba(200,255,224,0.7);padding:4px 0;border-bottom:1px solid rgba(13,43,26,0.5);">'+(p.mode||'SOS')+' | '+new Date(p.queued||p.timestamp).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi'})+'</div>';
+  }).join('');
+}
+
+function detectCountry(){
+  fetch('https://ipapi.co/json/')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var cc=d.country_code||'DEFAULT';
+    var data=EMERGENCY[cc]||EMERGENCY.DEFAULT;
+    var ct=document.getElementById('countryTag'),cn=document.getElementById('countryName'),eg=document.getElementById('emergencyGrid');
+    if(ct)ct.textContent=cc;
+    if(cn)cn.textContent='Region: '+data.name;
+    if(eg){
+      var html='';
+      data.numbers.forEach(function(n){
+        html+='<div class="emrg-btn" id="emrg-'+n.n+'"><span class="emrg-number">'+n.n+'</span><span class="emrg-label">'+n.l+'</span></div>';
+      });
+      eg.innerHTML=html;
+      data.numbers.forEach(function(n){
+        var el=document.getElementById('emrg-'+n.n);
+        if(el)el.addEventListener('click',function(){callNumber(n.n);});
+      });
+    }
+  }).catch(function(){});
+}
+function callNumber(n){window.location.href='tel:'+n;}
+
+function setCallsign(){
+  var n=prompt('Enter your callsign:');
+  if(n){localStorage.setItem('sentry_callsign',n);var el=document.getElementById('callsignDisplay');if(el)el.textContent=n.toUpperCase();}
+}
+function loadSaved(){
+  var cs=localStorage.getItem('sentry_callsign');
+  if(cs){var el=document.getElementById('callsignDisplay');if(el)el.textContent=cs.toUpperCase();}
+  var bl=localStorage.getItem('sentry_blood');
+  if(bl){var sel=document.getElementById('bloodSelect');if(sel)sel.value=bl;}
+}
+
+
+var camStream=null,camFacing='environment',camPhotos=[],camZoom=1,camMinZoom=1,camMaxZoom=5;
+var pinchStartDist=0,pinchStartZoom=1;
+
+function startCamera(){
+  if(camStream)return;
+  var constraints={video:{facingMode:camFacing,width:{ideal:1920},height:{ideal:1080}},audio:false};
+  navigator.mediaDevices.getUserMedia(constraints)
+  .then(function(stream){
+    camStream=stream;
+    var v=document.getElementById('camVideo');
+    if(v){
+      v.srcObject=stream;v.play();
+      // Check native zoom support
+      var track=stream.getVideoTracks()[0];
+      if(track){
+        var caps=track.getCapabilities();
+        if(caps&&caps.zoom){
+          camMinZoom=caps.zoom.min||1;
+          camMaxZoom=caps.zoom.max||5;
+          var sl=document.getElementById('zoomSlider');
+          if(sl){sl.min=camMinZoom;sl.max=camMaxZoom;sl.step=0.1;sl.value=1;}
+        }
+      }
+      // Pinch to zoom
+      v.addEventListener('touchstart',onPinchStart,{passive:true});
+      v.addEventListener('touchmove',onPinchMove,{passive:true});
+    }
+    updateCamOverlay();
+    camOverlayTimer=setInterval(updateCamOverlay,1000);
+  }).catch(function(e){toast('Camera: '+e.message);});
+}
+function onPinchStart(e){
+  if(e.touches.length===2){
+    pinchStartDist=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    pinchStartZoom=camZoom;
+  }
+}
+function onPinchMove(e){
+  if(e.touches.length===2){
+    var dist=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    var scale=dist/pinchStartDist;
+    var newZoom=Math.min(camMaxZoom,Math.max(camMinZoom,pinchStartZoom*scale));
+    setZoom(newZoom);
+  }
+}
+function setZoom(z){
+  z=parseFloat(z);
+  z=Math.min(camMaxZoom,Math.max(camMinZoom,z));
+  camZoom=z;
+  // Update UI
+  var sl=document.getElementById('zoomSlider');
+  var zv=document.getElementById('zoomVal');
+  if(sl)sl.value=z;
+  if(zv)zv.textContent=z.toFixed(1)+'x';
+  // Apply to track if supported
+  if(camStream){
+    var track=camStream.getVideoTracks()[0];
+    if(track){
+      var caps=track.getCapabilities();
+      if(caps&&caps.zoom){
+        track.applyConstraints({advanced:[{zoom:z}]}).catch(function(){
+          // Native zoom not supported  -  use CSS scale fallback
+          applyCssZoom(z);
+        });
+      } else {
+        applyCssZoom(z);
+      }
+    }
+  }
+}
+function applyCssZoom(z){
+  var v=document.getElementById('camVideo');
+  if(v){
+    v.style.transform='scale('+z+')';
+    v.style.transformOrigin='center center';
+  }
+}
+function stopCamera(){
+  if(camStream){
+    var track=camStream.getVideoTracks()[0];
+    if(track){
+      var caps=track.getCapabilities();
+      if(caps&&caps.zoom)track.applyConstraints({advanced:[{zoom:1}]}).catch(function(){});
+    }
+    camStream.getTracks().forEach(function(t){t.stop();});camStream=null;
+  }
+  clearInterval(camOverlayTimer);
+  var v=document.getElementById('camVideo');
+  if(v){
+    v.srcObject=null;
+    v.style.transform='scale(1)';
+    v.removeEventListener('touchstart',onPinchStart);
+    v.removeEventListener('touchmove',onPinchMove);
+  }
+  camZoom=1;
+  var sl=document.getElementById('zoomSlider');
+  var zv=document.getElementById('zoomVal');
+  if(sl)sl.value=1;
+  if(zv)zv.textContent='1.0x';
+  // Stop any active recording
+  if(mediaRecorder&&mediaRecorder.state==='recording')stopVideo();
+}
+function flipCamera(){
+  stopCamera();
+  camFacing=camFacing==='environment'?'user':'environment';
+  setTimeout(startCamera,300);
+}
+function updateCamOverlay(){
+  var gps=document.getElementById('camGpsOverlay');
+  var tim=document.getElementById('camTimeOverlay');
+  if(gps)gps.textContent=S.lat?S.lat.toFixed(4)+','+S.lng.toFixed(4):'NO GPS';
+  if(tim)tim.textContent=new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function capturePhoto(){
+  var v=document.getElementById('camVideo');
+  if(!v||!camStream){toast('Start camera first');return;}
+  var canvas=document.createElement('canvas');
+  canvas.width=v.videoWidth;canvas.height=v.videoHeight;
+  var ctx=canvas.getContext('2d');
+  ctx.drawImage(v,0,0);
+  // GPS + time stamp on photo
+  ctx.fillStyle='rgba(0,0,0,0.5)';
+  ctx.fillRect(0,canvas.height-28,canvas.width,28);
+  ctx.fillStyle='#00ff88';
+  ctx.font='12px monospace';
+  var gpsText=S.lat?S.lat.toFixed(5)+','+S.lng.toFixed(5):'NO GPS';
+  var timeText=new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi'});
+  ctx.fillText(gpsText+' | '+timeText+' EAT | SENTRY',8,canvas.height-10);
+  var dataUrl=canvas.toDataURL('image/jpeg',0.85);
+  // Save to gallery
+  camPhotos.unshift({dataUrl:dataUrl,lat:S.lat,lng:S.lng,time:new Date().toISOString()});
+  if(camPhotos.length>12)camPhotos.pop();
+  updateGallery();
+  // Download to phone
+  var a=document.createElement('a');
+  a.href=dataUrl;
+  a.download='SENTRY_'+Date.now()+'.jpg';
+  a.click();
+  toast('Photo saved');
+}
+function captureSOS(){
+  capturePhoto();
+  setTimeout(function(){triggerSOS();},500);
+}
+function updateGallery(){
+  var g=document.getElementById('photoGallery');
+  var c=document.getElementById('photoCount');
+  if(c)c.textContent=camPhotos.length+' ITEMS';
+  if(!g)return;
+  g.innerHTML=camPhotos.map(function(p,i){
+    var isVideo=p.type==='video';
+    var thumb=isVideo
+      ?'<div style="width:100%;padding-top:75%;background:#071510;border:1px solid var(--border);border-radius:2px;position:relative;"><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;">▶</span><span style="position:absolute;bottom:2px;right:4px;font-family:var(--mono);font-size:6px;color:var(--watch);">'+p.dur+'s</span></div>'
+      :'<img src="'+p.dataUrl+'" style="width:100%;border-radius:2px;border:1px solid var(--border);display:block;">';
+    return '<div style="position:relative;">'
+      +'<div style="cursor:pointer;" onclick="viewMedia('+i+')">'+thumb
+      +'<div style="position:absolute;bottom:2px;left:2px;font-family:var(--mono);font-size:6px;color:rgba(0,255,136,0.7);">'+new Date(p.time).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'})+'</div></div>'
+      +'<div onclick="deleteMedia('+i+')" style="position:absolute;top:2px;right:2px;background:rgba(255,34,68,0.8);color:#fff;font-size:8px;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;">x</div>'
+      +'</div>';
+  }).join('');
+}
+function deleteMedia(i){
+  camPhotos.splice(i,1);
+  updateGallery();
+  toast('Deleted');
+}
+function viewMedia(i){
+  var p=camPhotos[i];
+  if(!p)return;
+  if(p.type==='video'){
+    var w=window.open('');
+    w.document.write('<body style="margin:0;background:#000;"><video src="'+p.dataUrl+'" controls autoplay style="max-width:100%;max-height:100vh;display:block;margin:auto;"></video><p style="font-family:monospace;color:#0f0;padding:8px;font-size:11px;">'+new Date(p.time).toLocaleString()+(p.lat?' | '+p.lat.toFixed(5)+','+p.lng.toFixed(5):'')+'</p></body>');
+  } else {
+    var w=window.open('');
+    w.document.write('<body style="margin:0;background:#000;"><img src="'+p.dataUrl+'" style="max-width:100%;display:block;margin:auto;"><p style="font-family:monospace;color:#0f0;padding:8px;font-size:11px;">'+new Date(p.time).toLocaleString()+(p.lat?' | '+p.lat.toFixed(5)+','+p.lng.toFixed(5):'')+'</p></body>');
+  }
+}
+var camOverlayTimer=null;
+var mediaRecorder=null,recChunks=[],recInterval=null,recSeconds=0;
+function toggleVideo(){
+  if(mediaRecorder&&mediaRecorder.state==='recording'){
+    stopVideo();
+  } else {
+    startVideo();
+  }
+}
+function startVideo(){
+  if(!camStream){toast('Start camera first');return;}
+  recChunks=[];recSeconds=0;
+  try{
+    mediaRecorder=new MediaRecorder(camStream,{mimeType:'video/webm;codecs=vp8'});
+  }catch(e){
+    try{mediaRecorder=new MediaRecorder(camStream);}
+    catch(e2){toast('Video not supported on this device');return;}
+  }
+  mediaRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)recChunks.push(e.data);};
+  mediaRecorder.onstop=function(){
+    var blob=new Blob(recChunks,{type:'video/webm'});
+    var url=URL.createObjectURL(blob);
+    // Save to gallery
+    camPhotos.unshift({dataUrl:url,type:'video',dur:recSeconds,lat:S.lat,lng:S.lng,time:new Date().toISOString()});
+    if(camPhotos.length>12)camPhotos.pop();
+    updateGallery();
+    // Download to phone
+    var a=document.createElement('a');
+    a.href=url;a.download='SENTRY_VID_'+Date.now()+'.webm';a.click();
+    toast('Video saved  -  '+recSeconds+'s');
+  };
+  mediaRecorder.start(1000);
+  // Update UI
+  document.getElementById('recIndicator').style.display='block';
+  document.getElementById('videoRecBtn').textContent='⏹ STOP';
+  document.getElementById('videoRecBtn').style.color='var(--sos)';
+  document.getElementById('videoRecBtn').style.borderColor='rgba(255,34,68,0.5)';
+  recInterval=setInterval(function(){
+    recSeconds++;
+    var m=Math.floor(recSeconds/60),s=recSeconds%60;
+    var rt=document.getElementById('recTimer');
+    if(rt)rt.textContent=('0'+m).slice(-2)+':'+('0'+s).slice(-2);
+  },1000);
+}
+function stopVideo(){
+  if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();
+  clearInterval(recInterval);
+  document.getElementById('recIndicator').style.display='none';
+  document.getElementById('videoRecBtn').textContent='⏺ VIDEO';
+  document.getElementById('videoRecBtn').style.color='var(--watch)';
+  document.getElementById('videoRecBtn').style.borderColor='rgba(255,204,0,0.35)';
+}
+
+// ── STOPWATCH
+var SW={running:false,startTime:0,elapsed:0,laps:[],interval:null,lapStart:0};
+function swStartStop(){
+  if(!SW.running){
+    SW.running=true;
+    SW.startTime=Date.now()-SW.elapsed;
+    if(SW.laps.length===0)SW.lapStart=SW.startTime;
+    SW.interval=setInterval(swTick,50);
+    document.getElementById('swStartBtn').textContent='STOP';
+    document.getElementById('swStartBtn').style.color='var(--sos)';
+    document.getElementById('swStartBtn').style.borderColor='rgba(255,34,68,0.5)';
+    document.getElementById('swTag').textContent='RUNNING';
+    document.getElementById('swTag').style.color='var(--safe)';
+  } else {
+    SW.running=false;
+    clearInterval(SW.interval);
+    SW.elapsed=Date.now()-SW.startTime;
+    document.getElementById('swStartBtn').textContent='START';
+    document.getElementById('swStartBtn').style.color='var(--safe)';
+    document.getElementById('swStartBtn').style.borderColor='rgba(0,255,136,0.35)';
+    document.getElementById('swTag').textContent='PAUSED';
+    document.getElementById('swTag').style.color='var(--watch)';
+  }
+}
+function swTick(){
+  var now=Date.now();
+  var total=now-SW.startTime;
+  document.getElementById('swDisplay').textContent=swFormat(total,false);
+  document.getElementById('swMs').textContent='.'+('00'+Math.floor((total%1000)/10)).slice(-3);
+}
+function swFormat(ms,short){
+  var h=Math.floor(ms/3600000);
+  var m=Math.floor((ms%3600000)/60000);
+  var s=Math.floor((ms%60000)/1000);
+  if(short)return ('0'+m).slice(-2)+':'+('0'+s).slice(-2);
+  return ('0'+h).slice(-2)+':'+('0'+m).slice(-2)+':'+('0'+s).slice(-2);
+}
+function swLap(){
+  if(!SW.running&&SW.elapsed===0)return;
+  var total=SW.running?(Date.now()-SW.startTime):SW.elapsed;
+  var lapTime=total-(SW.lapStart-SW.startTime);
+  SW.lapStart=SW.running?Date.now():(SW.startTime+SW.elapsed);
+  var lapNum=SW.laps.length+1;
+  SW.laps.push({num:lapNum,lap:lapTime,total:total});
+  // Update split display
+  document.getElementById('swSplitRow').style.display='block';
+  document.getElementById('swLastSplit').textContent='LAP '+lapNum+'  -  '+swFormat(lapTime,true);
+  swRenderLaps();
+}
+function swReset(){
+  SW.running=false;SW.elapsed=0;SW.laps=[];SW.lapStart=0;
+  clearInterval(SW.interval);
+  document.getElementById('swDisplay').textContent='00:00:00';
+  document.getElementById('swMs').textContent='.000';
+  document.getElementById('swStartBtn').textContent='START';
+  document.getElementById('swStartBtn').style.color='var(--safe)';
+  document.getElementById('swStartBtn').style.borderColor='rgba(0,255,136,0.35)';
+  document.getElementById('swTag').textContent='READY';
+  document.getElementById('swTag').style.color='var(--dim)';
+  document.getElementById('swSplitRow').style.display='none';
+  document.getElementById('swLapsList').innerHTML='';
+}
+function swRenderLaps(){
+  var el=document.getElementById('swLapsList');
+  if(!el)return;
+  var html='<div style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">LAPS</div>';
+  var laps=SW.laps.slice().reverse();
+  laps.forEach(function(l){
+    var fastest=SW.laps.reduce(function(a,b){return a.lap<b.lap?a:b;});
+    var slowest=SW.laps.reduce(function(a,b){return a.lap>b.lap?a:b;});
+    var col=SW.laps.length>1?(l.num===fastest.num?'var(--safe)':l.num===slowest.num?'var(--sos)':'var(--text)'):'var(--text)';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,0.04);">'
+      +'<span style="font-family:var(--mono);font-size:9px;color:var(--dim);">LAP '+l.num+'</span>'
+      +'<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:'+col+';">'+swFormat(l.lap,true)+'</span>'
+      +'<span style="font-family:var(--mono);font-size:9px;color:var(--dim);">'+swFormat(l.total,false)+'</span>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+}
+
+// ── CONTACTS SYSTEM
+var contacts = JSON.parse(localStorage.getItem('sentry_contacts')||'[]');
+
+function saveContactsToStorage(){
+  localStorage.setItem('sentry_contacts', JSON.stringify(contacts));
+}
+
+function openAddContact(editId){
+  document.getElementById('editContactId').value = editId||'';
+  document.getElementById('contactModalTitle').textContent = editId ? 'EDIT CONTACT' : 'ADD CONTACT';
+  if(editId){
+    var c = contacts.find(function(x){return x.id===editId;});
+    if(c){
+      document.getElementById('cName').value = c.name||'';
+      document.getElementById('cRelation').value = c.relation||'';
+      document.getElementById('cPhone').value = c.phone||'';
+      document.getElementById('cTelegram').value = c.telegram||'';
+      document.getElementById('cWhatsapp').value = c.whatsapp||'';
+      document.getElementById('cCallmebot').value = c.callmebot||'';
+      document.getElementById('cAlertSOS').checked = c.alerts.sos||false;
+      document.getElementById('cAlertDeadzone').checked = c.alerts.deadzone||false;
+      document.getElementById('cAlertJourneyStart').checked = c.alerts.journeyStart||false;
+      document.getElementById('cAlertJourneyEnd').checked = c.alerts.journeyEnd||false;
+      document.getElementById('cAlertCheckin').checked = c.alerts.checkin||false;
+      document.getElementById('cAlertBuddy').checked = c.alerts.buddy||false;
+      document.getElementById('cAlertLowBatt').checked = c.alerts.lowBatt||false;
+      document.getElementById('cAlertTest').checked = c.alerts.test||false;
+      var radios = document.querySelectorAll('input[name="cChannel"]');
+      radios.forEach(function(r){r.checked = r.value===c.channel;});
+    }
+  } else {
+    document.getElementById('cName').value='';
+    document.getElementById('cRelation').value='';
+    document.getElementById('cPhone').value='';
+    document.getElementById('cTelegram').value='';
+    document.getElementById('cWhatsapp').value='';
+    document.getElementById('cCallmebot').value='';
+    document.getElementById('cAlertSOS').checked=true;
+    document.getElementById('cAlertDeadzone').checked=true;
+    document.getElementById('cAlertJourneyStart').checked=false;
+    document.getElementById('cAlertJourneyEnd').checked=false;
+    document.getElementById('cAlertCheckin').checked=false;
+    document.getElementById('cAlertBuddy').checked=false;
+    document.getElementById('cAlertLowBatt').checked=false;
+    document.getElementById('cAlertTest').checked=true;
+    document.querySelector('input[name="cChannel"][value="telegram"]').checked=true;
+  }
+  document.getElementById('addContactModal').style.display='block';
+}
+
+function closeAddContact(){
+  document.getElementById('addContactModal').style.display='none';
+}
+
+function saveContact(){
+  var name = document.getElementById('cName').value.trim();
+  if(!name){toast('Name is required');return;}
+  var editId = document.getElementById('editContactId').value;
+  var channel = document.querySelector('input[name="cChannel"]:checked');
+  var c = {
+    id: editId || ('c_'+Date.now()),
+    name: name,
+    relation: document.getElementById('cRelation').value.trim(),
+    phone: document.getElementById('cPhone').value.trim(),
+    telegram: document.getElementById('cTelegram').value.trim(),
+    whatsapp: document.getElementById('cWhatsapp').value.trim(),
+    callmebot: document.getElementById('cCallmebot').value.trim(),
+    channel: channel ? channel.value : 'telegram',
+    alerts: {
+      sos: document.getElementById('cAlertSOS').checked,
+      deadzone: document.getElementById('cAlertDeadzone').checked,
+      journeyStart: document.getElementById('cAlertJourneyStart').checked,
+      journeyEnd: document.getElementById('cAlertJourneyEnd').checked,
+      checkin: document.getElementById('cAlertCheckin').checked,
+      buddy: document.getElementById('cAlertBuddy').checked,
+      lowBatt: document.getElementById('cAlertLowBatt').checked,
+      test: document.getElementById('cAlertTest').checked
+    },
+    added: editId ? (contacts.find(function(x){return x.id===editId;}) || {}).added : new Date().toISOString()
+  };
+  if(editId){
+    var idx = contacts.findIndex(function(x){return x.id===editId;});
+    if(idx>=0)contacts[idx]=c; else contacts.push(c);
+  } else {
+    contacts.push(c);
+  }
+  saveContactsToStorage();
+  renderContacts();
+  closeAddContact();
+  toast((editId?'Contact updated: ':'Contact saved: ')+name);
+}
+
+function deleteContact(id){
+  contacts = contacts.filter(function(c){return c.id!==id;});
+  saveContactsToStorage();
+  renderContacts();
+  toast('Contact deleted');
+}
+
+function renderContacts(){
+  var el = document.getElementById('contactList');
+  if(!el)return;
+  if(contacts.length===0){
+    el.innerHTML='<div style="text-align:center;padding:20px;font-family:var(--mono);font-size:9px;color:var(--dim);">No contacts yet  -  tap + ADD</div>';
+    return;
+  }
+  el.innerHTML = contacts.map(function(c){
+    var channelIcons = {telegram:'TG',whatsapp:'WA',sms:'SMS'};
+    var alertList = [];
+    if(c.alerts.sos)alertList.push('<span style="color:var(--sos);">SOS</span>');
+    if(c.alerts.deadzone)alertList.push('<span style="color:var(--watch);">DEAD ZONE</span>');
+    if(c.alerts.journeyStart)alertList.push('<span style="color:var(--safe);">START</span>');
+    if(c.alerts.journeyEnd)alertList.push('<span style="color:var(--safe);">END</span>');
+    if(c.alerts.checkin)alertList.push('<span style="color:var(--safe);">CHECK-IN</span>');
+    if(c.alerts.buddy)alertList.push('<span style="color:var(--safe);">BUDDY</span>');
+    if(c.alerts.lowBatt)alertList.push('<span style="color:var(--watch);">BATT</span>');
+    var hasChannel = c.telegram||c.whatsapp||c.phone;
+    return '<div class="contact-row">'
+      +'<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">'
+      +'<div style="width:36px;height:36px;border-radius:50%;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-size:14px;font-weight:900;color:var(--safe);flex-shrink:0;">'
+      +c.name.charAt(0).toUpperCase()+'</div>'
+      +'<div style="min-width:0;">'
+      +'<div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--text);">'+c.name+(c.relation?' <span style="color:var(--dim);font-size:9px;font-weight:400;">'+c.relation+'</span>':'')+'</div>'
+      +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:1px;">'+(channelIcons[c.channel]||'?')+' · '+(hasChannel?'CONFIGURED':'NO CHANNEL SET')+'</div>'
+      +'<div style="font-family:var(--mono);font-size:7px;margin-top:3px;line-height:1.6;">'+alertList.join(' · ')+'</div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:4px;flex-shrink:0;">'
+      +'<button data-edit="'+c.id+'" style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);color:var(--safe);padding:5px 8px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;">EDIT</button>'
+      +'<button data-del="'+c.id+'" style="background:rgba(255,34,68,0.06);border:1px solid rgba(255,34,68,0.15);color:var(--sos);padding:5px 8px;border-radius:2px;font-family:var(--mono);font-size:8px;cursor:pointer;">DEL</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function testAllContacts(){
+  var callsign = localStorage.getItem('sentry_callsign')||'SENTRY';
+  var testContacts = contacts.filter(function(c){return c.alerts.test;});
+  if(testContacts.length===0){toast('No contacts with test alerts enabled');return;}
+  var msg = '[TEST] SENTRY TEST ALERT | Operator: '+callsign+' | '+(S.lat?S.lat.toFixed(5)+', '+S.lng.toFixed(5):'No GPS')+' | '+new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi'})+' EAT | System nominal.';  fetch(SERVER+'/sentry/sos',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify({callsign:callsign,lat:S.lat,lng:S.lng,accuracy:S.accuracy,mode:'TEST',message:'Contact test from app',timestamp:new Date().toISOString()})
+  }).then(function(r){return r.json();})
+  .then(function(d){toast(d.ok?'Test sent to '+testContacts.length+' contact(s)':'Test failed: '+(d.error||'unknown'));})
+  .catch(function(){toast('Could not send test');});
+}
+
+// Event delegation for contact buttons
+document.addEventListener('click', function(e){
+  if(e.target && e.target.dataset.edit) openAddContact(e.target.dataset.edit);
+  if(e.target && e.target.dataset.del) deleteContact(e.target.dataset.del);
+});
+
+function notifyContacts(alertType, extraData){
+  var relevant = contacts.filter(function(c){
+    return c.alerts && c.alerts[alertType];
+  });
+  if(!relevant.length)return;
+  var callsign = localStorage.getItem('sentry_callsign')||'SENTRY';
+  var payload = Object.assign({
+    callsign:callsign, lat:S.lat, lng:S.lng,
+    accuracy:S.accuracy, battery:S.battery,
+    timestamp:new Date().toISOString()
+  }, extraData||{});
+  // Send via server for each contact
+  relevant.forEach(function(c){
+    payload.contactTelegram = c.telegram||null;
+    payload.contactWhatsapp = c.whatsapp||null;
+    payload.contactCallmebot = c.callmebot||null;
+    payload.contactChannel = c.channel;
+    payload.contactName = c.name;
+  });
+  fetch(SERVER+'/sentry/sos',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-sentry-token':TOKEN},
+    body:JSON.stringify(payload)
+  }).catch(function(){});
+}
+
+// Init contacts on load
+renderContacts();
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.classList.remove('show');},3000);
+}
+</script>
+</body>
+</html>

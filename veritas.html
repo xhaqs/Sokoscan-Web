@@ -442,31 +442,75 @@ body::after{
 <div id="toast"></div>
 
 <script>
-// ── PASSKEY ──
+// ── KEYSTONE AUTH ──
 (function(){
-  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
-  var HASH=hc('Zack_Lingua');
+  var APP_ID='veritas';
   var SK='veritas_sk1';
+  var BASE=window.location.protocol+'//'+window.location.host;
+  function showApp(){ document.getElementById('app').style.display='flex';setTimeout(initVeritas,50); }
+  function mobileFixFocus(){
+    var pk=document.getElementById('pkScreen');
+    var inp=document.getElementById('pkInput');
+    if(pk&&inp){
+      pk.addEventListener('touchstart',function(e){
+        if(e.target!==inp&&e.target.tagName!=='BUTTON'){e.preventDefault();inp.focus();}
+      },{passive:false});
+      setTimeout(function(){inp.focus();},300);
+    }
+  }
   window.checkPK=function(){
     var v=document.getElementById('pkInput').value.trim();
-    if(!v){document.getElementById('pkError').textContent='ACCESS CODE REQUIRED';return;}
-    if(hc(v)===HASH){
-      try{sessionStorage.setItem(SK,'1');}catch(e){}
-      document.getElementById('pkScreen').style.display='none';
-      document.getElementById('app').style.display='flex';
-      initVeritas();
-    } else {
-      document.getElementById('pkError').textContent='INVALID CODE';
-      document.getElementById('pkInput').value='';
-    }
+    var errEl=document.getElementById('pkError');
+    if(!v){errEl.textContent='PASSWORD REQUIRED';return;}
+    errEl.textContent='';
+    var btn=document.querySelector('#pkScreen button');
+    if(btn){btn.textContent='VERIFYING...';btn.disabled=true;}
+    fetch(BASE+'/api/keystone/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:v,app:APP_ID})
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
+      if(d.ok&&d.token){
+        try{sessionStorage.setItem(SK,d.token);}catch(e){}
+        document.getElementById('pkScreen').style.display='none';
+        showApp();
+      } else {
+        errEl.textContent=d.error==='Access denied for this application'?'ACCESS NOT GRANTED':d.error||'INVALID PASSWORD';
+        document.getElementById('pkInput').value='';
+        document.getElementById('pkInput').focus();
+      }
+    })
+    .catch(function(){
+      if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
+      errEl.textContent='CONNECTION ERROR — TRY AGAIN';
+    });
   };
+  // Check saved token
   try{
-    if(sessionStorage.getItem(SK)==='1'){
-      document.getElementById('pkScreen').style.display='none';
-      document.getElementById('app').style.display='flex';
-      window.addEventListener('DOMContentLoaded',initVeritas);
+    var saved=sessionStorage.getItem(SK);
+    if(saved){
+      fetch(BASE+'/api/keystone/verify',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-keystone-token':saved},
+        body:JSON.stringify({app:APP_ID})
+      })
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){
+          document.getElementById('pkScreen').style.display='none';
+          showApp();
+        } else {
+          sessionStorage.removeItem(SK);
+          mobileFixFocus();
+        }
+      }).catch(function(){mobileFixFocus();});
+    } else {
+      mobileFixFocus();
     }
-  }catch(e){}
+  }catch(e){mobileFixFocus();}
 })();
 
 // ── TOAST ──
