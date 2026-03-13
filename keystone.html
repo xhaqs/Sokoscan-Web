@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#020508">
+<title>KEYSTONE — RIAKOINE-EMPIRE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020508;--bg2:#040c12;--card:#070f18;--border:#0d1e2c;
+  --gold:#c9a84c;--gold2:#f0c866;--teal:#0ea5b0;--teal2:#22d3db;
+  --red:#ef4444;--red2:#ff6b6b;--green:#10b981;--amber:#f59e0b;
+  --text:#e8f4f8;--text2:#94b8c8;--dim:#3a5a6a;
+  --mono:'Share Tech Mono',monospace;--cond:'Barlow Condensed',sans-serif;--serif:'Cinzel',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(201,168,76,0.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(14,165,176,0.03) 0%,transparent 50%);pointer-events:none;z-index:0;}
+#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:9px;letter-spacing:0.4em;color:rgba(255,255,255,0.12);pointer-events:none;z-index:9999;white-space:nowrap;font-weight:700;}
+
+/* PASSKEY */
+#pkScreen{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;}
+.pk-icon{font-size:36px;margin-bottom:16px;}
+.pk-empire{font-family:var(--serif);font-size:9px;letter-spacing:0.4em;color:var(--teal);margin-bottom:4px;text-align:center;}
+.pk-title{font-family:var(--serif);font-size:26px;color:var(--gold);letter-spacing:0.1em;margin-bottom:4px;text-align:center;}
+.pk-sub{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.15em;margin-bottom:8px;text-align:center;}
+.pk-badge{font-family:var(--mono);font-size:8px;color:var(--amber);border:1px solid rgba(245,158,11,0.3);padding:3px 12px;border-radius:2px;letter-spacing:0.12em;margin-bottom:24px;}
+.pk-input{width:100%;max-width:320px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.2);color:var(--text);font-family:var(--mono);font-size:16px;padding:14px 16px;border-radius:6px;outline:none;text-align:center;letter-spacing:0.2em;display:block;margin-bottom:12px;}
+.pk-input:focus{border-color:rgba(201,168,76,0.5);}
+.pk-btn{width:100%;max-width:320px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold2);font-family:var(--mono);font-size:11px;padding:14px;border-radius:6px;cursor:pointer;letter-spacing:0.2em;display:block;}
+.pk-error{font-family:var(--mono);font-size:9px;color:var(--red);margin-top:8px;letter-spacing:0.1em;text-align:center;min-height:16px;}
+
+/* APP */
+#app{display:none;flex-direction:column;height:100%;position:relative;z-index:1;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(2,5,8,0.95);backdrop-filter:blur(10px);flex-shrink:0;}
+.topbar-brand{display:flex;flex-direction:column;}
+.topbar-logo{font-family:var(--serif);font-size:9px;letter-spacing:0.3em;color:var(--dim);}
+.topbar-name{font-family:var(--serif);font-size:16px;color:var(--gold);letter-spacing:0.15em;line-height:1;}
+.topbar-sub{font-family:var(--mono);font-size:7px;color:var(--amber);letter-spacing:0.2em;margin-top:1px;}
+.admin-badge{font-family:var(--mono);font-size:8px;color:var(--amber);border:1px solid rgba(245,158,11,0.3);padding:3px 10px;border-radius:3px;letter-spacing:0.1em;}
+
+/* NAV */
+.nav-pills{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;background:rgba(2,5,8,0.9);scrollbar-width:none;}
+.nav-pills::-webkit-scrollbar{display:none;}
+.nav-pill{font-family:var(--mono);font-size:9px;padding:10px 16px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:0.1em;flex-shrink:0;border:none;background:none;}
+.nav-pill.active{color:var(--gold2);border-bottom:2px solid var(--gold);}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;padding-bottom:72px;}
+.panel{display:none;flex-direction:column;gap:12px;}
+.panel.active{display:flex;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.card-title{font-family:var(--serif);font-size:11px;color:var(--gold);letter-spacing:0.15em;}
+.card-tag{font-family:var(--mono);font-size:7px;color:var(--dim);border:1px solid var(--border);padding:2px 7px;border-radius:2px;letter-spacing:0.1em;}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:0;}
+.stat-box{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center;}
+.stat-val{font-family:var(--serif);font-size:22px;color:var(--teal2);margin-bottom:2px;}
+.stat-lbl{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.1em;}
+
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:10px;padding:9px 14px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;border:none;transition:all 0.2s;}
+.btn-gold{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold2);}
+.btn-red{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red2);}
+.btn-teal{background:rgba(14,165,176,0.1);border:1px solid rgba(14,165,176,0.3);color:var(--teal2);}
+.btn-ghost{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text2);}
+.btn-full{width:100%;}
+.btn-sm{padding:6px 10px;font-size:8px;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* FORM */
+.field{margin-bottom:10px;}
+.field-label{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.1em;margin-bottom:4px;}
+.field-input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 12px;border-radius:5px;outline:none;}
+.field-input:focus{border-color:rgba(201,168,76,0.35);}
+.field-select{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:10px 12px;border-radius:5px;outline:none;}
+
+/* APP CHECKBOXES */
+.app-checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.app-check{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:var(--text2);background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:5px 9px;border-radius:4px;cursor:pointer;transition:all 0.2s;-webkit-user-select:none;}
+.app-check.checked{background:rgba(14,165,176,0.1);border-color:rgba(14,165,176,0.3);color:var(--teal2);}
+.app-check input{display:none;}
+
+/* USER CARDS */
+.user-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;}
+.user-card:last-child{margin-bottom:0;}
+.user-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;color:var(--gold);flex-shrink:0;}
+.user-info{flex:1;min-width:0;}
+.user-name{font-family:var(--mono);font-size:11px;color:var(--text);margin-bottom:2px;}
+.user-role{font-family:var(--mono);font-size:7px;color:var(--dim);letter-spacing:0.1em;}
+.user-status{font-family:var(--mono);font-size:7px;padding:2px 7px;border-radius:2px;}
+.user-apps{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+.user-app-tag{font-family:var(--mono);font-size:7px;padding:2px 7px;background:rgba(14,165,176,0.06);border:1px solid rgba(14,165,176,0.15);color:var(--teal);border-radius:2px;}
+.user-meta{font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:8px;line-height:1.6;}
+.user-actions{display:flex;gap:6px;}
+
+/* AUDIT LOG */
+.audit-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.audit-row:last-child{border-bottom:none;}
+.audit-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center;margin-top:1px;}
+.audit-body{flex:1;min-width:0;}
+.audit-action{font-family:var(--mono);font-size:9px;color:var(--text2);}
+.audit-meta{font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:2px;}
+
+/* SESSION ROW */
+.session-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.session-row:last-child{border-bottom:none;}
+.session-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);flex-shrink:0;animation:livepulse 2s infinite;}
+@keyframes livepulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.session-info{flex:1;}
+.session-name{font-family:var(--mono);font-size:10px;color:var(--text2);}
+.session-meta{font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:2px;}
+
+/* EMPIRE NAV */
+.empire-nav{display:flex;border-top:1px solid var(--border);background:rgba(2,5,8,0.95);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.empire-nav::-webkit-scrollbar{display:none;}
+.empire-link{font-family:var(--mono);font-size:8px;padding:10px 14px;color:var(--dim);text-decoration:none;white-space:nowrap;letter-spacing:0.08em;flex-shrink:0;}
+.empire-link.active{color:var(--gold2);}
+
+/* TOAST */
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(7,15,24,0.95);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;padding:8px 20px;border-radius:4px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:1000;white-space:nowrap;}
+#toast.show{opacity:1;}
+
+/* DOTS */
+.dots::after{content:'...';animation:dotanim 1.5s infinite;}
+@keyframes dotanim{0%{content:'.';}33%{content:'..';}66%{content:'...';}100%{content:'.'}}
+</style>
+</head>
+<body>
+<div id="watermark">RIAKOINE-EMPIRE</div>
+
+<!-- PASSKEY -->
+<div id="pkScreen">
+  <div class="pk-icon">🗝️</div>
+  <div class="pk-empire">RIAKOINE · EMPIRE</div>
+  <div class="pk-title">KEYSTONE</div>
+  <div class="pk-sub">ACCESS CONTROL SYSTEM</div>
+  <div class="pk-badge">⚡ ADMIN ONLY</div>
+  <input class="pk-input" id="pkInput" type="password" placeholder="MASTER PASSWORD" autocomplete="off" onkeydown="if(event.key==='Enter')login()">
+  <button class="pk-btn" onclick="login()">AUTHENTICATE →</button>
+  <div class="pk-error" id="pkError"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">RIAKOINE-EMPIRE</div>
+      <div class="topbar-name">KEYSTONE</div>
+      <div class="topbar-sub">ACCESS CONTROL · ADMIN</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="admin-badge" id="adminName">ZACK</div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" style="font-size:8px;padding:5px 10px;">EXIT</button>
+    </div>
+  </div>
+
+  <div class="nav-pills">
+    <button class="nav-pill active" id="pill-overview" onclick="switchPanel('overview')">📊 OVERVIEW</button>
+    <button class="nav-pill" id="pill-users" onclick="switchPanel('users')">👥 USERS</button>
+    <button class="nav-pill" id="pill-add" onclick="switchPanel('add')">➕ ADD USER</button>
+    <button class="nav-pill" id="pill-sessions" onclick="switchPanel('sessions')">🔐 SESSIONS</button>
+    <button class="nav-pill" id="pill-audit" onclick="switchPanel('audit')">📋 AUDIT LOG</button>
+    <button class="nav-pill" id="pill-password" onclick="switchPanel('password')">🔑 MY PASSWORD</button>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">EMPIRE STATUS</span>
+          <span class="card-tag" id="overviewTime">--</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="statUsers">--</div>
+            <div class="stat-lbl">TOTAL USERS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statActive" style="color:var(--green);">--</div>
+            <div class="stat-lbl">ACTIVE USERS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statSessions" style="color:var(--teal2);">--</div>
+            <div class="stat-lbl">LIVE SESSIONS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statRevoked" style="color:var(--red);">--</div>
+            <div class="stat-lbl">REVOKED</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-title">PROTECTED SYSTEMS</span></div>
+        <div id="systemsList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">RECENT ACTIVITY</span>
+          <button class="btn btn-ghost btn-sm" onclick="switchPanel('audit')">VIEW ALL</button>
+        </div>
+        <div id="recentAudit"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">Loading</div></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="panel-users">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">ALL USERS</span>
+          <button class="btn btn-gold btn-sm" onclick="switchPanel('add')">+ ADD</button>
+        </div>
+        <div id="usersList"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;" class="dots">Loading</div></div>
+      </div>
+    </div>
+
+    <!-- ADD USER -->
+    <div class="panel" id="panel-add">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">ADD NEW USER</span>
+          <span class="card-tag">KEYSTONE MANAGED</span>
+        </div>
+
+        <div class="field">
+          <div class="field-label">FULL NAME</div>
+          <input class="field-input" id="newName" placeholder="e.g. Ken Mwangi" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <div class="field-label">PASSWORD</div>
+          <input class="field-input" id="newPwd" type="password" placeholder="Min 8 characters" autocomplete="new-password">
+        </div>
+
+        <div class="field">
+          <div class="field-label">ROLE</div>
+          <select class="field-select" id="newRole">
+            <option value="member">Member — 24hr session tokens</option>
+            <option value="admin">Admin — 7 day tokens + full access</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="field-label">APP ACCESS</div>
+          <div class="app-checks" id="appChecks">
+            <div class="app-check" onclick="toggleApp(this,'empire')"><input type="checkbox" value="empire">🏛️ EMPIRE</div>
+            <div class="app-check" onclick="toggleApp(this,'babel')"><input type="checkbox" value="babel">🌐 BABEL</div>
+            <div class="app-check" onclick="toggleApp(this,'intel')"><input type="checkbox" value="intel">🧬 INTEL</div>
+            <div class="app-check" onclick="toggleApp(this,'lumen')"><input type="checkbox" value="lumen">💡 LUMEN</div>
+            <div class="app-check" onclick="toggleApp(this,'veritas')"><input type="checkbox" value="veritas">🔍 VERITAS</div>
+            <div class="app-check" onclick="toggleApp(this,'sentry')"><input type="checkbox" value="sentry">🚨 SENTRY</div>
+            <div class="app-check" onclick="toggleApp(this,'sokoscan')"><input type="checkbox" value="sokoscan">📊 SOKOSCAN</div>
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-full" onclick="addUser()" id="addBtn" style="margin-top:4px;">➕ CREATE USER</button>
+        <div id="addError" style="font-family:var(--mono);font-size:9px;color:var(--red);margin-top:8px;min-height:14px;"></div>
+      </div>
+    </div>
+
+    <!-- SESSIONS -->
+    <div class="panel" id="panel-sessions">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">ACTIVE SESSIONS</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadSessions()">↻ REFRESH</button>
+        </div>
+        <div id="sessionsList"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;" class="dots">Loading</div></div>
+      </div>
+    </div>
+
+    <!-- AUDIT LOG -->
+    <div class="panel" id="panel-audit">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">AUDIT LOG</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadAudit()">↻ REFRESH</button>
+        </div>
+        <div id="auditList"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;" class="dots">Loading</div></div>
+      </div>
+    </div>
+
+    <!-- CHANGE PASSWORD -->
+    <div class="panel" id="panel-password">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">CHANGE MY PASSWORD</span>
+        </div>
+        <div class="field">
+          <div class="field-label">CURRENT PASSWORD</div>
+          <input class="field-input" id="oldPwd" type="password" placeholder="Current password" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <div class="field-label">NEW PASSWORD</div>
+          <input class="field-input" id="newPwdChange" type="password" placeholder="Min 8 characters" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <div class="field-label">CONFIRM NEW PASSWORD</div>
+          <input class="field-input" id="confirmPwd" type="password" placeholder="Repeat new password" autocomplete="new-password">
+        </div>
+        <button class="btn btn-gold btn-full" onclick="changePassword()" id="changePwdBtn" style="margin-top:4px;">🔑 UPDATE PASSWORD</button>
+        <div id="pwdError" style="font-family:var(--mono);font-size:9px;color:var(--red);margin-top:8px;min-height:14px;"></div>
+        <div id="pwdOk" style="font-family:var(--mono);font-size:9px;color:var(--green);margin-top:8px;min-height:14px;"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="empire-nav">
+    <a class="empire-link" href="/">🏛️ EMPIRE</a>
+    <a class="empire-link" href="/babel/">🌐 BABEL</a>
+    <a class="empire-link" href="/intel/">🧬 INTEL</a>
+    <a class="empire-link" href="/lumen/">💡 LUMEN</a>
+    <a class="empire-link" href="/veritas/">🔍 VERITAS</a>
+    <a class="empire-link" href="/sentry/">🚨 SENTRY</a>
+    <a class="empire-link active">🗝️ KEYSTONE</a>
+  </div>
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+var BASE=window.location.protocol+'//'+window.location.host;
+var KT_KEY='keystone_token';
+var currentToken=null;
+
+// ── TOAST ──
+function toast(msg,dur){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},dur||2500);
+}
+
+// ── NAV ──
+function switchPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-pill').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('pill-'+id).classList.add('active');
+  if(id==='users')loadUsers();
+  if(id==='sessions')loadSessions();
+  if(id==='audit')loadAudit();
+  if(id==='overview')loadOverview();
+}
+
+// ── LOGIN ──
+function login(){
+  var pwd=document.getElementById('pkInput').value.trim();
+  if(!pwd){document.getElementById('pkError').textContent='PASSWORD REQUIRED';return;}
+  document.getElementById('pkError').textContent='';
+  fetch(BASE+'/api/keystone/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({password:pwd,app:'keystone'})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok&&d.token){
+      currentToken=d.token;
+      try{sessionStorage.setItem(KT_KEY,d.token);}catch(e){}
+      if(d.role!=='admin'){
+        document.getElementById('pkError').textContent='ADMIN ACCESS REQUIRED';
+        currentToken=null;
+        return;
+      }
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      document.getElementById('adminName').textContent=d.name.toUpperCase();
+      loadOverview();
+    } else {
+      document.getElementById('pkError').textContent=d.error||'INVALID PASSWORD';
+      document.getElementById('pkInput').value='';
+      document.getElementById('pkInput').focus();
+    }
+  })
+  .catch(function(){document.getElementById('pkError').textContent='CONNECTION ERROR';});
+}
+
+// ── AUTO-LOGIN from session ──
+(function(){
+  try{
+    var saved=sessionStorage.getItem(KT_KEY);
+    if(saved){
+      fetch(BASE+'/api/keystone/verify',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-keystone-token':saved},
+        body:JSON.stringify({app:'keystone'})
+      })
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok&&d.role==='admin'){
+          currentToken=saved;
+          document.getElementById('pkScreen').style.display='none';
+          document.getElementById('app').style.display='flex';
+          document.getElementById('adminName').textContent=d.name.toUpperCase();
+          loadOverview();
+        }
+      }).catch(function(){});
+    } else {
+      setTimeout(function(){
+        var inp=document.getElementById('pkInput');
+        if(inp)inp.focus();
+      },300);
+    }
+  }catch(e){}
+  // Mobile tap focus
+  document.addEventListener('DOMContentLoaded',function(){
+    var pk=document.getElementById('pkScreen');
+    var inp=document.getElementById('pkInput');
+    if(pk&&inp){
+      pk.addEventListener('touchstart',function(e){
+        if(e.target!==inp&&e.target.tagName!=='BUTTON'){e.preventDefault();inp.focus();}
+      },{passive:false});
+    }
+  });
+})();
+
+// ── LOGOUT ──
+function logout(){
+  if(currentToken){
+    fetch(BASE+'/api/keystone/logout',{method:'POST',headers:{'Content-Type':'application/json','x-keystone-token':currentToken},body:JSON.stringify({})});
+  }
+  try{sessionStorage.removeItem(KT_KEY);}catch(e){}
+  currentToken=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('pkScreen').style.display='flex';
+  document.getElementById('pkInput').value='';
+}
+
+// ── API HELPER ──
+function api(method,path,body){
+  var opts={method:method,headers:{'Content-Type':'application/json','x-keystone-token':currentToken}};
+  if(body)opts.body=JSON.stringify(body);
+  return fetch(BASE+path,opts).then(function(r){return r.json();});
+}
+
+// ── LOAD OVERVIEW ──
+function loadOverview(){
+  document.getElementById('overviewTime').textContent=new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'})+' EAT';
+  Promise.all([
+    api('GET','/api/keystone/admin/users'),
+    api('GET','/api/keystone/admin/sessions'),
+    api('GET','/api/keystone/admin/audit')
+  ]).then(function(results){
+    var users=results[0].users||[];
+    var sessions=results[1].sessions||[];
+    var audit=results[2].log||[];
+    var active=users.filter(function(u){return u.active;}).length;
+    var revoked=users.filter(function(u){return !u.active;}).length;
+    document.getElementById('statUsers').textContent=users.length;
+    document.getElementById('statActive').textContent=active;
+    document.getElementById('statSessions').textContent=sessions.length;
+    document.getElementById('statRevoked').textContent=revoked;
+
+    // Systems list
+    var apps=[
+      {id:'empire',icon:'🏛️',name:'EMPIRE HOME'},
+      {id:'babel',icon:'🌐',name:'BABEL'},
+      {id:'intel',icon:'🧬',name:'INTEL'},
+      {id:'lumen',icon:'💡',name:'LUMEN'},
+      {id:'veritas',icon:'🔍',name:'VERITAS'},
+      {id:'sentry',icon:'🚨',name:'SENTRY'},
+      {id:'sokoscan',icon:'📊',name:'SOKOSCAN'}
+    ];
+    document.getElementById('systemsList').innerHTML=apps.map(function(a){
+      var count=users.filter(function(u){return u.active&&(u.apps.includes('*')||u.apps.includes(a.id));}).length;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<span style="font-size:14px;">'+a.icon+'</span>'
+        +'<span style="font-family:var(--mono);font-size:9px;color:var(--text2);">'+a.name+'</span>'
+        +'</div>'
+        +'<span style="font-family:var(--mono);font-size:8px;color:var(--teal);">'+count+' user'+(count!==1?'s':'')+'</span>'
+        +'</div>';
+    }).join('');
+
+    // Recent audit
+    var icons={LOGIN_OK:'✅',LOGIN_FAILED:'❌',LOGOUT:'🚪',USER_CREATED:'➕',USER_UPDATED:'✏️',USER_REVOKED:'🚫',ACCESS_DENIED:'⛔',PASSWORD_CHANGED:'🔑'};
+    document.getElementById('recentAudit').innerHTML=audit.slice(0,5).map(function(e){
+      return '<div class="audit-row">'
+        +'<div class="audit-icon">'+(icons[e.action]||'📌')+'</div>'
+        +'<div class="audit-body">'
+        +'<div class="audit-action">'+e.action.replace(/_/g,' ')+(e.detail?' — '+e.detail:'')+'</div>'
+        +'<div class="audit-meta">'+e.userId+' · '+new Date(e.time).toLocaleString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})+'</div>'
+        +'</div></div>';
+    }).join('')||'<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No activity yet.</div>';
+  }).catch(function(){toast('Load error');});
+}
+
+// ── LOAD USERS ──
+function loadUsers(){
+  api('GET','/api/keystone/admin/users').then(function(d){
+    var users=d.users||[];
+    if(!users.length){
+      document.getElementById('usersList').innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No users yet.</div>';
+      return;
+    }
+    document.getElementById('usersList').innerHTML=users.map(function(u){
+      var roleCol=u.role==='admin'?'var(--amber)':'var(--teal)';
+      var statusCol=u.active?'var(--green)':'var(--red)';
+      var apps=u.apps.includes('*')?['ALL APPS']:u.apps;
+      return '<div class="user-card">'
+        +'<div class="user-head">'
+        +'<div class="user-avatar">'+u.name.charAt(0).toUpperCase()+'</div>'
+        +'<div class="user-info">'
+        +'<div class="user-name">'+u.name+'</div>'
+        +'<div class="user-role" style="color:'+roleCol+';">'+u.role.toUpperCase()+'</div>'
+        +'</div>'
+        +'<div class="user-status" style="background:'+statusCol+'18;border:1px solid '+statusCol+'33;color:'+statusCol+';">'+( u.active?'ACTIVE':'REVOKED')+'</div>'
+        +'</div>'
+        +'<div class="user-apps">'+apps.map(function(a){return '<span class="user-app-tag">'+a+'</span>';}).join('')+'</div>'
+        +'<div class="user-meta">'
+        +'Created: '+(u.created?new Date(u.created).toLocaleDateString('en-GB'):'Unknown')+'<br>'
+        +'Last login: '+(u.lastLogin?new Date(u.lastLogin).toLocaleString('en-GB',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' EAT':'Never')
+        +'</div>'
+        +(u.id!=='zack'?'<div class="user-actions">'
+          +(u.active
+            ?'<button class="btn btn-red btn-sm" onclick="revokeUser(\''+u.id+'\',\''+u.name+'\')">🚫 REVOKE</button>'
+            :'<button class="btn btn-teal btn-sm" onclick="restoreUser(\''+u.id+'\',\''+u.name+'\')">✅ RESTORE</button>')
+          +'<button class="btn btn-ghost btn-sm" onclick="resetPassword(\''+u.id+'\',\''+u.name+'\')">🔑 RESET PWD</button>'
+          +'</div>':'')
+        +'</div>';
+    }).join('');
+  }).catch(function(){toast('Load error');});
+}
+
+// ── REVOKE USER ──
+function revokeUser(id,name){
+  if(!confirm('Revoke access for '+name+'? Their active sessions will be killed immediately.')){return;}
+  api('DELETE','/api/keystone/admin/users/'+id).then(function(d){
+    if(d.ok){toast('✅ '+name+' revoked — sessions killed');loadUsers();loadOverview();}
+    else toast('Error: '+(d.error||'failed'));
+  });
+}
+
+// ── RESTORE USER ──
+function restoreUser(id,name){
+  api('PATCH','/api/keystone/admin/users/'+id,{active:true}).then(function(d){
+    if(d.ok){toast('✅ '+name+' restored');loadUsers();loadOverview();}
+    else toast('Error: '+(d.error||'failed'));
+  });
+}
+
+// ── RESET PASSWORD ──
+function resetPassword(id,name){
+  var newPwd=prompt('New password for '+name+' (min 8 characters):');
+  if(!newPwd)return;
+  if(newPwd.length<8){toast('Password too short — min 8 characters');return;}
+  api('PATCH','/api/keystone/admin/users/'+id,{password:newPwd}).then(function(d){
+    if(d.ok){toast('✅ Password reset for '+name+' — all their sessions killed');}
+    else toast('Error: '+(d.error||'failed'));
+  });
+}
+
+// ── APP CHECKS ──
+function toggleApp(el,app){
+  el.classList.toggle('checked');
+  var cb=el.querySelector('input');
+  cb.checked=!cb.checked;
+}
+
+function getSelectedApps(){
+  var checked=document.querySelectorAll('#appChecks .app-check.checked input');
+  return Array.from(checked).map(function(c){return c.value;});
+}
+
+// ── ADD USER ──
+function addUser(){
+  var name=document.getElementById('newName').value.trim();
+  var pwd=document.getElementById('newPwd').value;
+  var role=document.getElementById('newRole').value;
+  var apps=getSelectedApps();
+  var errEl=document.getElementById('addError');
+  errEl.textContent='';
+  if(!name){errEl.textContent='Name required';return;}
+  if(!pwd||pwd.length<8){errEl.textContent='Password must be 8+ characters';return;}
+  if(!apps.length){errEl.textContent='Select at least one app';return;}
+  var btn=document.getElementById('addBtn');
+  btn.textContent='Creating';btn.className='btn btn-gold btn-full dots';btn.disabled=true;
+  api('POST','/api/keystone/admin/users',{name:name,password:pwd,role:role,apps:apps})
+  .then(function(d){
+    btn.textContent='➕ CREATE USER';btn.className='btn btn-gold btn-full';btn.disabled=false;
+    if(d.ok){
+      toast('✅ User '+name+' created');
+      document.getElementById('newName').value='';
+      document.getElementById('newPwd').value='';
+      document.querySelectorAll('#appChecks .app-check').forEach(function(el){el.classList.remove('checked');el.querySelector('input').checked=false;});
+      switchPanel('users');
+    } else {
+      errEl.textContent=d.error||'Failed to create user';
+    }
+  }).catch(function(){
+    btn.textContent='➕ CREATE USER';btn.className='btn btn-gold btn-full';btn.disabled=false;
+    errEl.textContent='Connection error';
+  });
+}
+
+// ── LOAD SESSIONS ──
+function loadSessions(){
+  api('GET','/api/keystone/admin/sessions').then(function(d){
+    var sessions=d.sessions||[];
+    if(!sessions.length){
+      document.getElementById('sessionsList').innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No active sessions.</div>';
+      return;
+    }
+    document.getElementById('sessionsList').innerHTML=sessions.map(function(s){
+      var expiry=new Date(s.expires).toLocaleString('en-GB',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' EAT';
+      return '<div class="session-row">'
+        +'<div class="session-dot"></div>'
+        +'<div class="session-info">'
+        +'<div class="session-name">'+s.name+' <span style="color:var(--dim);font-size:8px;">·</span> <span style="color:var(--teal);font-size:8px;">'+s.app.toUpperCase()+'</span></div>'
+        +'<div class="session-meta">Token: '+s.tokenPreview+' · Expires: '+expiry+'</div>'
+        +'</div>'
+        +'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);text-align:right;">'+s.role.toUpperCase()+'</div>'
+        +'</div>';
+    }).join('');
+  });
+}
+
+// ── LOAD AUDIT ──
+function loadAudit(){
+  var icons={LOGIN_OK:'✅',LOGIN_FAILED:'❌',LOGOUT:'🚪',USER_CREATED:'➕',USER_UPDATED:'✏️',USER_REVOKED:'🚫',ACCESS_DENIED:'⛔',PASSWORD_CHANGED:'🔑'};
+  api('GET','/api/keystone/admin/audit').then(function(d){
+    var log=d.log||[];
+    if(!log.length){
+      document.getElementById('auditList').innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:12px;">No events yet.</div>';
+      return;
+    }
+    document.getElementById('auditList').innerHTML=log.map(function(e){
+      return '<div class="audit-row">'
+        +'<div class="audit-icon">'+(icons[e.action]||'📌')+'</div>'
+        +'<div class="audit-body">'
+        +'<div class="audit-action">'+e.action.replace(/_/g,' ')+(e.detail?' — '+e.detail:'')+'</div>'
+        +'<div class="audit-meta">User: '+e.userId+' · '+new Date(e.time).toLocaleString('en-GB',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})+' EAT</div>'
+        +'</div></div>';
+    }).join('');
+  });
+}
+
+// ── CHANGE PASSWORD ──
+function changePassword(){
+  var oldP=document.getElementById('oldPwd').value;
+  var newP=document.getElementById('newPwdChange').value;
+  var confP=document.getElementById('confirmPwd').value;
+  var errEl=document.getElementById('pwdError');
+  var okEl=document.getElementById('pwdOk');
+  errEl.textContent='';okEl.textContent='';
+  if(!oldP||!newP||!confP){errEl.textContent='All fields required';return;}
+  if(newP.length<8){errEl.textContent='New password must be 8+ characters';return;}
+  if(newP!==confP){errEl.textContent='Passwords do not match';return;}
+  var btn=document.getElementById('changePwdBtn');
+  btn.textContent='Updating';btn.className='btn btn-gold btn-full dots';btn.disabled=true;
+  api('POST','/api/keystone/admin/change-password',{oldPassword:oldP,newPassword:newP})
+  .then(function(d){
+    btn.textContent='🔑 UPDATE PASSWORD';btn.className='btn btn-gold btn-full';btn.disabled=false;
+    if(d.ok){
+      okEl.textContent='✅ Password updated successfully';
+      document.getElementById('oldPwd').value='';
+      document.getElementById('newPwdChange').value='';
+      document.getElementById('confirmPwd').value='';
+    } else {
+      errEl.textContent=d.error||'Update failed';
+    }
+  }).catch(function(){
+    btn.textContent='🔑 UPDATE PASSWORD';btn.className='btn btn-gold btn-full';btn.disabled=false;
+    errEl.textContent='Connection error';
+  });
+}
+</script>
+</body>
+</html>
