@@ -245,6 +245,7 @@ body::after{content:'';position:fixed;inset:0;
   <div class="nav-strip">
     <button class="nav-btn active" id="pill-markets" onclick="switchPanel('markets')">📡 MARKETS</button>
     <button class="nav-btn" id="pill-alerts" onclick="switchPanel('alerts')">🔔 ALERTS</button>
+    <button class="nav-btn" id="pill-fast" onclick="switchPanel('fast')">⚡ FAST</button>
     <button class="nav-btn" id="pill-positions" onclick="switchPanel('positions')">📊 POSITIONS</button>
     <button class="nav-btn" id="pill-bankroll" onclick="switchPanel('bankroll')">💰 BANKROLL</button>
     <button class="nav-btn" id="pill-settings" onclick="switchPanel('settings')">⚙️ SETTINGS</button>
@@ -272,6 +273,45 @@ body::after{content:'';position:fixed;inset:0;
           <button class="btn btn-ghost btn-sm" onclick="loadMarkets()">↻ REFRESH</button>
         </div>
         <div id="marketsList"><div class="loading">Fetching markets</div></div>
+      </div>
+    </div>
+
+    <!-- FAST MARKETS -->
+    <div class="panel" id="panel-fast">
+      <div class="card" style="border-color:rgba(16,185,129,0.2);background:rgba(16,185,129,0.02);">
+        <div class="card-head">
+          <span class="card-title" style="color:var(--green2);">⚡ FAST MARKETS</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadFastMarkets()">↻ REFRESH</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);line-height:1.8;margin-bottom:10px;">
+          Markets closing soon — bet today, collect today. Sorted by time remaining.
+        </div>
+        <div class="chip-row" id="fastTimeChips">
+          <div class="chip active" onclick="setFastFilter(6,this)">6H</div>
+          <div class="chip" onclick="setFastFilter(12,this)">12H</div>
+          <div class="chip" onclick="setFastFilter(24,this)">24H</div>
+          <div class="chip" onclick="setFastFilter(48,this)">48H</div>
+          <div class="chip" onclick="setFastFilter(168,this)">7D</div>
+        </div>
+        <div id="fastScanStatus" style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:8px;min-height:14px;"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">CLOSING SOON</span>
+          <span class="card-tag" id="fastCount">-- MARKETS</span>
+        </div>
+        <div id="fastMarketsList"><div class="loading">Loading fast markets</div></div>
+      </div>
+      <div class="card" style="border-color:rgba(201,168,76,0.15);">
+        <div class="card-head">
+          <span class="card-title">🧠 AI FAST SCAN</span>
+          <span class="card-tag" style="color:var(--gold2);">RECOMMENDED</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);line-height:1.8;margin-bottom:10px;">
+          AI analyses only fast-closing markets. Fastest path to edge + resolution.
+        </div>
+        <button class="btn btn-gold btn-full" id="fastAiBtn" onclick="runFastAIScan()">🧠 AI SCAN FAST MARKETS</button>
+        <div id="fastAiStatus" style="font-family:var(--mono);font-size:8px;color:var(--dim);text-align:center;margin-top:8px;min-height:14px;"></div>
       </div>
     </div>
 
@@ -619,8 +659,10 @@ function switchPanel(id){
 function initOracle(){
   loadLocal();
   loadMarkets();
+  loadFastMarkets();
   renderPositions();
   renderBankroll();
+  renderAlerts();
 }
 
 // ── LOCAL STORAGE ──
@@ -718,6 +760,160 @@ function setCategory(cat,el){
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
   el.classList.add('active');
   renderMarkets();
+}
+
+// ── FAST MARKETS ──
+var fastHours=6;
+var fastMarkets=[];
+
+function setFastFilter(hours,el){
+  fastHours=hours;
+  document.querySelectorAll('#fastTimeChips .chip').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  renderFastMarkets();
+}
+
+function loadFastMarkets(){
+  document.getElementById('fastMarketsList').innerHTML='<div class="loading">Fetching fast markets</div>';
+  // Use already loaded markets + fetch more with endDate filter
+  fetch(BASE+'/api/polymarket/markets')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    fastMarkets=data||[];
+    renderFastMarkets();
+  })
+  .catch(function(){
+    // Fall back to allMarkets
+    fastMarkets=allMarkets;
+    renderFastMarkets();
+  });
+}
+
+function renderFastMarkets(){
+  var now=Date.now();
+  var cutoff=now+(fastHours*60*60*1000);
+  var list=(fastMarkets.length?fastMarkets:allMarkets).filter(function(m){
+    var end=m.endDateIso||m.endDate||'';
+    if(!end)return false;
+    var endMs=new Date(end).getTime();
+    return endMs>now&&endMs<=cutoff;
+  });
+  // Sort by soonest closing
+  list.sort(function(a,b){
+    return new Date(a.endDateIso||a.endDate).getTime()-new Date(b.endDateIso||b.endDate).getTime();
+  });
+  document.getElementById('fastCount').textContent=list.length+' MARKETS';
+  var statusEl=document.getElementById('fastScanStatus');
+  if(!list.length){
+    // Try wider window suggestion
+    statusEl.textContent='No markets closing in '+fastHours+'h — try 24H or 48H';
+    statusEl.style.color='var(--amber2)';
+    document.getElementById('fastMarketsList').innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">No markets closing in '+fastHours+' hours.<br>Try a wider window above.</div>';
+    return;
+  }
+  statusEl.textContent=list.length+' markets closing within '+fastHours+'h';
+  statusEl.style.color='var(--green2)';
+  document.getElementById('fastMarketsList').innerHTML=list.map(function(m){
+    var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||0);
+    var no=parseFloat(m.outcomePrices&&m.outcomePrices[1]||0);
+    var vol=parseFloat(m.volumeNum||m.volume||0);
+    var volStr=vol>1000000?'$'+(vol/1000000).toFixed(1)+'M':vol>1000?'$'+(vol/1000).toFixed(0)+'K':'$'+vol.toFixed(0);
+    var endMs=new Date(m.endDateIso||m.endDate).getTime();
+    var hoursLeft=((endMs-Date.now())/3600000);
+    var timeLeft=hoursLeft<1?(Math.round(hoursLeft*60)+'m'):hoursLeft<24?(hoursLeft.toFixed(1)+'h'):(Math.round(hoursLeft/24)+'d');
+    var urgency=hoursLeft<2?'var(--red2)':hoursLeft<6?'var(--amber2)':'var(--green2)';
+    var barW=Math.round(yes*100);
+    var edge=Math.abs(yes-0.5)*100;
+    var edgeBadge=edge>20?'HOT':edge>10?'WATCH':'LOW';
+    var edgeColor=edge>20?'var(--green2)':edge>10?'var(--amber2)':'var(--dim)';
+    var url=m.slug?'https://polymarket.com/event/'+m.slug:'';
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--border);" onclick="openMarket(\''+m.conditionId+'\')" style="cursor:pointer;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">'
+      +'<div style="font-family:var(--cond);font-size:12px;color:var(--text);font-weight:600;flex:1;line-height:1.3;padding-right:8px;">'+m.question+'</div>'
+      +'<div style="font-family:var(--mono);font-size:10px;color:'+urgency+';font-weight:700;flex-shrink:0;">⏱ '+timeLeft+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;align-items:center;margin-bottom:4px;">'
+      +'<span style="font-family:var(--mono);font-size:10px;color:var(--green2);">YES '+(yes*100).toFixed(0)+'%</span>'
+      +'<span style="font-family:var(--mono);font-size:10px;color:var(--red2);">NO '+(no*100).toFixed(0)+'%</span>'
+      +'<span style="font-family:var(--mono);font-size:8px;color:var(--dim);">'+volStr+'</span>'
+      +'<span style="font-family:var(--mono);font-size:7px;color:'+edgeColor+';margin-left:auto;">'+edgeBadge+'</span>'
+      +'</div>'
+      +'<div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;">'
+      +'<div style="height:100%;width:'+barW+'%;background:linear-gradient(90deg,var(--green),var(--teal));border-radius:2px;"></div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function runFastAIScan(){
+  var btn=document.getElementById('fastAiBtn');
+  var status=document.getElementById('fastAiStatus');
+  // Get fast market condition IDs to pass as filter
+  var now=Date.now();
+  var cutoff=now+(fastHours*60*60*1000);
+  var fastList=(fastMarkets.length?fastMarkets:allMarkets).filter(function(m){
+    var end=m.endDateIso||m.endDate||'';
+    if(!end)return false;
+    var endMs=new Date(end).getTime();
+    return endMs>now&&endMs<=cutoff;
+  });
+  if(!fastList.length){
+    toast('No fast markets found — try wider window');
+    return;
+  }
+  if(btn){btn.disabled=true;btn.textContent='🧠 ANALYSING...';}
+  status.textContent='AI analysing '+fastList.length+' fast markets...';
+  status.style.color='var(--amber2)';
+  var token='';try{token=sessionStorage.getItem(SK)||'';}catch(e){}
+  var dots=0;
+  var ticker=setInterval(function(){
+    dots=(dots+1)%4;
+    status.textContent='AI analysing fast markets'+'.'.repeat(dots)+' (~'+Math.min(fastList.length,10)*5+'s)';
+  },800);
+  fetch(BASE+'/api/oracle/smart-scan-fast',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-keystone-token':token},
+    body:JSON.stringify({
+      hoursWindow:fastHours,
+      minEdge:10,
+      minVolume:500,
+      maxMarkets:10
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    clearInterval(ticker);
+    if(btn){btn.disabled=false;btn.textContent='🧠 AI SCAN FAST MARKETS';}
+    if(!d.ok){status.textContent='Failed: '+(d.error||'unknown');status.style.color='var(--red2)';return;}
+    var found=d.alerts||[];
+    if(found.length){
+      var newAlerts=found.map(function(a){
+        return {market:a.question,yes:a.yes,no:a.no,edge:a.edge,absEdge:a.absEdge,
+          aiProb:a.aiProb,direction:a.direction,confidence:a.confidence,
+          reasoning:a.reasoning,keyFactor:a.keyFactor,vol:a.volume,
+          slug:a.slug,time:a.time,smart:true,fast:true,
+          timeLeft:a.timeLeft,endDate:a.endDate};
+      });
+      alerts=newAlerts.concat(alerts).slice(0,50);
+      saveLocal();
+      status.textContent='✅ Found '+found.length+' fast AI edge'+(found.length>1?'s':'')+' — check ALERTS tab';
+      status.style.color='var(--green2)';
+      switchPanel('alerts');
+      renderAlerts();
+      document.getElementById('alertCount').textContent=found.length+' FAST';
+      toast('⚡ '+found.length+' fast AI edge'+(found.length>1?'s':'')+' found!');
+    } else {
+      status.textContent='No edges found in '+fastHours+'h window — try wider';
+      status.style.color='var(--dim)';
+      toast('No fast edges found');
+    }
+  })
+  .catch(function(e){
+    clearInterval(ticker);
+    if(btn){btn.disabled=false;btn.textContent='🧠 AI SCAN FAST MARKETS';}
+    status.textContent='Error: '+e.message;
+    toast('Scan failed');
+  });
 }
 
 // ── OPEN MARKET DETAIL ──
