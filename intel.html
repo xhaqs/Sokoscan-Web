@@ -219,11 +219,7 @@ select.intel-input option{background:var(--card);}
 @keyframes dots{0%{content:'.';}33%{content:'..';}66%{content:'...';}100%{content:'.'}}
 
 /* WATERMARK */
-#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.4em;color:rgba(255,255,255,0.15);pointer-events:none;z-index:9999;white-space:nowrap;font-weight:700;}
-
-/* CONTINENT BUTTONS */
-.continent-btn{font-family:var(--mono);font-size:8px;padding:5px 10px;border-radius:4px;border:1px solid rgba(14,165,176,0.15);background:rgba(14,165,176,0.04);color:var(--dim);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
-.continent-btn.active{background:rgba(14,165,176,0.12);border-color:rgba(14,165,176,0.35);color:var(--teal2);}
+#watermark{position:fixed;bottom:50%;right:-55px;transform:translateY(50%) rotate(90deg);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.4em;color:rgba(14,165,176,0.07);pointer-events:none;z-index:0;white-space:nowrap;font-weight:700;}
 </style>
 </head>
 <body>
@@ -453,17 +449,9 @@ select.intel-input option{background:var(--card);}
           </div>
         </div>
 
-        <!-- CONTINENT TABS -->
-        <div style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;flex-wrap:wrap;gap:4px;">
-          <button class="continent-btn active" onclick="showContinent('africa')" id="cb-africa">🌍 AFRICA</button>
-          <button class="continent-btn" onclick="showContinent('asia')" id="cb-asia">🌏 ASIA</button>
-          <button class="continent-btn" onclick="showContinent('americas')" id="cb-americas">🌎 AMERICAS</button>
-          <button class="continent-btn" onclick="showContinent('pacific')" id="cb-pacific">🏝️ PACIFIC</button>
-          <button class="continent-btn" onclick="showContinent('europe')" id="cb-europe">🇪🇺 EUROPE</button>
-          <button class="continent-btn" onclick="showContinent('mideast')" id="cb-mideast">🕌 MIDDLE EAST</button>
-        </div>
-
-        <div id="continentData"></div>
+        <!-- AFRICA FOCUS -->
+        <div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.15em;margin-bottom:10px;">AFRICA — THE DIVERSITY EPICENTER</div>
+        <div id="africaData"></div>
       </div>
 
       <!-- LANGUAGE FAMILIES -->
@@ -501,75 +489,31 @@ select.intel-input option{background:var(--card);}
 <div id="toast"></div>
 
 <script>
-// ── KEYSTONE AUTH ──
+// ── PASSKEY ──
 (function(){
-  var APP_ID='intel';
+  function hc(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(16);}
+  var HASH=hc('Zack_Lingua');
   var SK='intel_sk1';
-  var BASE=window.location.protocol+'//'+window.location.host;
-  function showApp(){ document.getElementById('app').style.display='flex';setTimeout(initIntel,50); }
-  function mobileFixFocus(){
-    var pk=document.getElementById('pkScreen');
-    var inp=document.getElementById('pkInput');
-    if(pk&&inp){
-      pk.addEventListener('touchstart',function(e){
-        if(e.target!==inp&&e.target.tagName!=='BUTTON'){e.preventDefault();inp.focus();}
-      },{passive:false});
-      setTimeout(function(){inp.focus();},300);
-    }
-  }
   window.checkPK=function(){
     var v=document.getElementById('pkInput').value.trim();
-    var errEl=document.getElementById('pkError');
-    if(!v){errEl.textContent='PASSWORD REQUIRED';return;}
-    errEl.textContent='';
-    var btn=document.querySelector('#pkScreen button');
-    if(btn){btn.textContent='VERIFYING...';btn.disabled=true;}
-    fetch(BASE+'/api/keystone/login',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({password:v,app:APP_ID})
-    })
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
-      if(d.ok&&d.token){
-        try{sessionStorage.setItem(SK,d.token);}catch(e){}
-        document.getElementById('pkScreen').style.display='none';
-        showApp();
-      } else {
-        errEl.textContent=d.error==='Access denied for this application'?'ACCESS NOT GRANTED':d.error||'INVALID PASSWORD';
-        document.getElementById('pkInput').value='';
-        document.getElementById('pkInput').focus();
-      }
-    })
-    .catch(function(){
-      if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
-      errEl.textContent='CONNECTION ERROR — TRY AGAIN';
-    });
-  };
-  // Check saved token
-  try{
-    var saved=sessionStorage.getItem(SK);
-    if(saved){
-      fetch(BASE+'/api/keystone/verify',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-keystone-token':saved},
-        body:JSON.stringify({app:APP_ID})
-      })
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(d.ok){
-          document.getElementById('pkScreen').style.display='none';
-          showApp();
-        } else {
-          sessionStorage.removeItem(SK);
-          mobileFixFocus();
-        }
-      }).catch(function(){mobileFixFocus();});
+    if(!v){document.getElementById('pkError').textContent='ACCESS CODE REQUIRED';return;}
+    if(hc(v)===HASH){
+      try{sessionStorage.setItem(SK,'1');}catch(e){}
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      initIntel();
     } else {
-      mobileFixFocus();
+      document.getElementById('pkError').textContent='INVALID CODE';
+      document.getElementById('pkInput').value='';
     }
-  }catch(e){mobileFixFocus();}
+  };
+  try{
+    if(sessionStorage.getItem(SK)==='1'){
+      document.getElementById('pkScreen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      window.addEventListener('DOMContentLoaded',initIntel);
+    }
+  }catch(e){}
 })();
 
 // ── TOAST ──
@@ -948,116 +892,25 @@ function analyzeLanguage(name){
 }
 
 // ── ETHNOLINGUISTIC MAP DATA ──
-var CONTINENT_DATA={
-  africa:{
-    title:'AFRICA — THE DIVERSITY EPICENTER',
-    total:'2,000+',
-    endangered:'~500',
-    note:'Africa hosts ~30% of all world languages with the highest genetic diversity.',
-    regions:[
-      {name:'West Africa',count:'1,500+',top:'Hausa, Yoruba, Igbo, Fulfulde, Wolof, Ewe, Twi, Mandinka'},
-      {name:'East Africa',count:'700+',top:'Swahili, Amharic, Somali, Oromo, Gikuyu, Luo, Luganda'},
-      {name:'Central Africa',count:'600+',top:'Lingala, Kikongo, Sango, Zande, Mongo, Tshiluba'},
-      {name:'Southern Africa',count:'400+',top:'Zulu, Xhosa, Shona, Ndebele, Tswana, Sotho, Venda'},
-      {name:'North Africa',count:'300+',top:'Arabic, Tamazight, Tigrinya, Coptic, Kabyle, Tarifit'}
-    ]
-  },
-  asia:{
-    title:'ASIA — GREATEST LINGUISTIC MASS',
-    total:'2,300+',
-    endangered:'~700',
-    note:'Asia has the most speakers per language globally. PNG alone has 800+ languages.',
-    regions:[
-      {name:'South Asia',count:'780+',top:'Hindi, Bengali, Urdu, Tamil, Telugu, Marathi, Kannada, Nepali'},
-      {name:'Southeast Asia',count:'1,100+',top:'Javanese, Filipino, Vietnamese, Thai, Khmer, Burmese, Malay'},
-      {name:'East Asia',count:'300+',top:'Mandarin, Cantonese, Wu, Min, Tibetan, Mongolian, Korean, Japanese'},
-      {name:'Central Asia',count:'100+',top:'Kazakh, Uzbek, Uyghur, Kyrgyz, Tajik, Turkmen'},
-      {name:'Siberia & Far East',count:'100+',top:'Yakut, Buryat, Evenki, Chukchi, Nivkh, Nanai'}
-    ]
-  },
-  americas:{
-    title:'THE AMERICAS — ANCIENT DIVERSITY',
-    total:'1,000+',
-    endangered:'~900',
-    note:'Pre-colonial Americas had over 1,000 languages. Today ~40% are critically endangered.',
-    regions:[
-      {name:'North America',count:'250+',top:'Navajo, Cherokee, Ojibwe, Cree, Inuktitut, Dakota, Apache'},
-      {name:'Mesoamerica',count:'300+',top:'Nahuatl, Maya, Zapotec, Mixtec, Totonac, Otomi, Tzeltal'},
-      {name:'Caribbean',count:'20+',top:'Garifuna, Papiamentu, Haitian Creole, Taino (extinct)'},
-      {name:'South America (Andean)',count:'200+',top:'Quechua, Aymara, Mapuche, Guarani, Puquina'},
-      {name:'Amazonia',count:'350+',top:'Yanomami, Tikuna, Tukano, Ye\'kuana, Waorani, Kayapo'}
-    ]
-  },
-  pacific:{
-    title:'PACIFIC — DENSITY CHAMPION',
-    total:'1,300+',
-    endangered:'~400',
-    note:'Papua New Guinea alone has 840 languages — the highest density of any country on Earth.',
-    regions:[
-      {name:'Papua New Guinea',count:'840+',top:'Tok Pisin, Enga, Huli, Melpa, Kalam, Wahgi, Baining'},
-      {name:'Australia',count:'250+',top:'Warlpiri, Arrernte, Yolngu, Pitjantjatjara, Murrinh-patha'},
-      {name:'Melanesia',count:'300+',top:'Bislama, Fijian, Kanak languages, Solomon Islands Pijin'},
-      {name:'Micronesia',count:'20+',top:'Chamorro, Palauan, Carolinian, Marshallese, Kosraean'},
-      {name:'Polynesia',count:'30+',top:'Hawaiian, Maori, Samoan, Tongan, Tahitian, Cook Islands Maori'}
-    ]
-  },
-  europe:{
-    title:'EUROPE — MINORITY LANGUAGES AT RISK',
-    total:'300+',
-    endangered:'~50',
-    note:'Europe has fewer languages but strong institutional preservation. ~50 minority languages threatened.',
-    regions:[
-      {name:'Western Europe',count:'40+',top:'Catalan, Basque, Welsh, Breton, Occitan, Galician, Frisian'},
-      {name:'Northern Europe',count:'30+',top:'Sami (10 dialects), Faroese, Meänkieli, Karelian, Livonian'},
-      {name:'Eastern Europe',count:'80+',top:'Romani, Rusyn, Sorbian, Kashubian, Aromanian, Gagauz'},
-      {name:'Southern Europe',count:'30+',top:'Ladin, Friulian, Corsican, Neapolitan, Sicilian, Aromanian'},
-      {name:'Caucasus',count:'50+',top:'Georgian, Armenian, Chechen, Avar, Lezgian, Ingush, Abkhaz'}
-    ]
-  },
-  mideast:{
-    title:'MIDDLE EAST — CRADLE OF WRITING',
-    total:'60+',
-    endangered:'~20',
-    note:'Home to some of the world\'s oldest written languages. Aramaic, once dominant, now critically endangered.',
-    regions:[
-      {name:'Levant',count:'15+',top:'Arabic (Levantine), Hebrew, Aramaic, Assyrian Neo-Aramaic'},
-      {name:'Arabian Peninsula',count:'10+',top:'Gulf Arabic, Mehri, Shehri, Soqotri, Harsusi'},
-      {name:'Mesopotamia / Iraq',count:'10+',top:'Iraqi Arabic, Kurdish (Kurmanji/Sorani), Mandaic, Shabaki'},
-      {name:'Iran & Persia',count:'20+',top:'Persian, Kurdish, Azerbaijani, Gilaki, Mazanderani, Luri'},
-      {name:'Turkey & Anatolia',count:'15+',top:'Turkish, Kurdish, Zazaki, Laz, Armenian, Greek (Pontic)'}
-    ]
-  }
-};
-
-function showContinent(id){
-  document.querySelectorAll('.continent-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('cb-'+id).classList.add('active');
-  var c=CONTINENT_DATA[id];
-  if(!c)return;
-  var html='<div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.15em;margin-bottom:6px;">'+c.title+'</div>'
-    +'<div style="display:flex;gap:8px;margin-bottom:10px;">'
-    +'<div style="flex:1;background:rgba(14,165,176,0.06);border:1px solid rgba(14,165,176,0.12);border-radius:4px;padding:8px;text-align:center;">'
-    +'<div style="font-family:var(--mono);font-size:14px;color:var(--teal2);">'+c.total+'</div>'
-    +'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);">LANGUAGES</div></div>'
-    +'<div style="flex:1;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.12);border-radius:4px;padding:8px;text-align:center;">'
-    +'<div style="font-family:var(--mono);font-size:14px;color:#ef4444;">'+c.endangered+'</div>'
-    +'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);">ENDANGERED</div></div>'
-    +'</div>'
-    +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.6;margin-bottom:12px;padding:8px;background:rgba(201,168,76,0.04);border-left:2px solid rgba(201,168,76,0.2);border-radius:0 4px 4px 0;">'+c.note+'</div>';
-  c.regions.forEach(function(r){
-    html+='<div style="margin-bottom:8px;padding:10px;background:rgba(14,165,176,0.03);border:1px solid rgba(14,165,176,0.08);border-radius:6px;">'
+function renderMapData(){
+  // Africa data
+  var africaData=document.getElementById('africaData');
+  var africaRegions=[
+    {name:'West Africa',count:'1,500+',top:'Hausa, Yoruba, Igbo, Fulfulde, Wolof'},
+    {name:'East Africa',count:'700+',top:'Swahili, Amharic, Somali, Oromo, Gikuyu'},
+    {name:'Central Africa',count:'600+',top:'Lingala, Kikongo, Sango, Zande'},
+    {name:'Southern Africa',count:'400+',top:'Zulu, Xhosa, Shona, Ndebele, Tswana'},
+    {name:'North Africa',count:'300+',top:'Arabic, Tamazight, Tigrinya, Coptic'}
+  ];
+  africaData.innerHTML=africaRegions.map(function(r){
+    return '<div style="margin-bottom:10px;padding:10px;background:rgba(14,165,176,0.04);border:1px solid rgba(14,165,176,0.1);border-radius:6px;">'
       +'<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
       +'<span style="font-family:var(--mono);font-size:9px;color:var(--teal2);">'+r.name+'</span>'
       +'<span style="font-family:var(--mono);font-size:9px;color:var(--gold);">'+r.count+' languages</span>'
       +'</div>'
       +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);">'+r.top+'</div>'
       +'</div>';
-  });
-  document.getElementById('continentData').innerHTML=html;
-}
-
-function renderMapData(){
-  showContinent('africa');
+  }).join('');
 
   // Language families
   var familyData=document.getElementById('familyData');

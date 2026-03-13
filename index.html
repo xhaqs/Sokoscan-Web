@@ -370,32 +370,36 @@ body::after{
 
 </div><!-- /wrap -->
 
-<script>
+<script>/* @protected */
+
 // ── KEYSTONE AUTH ──
 (function(){
-  var APP_ID='empire';
+  var _0xdead6=null;
+var _0xdead1=function(){return false;};
+var _0xdead7=function(){try{return!!window;}catch(e){return false;}};
+var APP_ID='\x65\x6d\x70\x69\x72\x65';
   var SK='empire_sk1';
   var BASE=window.location.protocol+'//'+window.location.host;
-  function showApp(){ document.getElementById('pkScreen').style.display='none'; }
+  function showApp(){ document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e').style.display='\x6e\x6f\x6e\x65'; }
   function mobileFixFocus(){
-    var pk=document.getElementById('pkScreen');
-    var inp=document.getElementById('pkInput');
+    var pk=document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e');
+    var inp=document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74');
     if(pk&&inp){
-      pk.addEventListener('touchstart',function(e){
-        if(e.target!==inp&&e.target.tagName!=='BUTTON'){e.preventDefault();inp.focus();}
+      pk.addEventListener('\x74\x6f\x75\x63\x68\x73\x74\x61\x72\x74',function(e){
+        if(e.target!==inp&&e.target.tagName!=='\x42\x55\x54\x54\x4f\x4e'){e.preventDefault();inp.focus();}
       },{passive:false});
       setTimeout(function(){inp.focus();},300);
     }
   }
   window.checkPK=function(){
-    var v=document.getElementById('pkInput').value.trim();
-    var errEl=document.getElementById('pkError');
-    if(!v){errEl.textContent='PASSWORD REQUIRED';return;}
+    var v=document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74').value.trim();
+    var errEl=document.getElementById('\x70\x6b\x45\x72\x72\x6f\x72');
+    if(!v){errEl.textContent='\x50\x41\x53\x53\x57\x4f\x52\x44\x20\x52\x45\x51\x55\x49\x52\x45\x44';return;}
     errEl.textContent='';
     var btn=document.querySelector('#pkScreen button');
     if(btn){btn.textContent='VERIFYING...';btn.disabled=true;}
     fetch(BASE+'/api/keystone/login',{
-      method:'POST',
+      method:'\x50\x4f\x53\x54',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({password:v,app:APP_ID})
     })
@@ -404,12 +408,12 @@ body::after{
       if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
       if(d.ok&&d.token){
         try{sessionStorage.setItem(SK,d.token);}catch(e){}
-        document.getElementById('pkScreen').style.display='none';
+        document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e').style.display='\x6e\x6f\x6e\x65';
         showApp();
       } else {
-        errEl.textContent=d.error==='Access denied for this application'?'ACCESS NOT GRANTED':d.error||'INVALID PASSWORD';
-        document.getElementById('pkInput').value='';
-        document.getElementById('pkInput').focus();
+        errEl.textContent=d.error==='Access denied for this application'?'\x41\x43\x43\x45\x53\x53\x20\x4e\x4f\x54\x20\x47\x52\x41\x4e\x54\x45\x44':d.error||'\x49\x4e\x56\x41\x4c\x49\x44\x20\x50\x41\x53\x53\x57\x4f\x52\x44';
+        document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74').value='';
+        document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74').focus();
       }
     })
     .catch(function(){
@@ -422,14 +426,14 @@ body::after{
     var saved=sessionStorage.getItem(SK);
     if(saved){
       fetch(BASE+'/api/keystone/verify',{
-        method:'POST',
+        method:'\x50\x4f\x53\x54',
         headers:{'Content-Type':'application/json','x-keystone-token':saved},
         body:JSON.stringify({app:APP_ID})
       })
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.ok){
-          document.getElementById('pkScreen').style.display='none';
+          document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e').style.display='\x6e\x6f\x6e\x65';
           showApp();
         } else {
           sessionStorage.removeItem(SK);
@@ -443,16 +447,16 @@ body::after{
 })();
 document.querySelectorAll('.app-card').forEach(function(card){
   var color=getComputedStyle(card).getPropertyValue('--accent-color').trim()||'#0ea5b0';
-  card.addEventListener('mouseenter',function(){
+  card.addEventListener('\x6d\x6f\x75\x73\x65\x65\x6e\x74\x65\x72',function(){
     card.style.borderColor=color.replace(')',',0.3)').replace('rgb','rgba');
   });
-  card.addEventListener('mouseleave',function(){
+  card.addEventListener('\x6d\x6f\x75\x73\x65\x6c\x65\x61\x76\x65',function(){
     card.style.borderColor='';
   });
-  card.addEventListener('touchstart',function(){
+  card.addEventListener('\x74\x6f\x75\x63\x68\x73\x74\x61\x72\x74',function(){
     card.style.borderColor=color;
   },{passive:true});
-  card.addEventListener('touchend',function(){
+  card.addEventListener('\x74\x6f\x75\x63\x68\x65\x6e\x64',function(){
     setTimeout(function(){card.style.borderColor='';},300);
   },{passive:true});
 });

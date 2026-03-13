@@ -441,32 +441,36 @@ body::after{
 
 <div id="toast"></div>
 
-<script>
+<script>/* @protected */
+
 // ── KEYSTONE AUTH ──
 (function(){
-  var APP_ID='veritas';
+  var _0xdead1=function(){return false;};
+var _0xdead5=[];
+var _0xdead4=function(x){return x^0x1337;};
+var APP_ID='\x76\x65\x72\x69\x74\x61\x73';
   var SK='veritas_sk1';
   var BASE=window.location.protocol+'//'+window.location.host;
-  function showApp(){ document.getElementById('app').style.display='flex';setTimeout(initVeritas,50); }
+  function showApp(){ document.getElementById('app').style.display='\x66\x6c\x65\x78';setTimeout(initVeritas,0x32); }
   function mobileFixFocus(){
-    var pk=document.getElementById('pkScreen');
-    var inp=document.getElementById('pkInput');
+    var pk=document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e');
+    var inp=document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74');
     if(pk&&inp){
-      pk.addEventListener('touchstart',function(e){
-        if(e.target!==inp&&e.target.tagName!=='BUTTON'){e.preventDefault();inp.focus();}
+      pk.addEventListener('\x74\x6f\x75\x63\x68\x73\x74\x61\x72\x74',function(e){
+        if(e.target!==inp&&e.target.tagName!=='\x42\x55\x54\x54\x4f\x4e'){e.preventDefault();inp.focus();}
       },{passive:false});
       setTimeout(function(){inp.focus();},300);
     }
   }
   window.checkPK=function(){
-    var v=document.getElementById('pkInput').value.trim();
-    var errEl=document.getElementById('pkError');
-    if(!v){errEl.textContent='PASSWORD REQUIRED';return;}
+    var v=document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74').value.trim();
+    var errEl=document.getElementById('\x70\x6b\x45\x72\x72\x6f\x72');
+    if(!v){errEl.textContent='\x50\x41\x53\x53\x57\x4f\x52\x44\x20\x52\x45\x51\x55\x49\x52\x45\x44';return;}
     errEl.textContent='';
     var btn=document.querySelector('#pkScreen button');
     if(btn){btn.textContent='VERIFYING...';btn.disabled=true;}
     fetch(BASE+'/api/keystone/login',{
-      method:'POST',
+      method:'\x50\x4f\x53\x54',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({password:v,app:APP_ID})
     })
@@ -475,12 +479,12 @@ body::after{
       if(btn){btn.textContent='AUTHENTICATE →';btn.disabled=false;}
       if(d.ok&&d.token){
         try{sessionStorage.setItem(SK,d.token);}catch(e){}
-        document.getElementById('pkScreen').style.display='none';
+        document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e').style.display='\x6e\x6f\x6e\x65';
         showApp();
       } else {
-        errEl.textContent=d.error==='Access denied for this application'?'ACCESS NOT GRANTED':d.error||'INVALID PASSWORD';
-        document.getElementById('pkInput').value='';
-        document.getElementById('pkInput').focus();
+        errEl.textContent=d.error==='Access denied for this application'?'\x41\x43\x43\x45\x53\x53\x20\x4e\x4f\x54\x20\x47\x52\x41\x4e\x54\x45\x44':d.error||'\x49\x4e\x56\x41\x4c\x49\x44\x20\x50\x41\x53\x53\x57\x4f\x52\x44';
+        document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74').value='';
+        document.getElementById('\x70\x6b\x49\x6e\x70\x75\x74').focus();
       }
     })
     .catch(function(){
@@ -493,14 +497,14 @@ body::after{
     var saved=sessionStorage.getItem(SK);
     if(saved){
       fetch(BASE+'/api/keystone/verify',{
-        method:'POST',
+        method:'\x50\x4f\x53\x54',
         headers:{'Content-Type':'application/json','x-keystone-token':saved},
         body:JSON.stringify({app:APP_ID})
       })
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.ok){
-          document.getElementById('pkScreen').style.display='none';
+          document.getElementById('\x70\x6b\x53\x63\x72\x65\x65\x6e').style.display='\x6e\x6f\x6e\x65';
           showApp();
         } else {
           sessionStorage.removeItem(SK);
@@ -515,21 +519,21 @@ body::after{
 
 // ── TOAST ──
 function toast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},2500);
+  var t=document.getElementById('\x74\x6f\x61\x73\x74');
+  t.textContent=msg;t.classList.add('\x73\x68\x6f\x77');
+  setTimeout(function(){t.classList.remove('\x73\x68\x6f\x77');},2500);
 }
 
 // ── NAV ──
 function switchPanel(id){
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.nav-pill').forEach(function(p){p.classList.remove('active');});
-  document.getElementById('panel-'+id).classList.add('active');
-  document.getElementById('pill-'+id).classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('\x61\x63\x74\x69\x76\x65');});
+  document.querySelectorAll('.nav-pill').forEach(function(p){p.classList.remove('\x61\x63\x74\x69\x76\x65');});
+  document.getElementById('panel-'+id).classList.add('\x61\x63\x74\x69\x76\x65');
+  document.getElementById('pill-'+id).classList.add('\x61\x63\x74\x69\x76\x65');
 }
 
 // ── STATE ──
-var currentMode='image';
+var currentMode='\x69\x6d\x61\x67\x65';
 var currentFile=null;
 var currentFileData=null;
 var scanHistory=JSON.parse(localStorage.getItem('veritas_history')||'[]');
@@ -538,41 +542,41 @@ var API=window.location.protocol+'//'+window.location.host+'/api/tutor';
 // ── MODE ──
 function setMode(m){
   currentMode=m;
-  document.querySelectorAll('.mode-tab').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('mode-'+m).classList.add('active');
+  document.querySelectorAll('.mode-tab').forEach(function(t){t.classList.remove('\x61\x63\x74\x69\x76\x65');});
+  document.getElementById('mode-'+m).classList.add('\x61\x63\x74\x69\x76\x65');
   // update upload zone
   var icons={image:'🖼️',video:'🎬',audio:'🎙️',url:'🔗'};
   var accepts={image:'image/*',video:'video/*',audio:'audio/*',url:''};
   var subs={image:'JPG · PNG · WEBP · GIF — Max 50MB',video:'MP4 · WEBM · MOV — Max 50MB',audio:'MP3 · WAV · M4A — Max 50MB',url:'Paste image or media URL'};
-  document.getElementById('uploadIcon').textContent=icons[m];
-  document.getElementById('uploadSub').textContent=subs[m];
-  document.getElementById('uploadTitle').textContent=m==='url'?'ENTER URL BELOW':'DROP FILE OR TAP TO UPLOAD';
-  document.getElementById('urlInput').style.display=m==='url'?'block':'none';
-  document.getElementById('uploadZone').style.display=m==='url'?'none':'block';
-  if(m!=='url')document.getElementById('fileInput').accept=accepts[m];
+  document.getElementById('\x75\x70\x6c\x6f\x61\x64\x49\x63\x6f\x6e').textContent=icons[m];
+  document.getElementById('\x75\x70\x6c\x6f\x61\x64\x53\x75\x62').textContent=subs[m];
+  document.getElementById('\x75\x70\x6c\x6f\x61\x64\x54\x69\x74\x6c\x65').textContent=m==='url'?'\x45\x4e\x54\x45\x52\x20\x55\x52\x4c\x20\x42\x45\x4c\x4f\x57':'DROP FILE OR TAP TO UPLOAD';
+  document.getElementById('\x75\x72\x6c\x49\x6e\x70\x75\x74').style.display=m==='url'?'\x62\x6c\x6f\x63\x6b':'\x6e\x6f\x6e\x65';
+  document.getElementById('\x75\x70\x6c\x6f\x61\x64\x5a\x6f\x6e\x65').style.display=m==='url'?'\x6e\x6f\x6e\x65':'\x62\x6c\x6f\x63\x6b';
+  if(m!=='url')document.getElementById('\x66\x69\x6c\x65\x49\x6e\x70\x75\x74').accept=accepts[m];
   resetScan();
 }
 
 function resetScan(){
   currentFile=null;currentFileData=null;
-  document.getElementById('mediaPreview').style.display='none';
-  document.getElementById('fileMeta').style.display='none';
-  document.getElementById('descCard').style.display='none';
-  document.getElementById('scanBtnWrap').style.display='none';
-  document.getElementById('scanOverlay').style.display='none';
+  document.getElementById('\x6d\x65\x64\x69\x61\x50\x72\x65\x76\x69\x65\x77').style.display='\x6e\x6f\x6e\x65';
+  document.getElementById('\x66\x69\x6c\x65\x4d\x65\x74\x61').style.display='\x6e\x6f\x6e\x65';
+  document.getElementById('\x64\x65\x73\x63\x43\x61\x72\x64').style.display='\x6e\x6f\x6e\x65';
+  document.getElementById('\x73\x63\x61\x6e\x42\x74\x6e\x57\x72\x61\x70').style.display='\x6e\x6f\x6e\x65';
+  document.getElementById('\x73\x63\x61\x6e\x4f\x76\x65\x72\x6c\x61\x79').style.display='\x6e\x6f\x6e\x65';
 }
 
 // ── FILE HANDLING ──
 function handleDrop(e){
   e.preventDefault();
-  document.getElementById('uploadZone').classList.remove('dragover');
+  document.getElementById('\x75\x70\x6c\x6f\x61\x64\x5a\x6f\x6e\x65').classList.remove('\x64\x72\x61\x67\x6f\x76\x65\x72');
   var f=e.dataTransfer.files[0];
   if(f)handleFile(f);
 }
 
 function handleFile(f){
   if(!f){return;}
-  var maxMB=50;
+  var maxMB=0x32;
   if(f.size>maxMB*1024*1024){toast('File too large — max 50MB');return;}
   currentFile=f;
   var reader=new FileReader();
@@ -580,44 +584,44 @@ function handleFile(f){
     currentFileData=ev.target.result;
     showPreview(f,ev.target.result);
     showMeta(f);
-    document.getElementById('descCard').style.display='block';
-    document.getElementById('scanBtnWrap').style.display='block';
+    document.getElementById('\x64\x65\x73\x63\x43\x61\x72\x64').style.display='\x62\x6c\x6f\x63\x6b';
+    document.getElementById('\x73\x63\x61\x6e\x42\x74\x6e\x57\x72\x61\x70').style.display='\x62\x6c\x6f\x63\x6b';
   };
   reader.readAsDataURL(f);
 }
 
 function showPreview(f,data){
-  var preview=document.getElementById('mediaPreview');
-  preview.style.display='block';
+  var preview=document.getElementById('\x6d\x65\x64\x69\x61\x50\x72\x65\x76\x69\x65\x77');
+  preview.style.display='\x62\x6c\x6f\x63\x6b';
   var type=f.type.split('/')[0];
-  if(type==='image'){
-    preview.innerHTML='<img src="'+data+'" style="max-width:100%;max-height:220px;display:block;margin:0 auto;border-radius:6px;">'
+  if(type==='\x69\x6d\x61\x67\x65'){
+    preview.innerHTML='<img src="'+data+'" style="max-width:0x64%;max-height:220px;display:block;margin:0 auto;border-radius:6px;">'
       +'<div class="scan-overlay" id="scanOverlay" style="display:none;"><div class="scan-line"></div></div>';
-  } else if(type==='video'){
-    preview.innerHTML='<video src="'+data+'" controls style="max-width:100%;max-height:220px;display:block;margin:0 auto;border-radius:6px;"></video>'
+  } else if(type==='\x76\x69\x64\x65\x6f'){
+    preview.innerHTML='<video src="'+data+'" controls style="max-width:0x64%;max-height:220px;display:block;margin:0 auto;border-radius:6px;"></video>'
       +'<div class="scan-overlay" id="scanOverlay" style="display:none;"><div class="scan-line"></div></div>';
-  } else if(type==='audio'){
-    preview.innerHTML='<div style="padding:16px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">🎙️</div><div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:10px;">'+f.name+'</div><audio src="'+data+'" controls style="width:100%;"></audio></div>'
+  } else if(type==='\x61\x75\x64\x69\x6f'){
+    preview.innerHTML='<div style="padding:16px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">🎙️</div><div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:10px;">'+f.name+'</div><audio src="'+data+'" controls style="width:0x64%;"></audio></div>'
       +'<div class="scan-overlay" id="scanOverlay" style="display:none;"></div>';
   }
 }
 
 function showMeta(f){
-  var metaDiv=document.getElementById('fileMeta');
-  metaDiv.style.display='block';
+  var metaDiv=document.getElementById('\x66\x69\x6c\x65\x4d\x65\x74\x61');
+  metaDiv.style.display='\x62\x6c\x6f\x63\x6b';
   var sizeMB=(f.size/1024/1024).toFixed(2);
   var sizeKB=(f.size/1024).toFixed(0);
   var ext=f.name.split('.').pop().toUpperCase();
-  var modified=f.lastModified?new Date(f.lastModified).toLocaleString():'Unknown';
+  var modified=f.lastModified?new Date(f.lastModified).toLocaleString():'\x55\x6e\x6b\x6e\x6f\x77\x6e';
   var rows=[
-    ['FILENAME',f.name],
-    ['TYPE',f.type||'Unknown'],
-    ['FORMAT',ext],
-    ['SIZE',sizeMB+' MB ('+sizeKB+' KB)'],
-    ['LAST MODIFIED',modified],
-    ['EXIF DATA','Extracting...']
+    ['\x46\x49\x4c\x45\x4e\x41\x4d\x45',f.name],
+    ['\x54\x59\x50\x45',f.type||'\x55\x6e\x6b\x6e\x6f\x77\x6e'],
+    ['\x46\x4f\x52\x4d\x41\x54',ext],
+    ['\x53\x49\x5a\x45',sizeMB+' MB ('+sizeKB+' KB)'],
+    ['\x4c\x41\x53\x54\x20\x4d\x4f\x44\x49\x46\x49\x45\x44',modified],
+    ['\x45\x58\x49\x46\x20\x44\x41\x54\x41','Extracting...']
   ];
-  document.getElementById('metaTable').innerHTML=rows.map(function(r){
+  document.getElementById('\x6d\x65\x74\x61\x54\x61\x62\x6c\x65').innerHTML=rows.map(function(r){
     return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';
   }).join('');
   // Try to read image dimensions
@@ -625,15 +629,15 @@ function showMeta(f){
     var img=new Image();
     img.onload=function(){
       var rows2=[
-        ['FILENAME',f.name],
-        ['TYPE',f.type||'Unknown'],
-        ['FORMAT',ext],
-        ['SIZE',sizeMB+' MB ('+sizeKB+' KB)'],
-        ['DIMENSIONS',img.width+' × '+img.height+' px'],
-        ['LAST MODIFIED',modified],
-        ['EXIF DATA','Not extractable in browser']
+        ['\x46\x49\x4c\x45\x4e\x41\x4d\x45',f.name],
+        ['\x54\x59\x50\x45',f.type||'\x55\x6e\x6b\x6e\x6f\x77\x6e'],
+        ['\x46\x4f\x52\x4d\x41\x54',ext],
+        ['\x53\x49\x5a\x45',sizeMB+' MB ('+sizeKB+' KB)'],
+        ['\x44\x49\x4d\x45\x4e\x53\x49\x4f\x4e\x53',img.width+' × '+img.height+' px'],
+        ['\x4c\x41\x53\x54\x20\x4d\x4f\x44\x49\x46\x49\x45\x44',modified],
+        ['\x45\x58\x49\x46\x20\x44\x41\x54\x41','Not extractable in browser']
       ];
-      document.getElementById('metaTable').innerHTML=rows2.map(function(r){
+      document.getElementById('\x6d\x65\x74\x61\x54\x61\x62\x6c\x65').innerHTML=rows2.map(function(r){
         return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';
       }).join('');
     };
@@ -642,42 +646,42 @@ function showMeta(f){
 }
 
 function loadFromUrl(){
-  var url=document.getElementById('urlField').value.trim();
-  if(!url){toast('Enter a URL');return;}
+  var url=document.getElementById('\x75\x72\x6c\x46\x69\x65\x6c\x64').value.trim();
+  if(!url){toast('\x45\x6e\x74\x65\x72\x20\x61\x20\x55\x52\x4c');return;}
   // Show URL as file info
   currentFile={name:url,type:'image/url',size:0,lastModified:Date.now()};
   currentFileData=null;
-  var preview=document.getElementById('mediaPreview');
-  preview.style.display='block';
-  preview.innerHTML='<img src="'+url+'" style="max-width:100%;max-height:220px;display:block;margin:0 auto;border-radius:6px;" onerror="this.parentElement.innerHTML=\'<div style=padding:20px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--dim);>Could not load image from URL. Will analyze URL context only.</div>\'">'
+  var preview=document.getElementById('\x6d\x65\x64\x69\x61\x50\x72\x65\x76\x69\x65\x77');
+  preview.style.display='\x62\x6c\x6f\x63\x6b';
+  preview.innerHTML='<img src="'+url+'" style="max-width:0x64%;max-height:220px;display:block;margin:0 auto;border-radius:6px;" onerror="this.parentElement.innerHTML=\'<div style=padding:20px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--dim);>Could not load image from URL. Will analyze URL context only.</div>\'">'
     +'<div class="scan-overlay" id="scanOverlay" style="display:none;"><div class="scan-line"></div></div>';
-  document.getElementById('descCard').style.display='block';
-  document.getElementById('scanBtnWrap').style.display='block';
-  var rows=[['SOURCE URL',url],['TYPE','Remote URL'],['LOCAL COPY','None — URL analysis only']];
-  document.getElementById('fileMeta').style.display='block';
-  document.getElementById('metaTable').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('');
+  document.getElementById('\x64\x65\x73\x63\x43\x61\x72\x64').style.display='\x62\x6c\x6f\x63\x6b';
+  document.getElementById('\x73\x63\x61\x6e\x42\x74\x6e\x57\x72\x61\x70').style.display='\x62\x6c\x6f\x63\x6b';
+  var rows=[['\x53\x4f\x55\x52\x43\x45\x20\x55\x52\x4c',url],['\x54\x59\x50\x45','\x52\x65\x6d\x6f\x74\x65\x20\x55\x52\x4c'],['\x4c\x4f\x43\x41\x4c\x20\x43\x4f\x50\x59','None — URL analysis only']];
+  document.getElementById('\x66\x69\x6c\x65\x4d\x65\x74\x61').style.display='\x62\x6c\x6f\x63\x6b';
+  document.getElementById('\x6d\x65\x74\x61\x54\x61\x62\x6c\x65').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('');
 }
 
 // ── RUN SCAN ──
 function runScan(){
-  var btn=document.getElementById('scanBtn');
-  var context=document.getElementById('contextInput').value.trim();
-  var overlay=document.getElementById('scanOverlay');
+  var btn=document.getElementById('\x73\x63\x61\x6e\x42\x74\x6e');
+  var context=document.getElementById('\x63\x6f\x6e\x74\x65\x78\x74\x49\x6e\x70\x75\x74').value.trim();
+  var overlay=document.getElementById('\x73\x63\x61\x6e\x4f\x76\x65\x72\x6c\x61\x79');
 
   btn.textContent='🔬 ANALYZING';
   btn.className='btn btn-red btn-full dots';
   btn.disabled=true;
-  if(overlay)overlay.style.display='block';
+  if(overlay)overlay.style.display='\x62\x6c\x6f\x63\x6b';
 
   // Build analysis prompt
   var fileDesc='';
   if(currentFile&&currentFile.name){
-    var sizeMB=currentFile.size?(currentFile.size/1024/1024).toFixed(2)+'MB':'unknown size';
+    var sizeMB=currentFile.size?(currentFile.size/1024/1024).toFixed(2)+'MB':'\x75\x6e\x6b\x6e\x6f\x77\x6e\x20\x73\x69\x7a\x65';
     fileDesc='File: '+currentFile.name+', Type: '+currentFile.type+', Size: '+sizeMB+'.';
     if(currentFile.lastModified){fileDesc+=' Last modified: '+new Date(currentFile.lastModified).toLocaleString()+'.';}
   }
-  if(currentMode==='url'&&document.getElementById('urlField')){
-    fileDesc='URL: '+document.getElementById('urlField').value.trim();
+  if(currentMode==='url'&&document.getElementById('\x75\x72\x6c\x46\x69\x65\x6c\x64')){
+    fileDesc='URL: '+document.getElementById('\x75\x72\x6c\x46\x69\x65\x6c\x64').value.trim();
   }
 
   var prompt='You are VERITAS, an expert deepfake and media manipulation detection system. Analyze the following media submission and provide a detailed forensic assessment.\n\n';
@@ -686,12 +690,12 @@ function runScan(){
   prompt+='\nBased on all available signals (file metadata, type, context, and your knowledge of deepfake/AI-generation artifacts), provide your analysis.\n\n';
   prompt+='Return ONLY a valid JSON object with exactly these fields:\n';
   prompt+='{\n';
-  prompt+='  "score": (0-100, where 100 = definitely fake),\n';
+  prompt+='  "score": (0-0x64, where 0x64 = definitely fake),\n';
   prompt+='  "verdict": ("AUTHENTIC" | "LIKELY AUTHENTIC" | "SUSPECT" | "LIKELY SYNTHETIC" | "SYNTHETIC"),\n';
   prompt+='  "confidence": ("LOW" | "MEDIUM" | "HIGH"),\n';
   prompt+='  "summary": "2-3 sentence overall assessment",\n';
   prompt+='  "indicators": [\n';
-  prompt+='    {"name": "indicator name", "level": 0-100, "note": "brief finding"},\n';
+  prompt+='    {"name": "indicator name", "level": 0-0x64, "note": "brief finding"},\n';
   prompt+='    (provide 5-6 indicators covering: facial artifacts, metadata integrity, compression patterns, contextual consistency, generative signatures, source credibility)\n';
   prompt+='  ],\n';
   prompt+='  "flags": ["array of specific red flags found, or empty if none"],\n';
@@ -702,13 +706,13 @@ function runScan(){
   prompt+='Return ONLY the JSON. No other text.';
 
   fetch(API,{
-    method:'POST',
+    method:'\x50\x4f\x53\x54',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       max_tokens:1000,
       system:'You are VERITAS, an expert forensic media authenticity analyst. You specialize in detecting deepfakes, AI-generated content, and media manipulation. Return only valid JSON.',
-      messages:[{role:'user',content:prompt}]
+      messages:[{role:'\x75\x73\x65\x72',content:prompt}]
     })
   })
   .then(function(r){return r.json();})
@@ -716,7 +720,7 @@ function runScan(){
     btn.textContent='🔬 RUN DEEPFAKE ANALYSIS';
     btn.className='btn btn-red btn-full';
     btn.disabled=false;
-    if(overlay)overlay.style.display='none';
+    if(overlay)overlay.style.display='\x6e\x6f\x6e\x65';
     var text='';
     if(data.choices&&data.choices[0])text=data.choices[0].message.content;
     try{
@@ -725,7 +729,7 @@ function runScan(){
       renderResult(result);
       saveToHistory(result);
       updateStats();
-      switchPanel('result');
+      switchPanel('\x72\x65\x73\x75\x6c\x74');
     } catch(e){
       toast('Analysis error — try again');
       console.error(e,text);
@@ -735,7 +739,7 @@ function runScan(){
     btn.textContent='🔬 RUN DEEPFAKE ANALYSIS';
     btn.className='btn btn-red btn-full';
     btn.disabled=false;
-    if(overlay)overlay.style.display='none';
+    if(overlay)overlay.style.display='\x6e\x6f\x6e\x65';
     toast('Connection error — try again');
   });
 }
@@ -743,42 +747,42 @@ function runScan(){
 // ── RENDER RESULT ──
 function renderResult(r){
   var score=r.score||0;
-  var scoreColor=score>=66?'#ef4444':score>=31?'#f59e0b':'#10b981';
+  var scoreColor=score>=0x42?'#ef4444':score>=0x1f?'#f59e0b':'#10b981';
   var verdictColors={
-    'AUTHENTIC':'#10b981','LIKELY AUTHENTIC':'#10b981',
-    'SUSPECT':'#f59e0b',
-    'LIKELY SYNTHETIC':'#ef4444','SYNTHETIC':'#ef4444'
+    '\x41\x55\x54\x48\x45\x4e\x54\x49\x43':'#10b981','\x4c\x49\x4b\x45\x4c\x59\x20\x41\x55\x54\x48\x45\x4e\x54\x49\x43':'#10b981',
+    '\x53\x55\x53\x50\x45\x43\x54':'#f59e0b',
+    '\x4c\x49\x4b\x45\x4c\x59\x20\x53\x59\x4e\x54\x48\x45\x54\x49\x43':'#ef4444','\x53\x59\x4e\x54\x48\x45\x54\x49\x43':'#ef4444'
   };
   var vCol=verdictColors[r.verdict]||'#94b8c8';
-  var circumference=2*Math.PI*44;
-  var dashoffset=circumference-(score/100)*circumference;
+  var circumference=2*Math.PI*0x2c;
+  var dashoffset=circumference-(score/0x64)*circumference;
 
   var html='<div class="card">'
 
     // Score ring
     +'<div class="score-ring-wrap">'
     +'<div class="score-ring">'
-    +'<svg width="110" height="110" viewBox="0 0 110 110">'
-    +'<circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>'
-    +'<circle cx="55" cy="55" r="44" fill="none" stroke="'+scoreColor+'" stroke-width="8" stroke-dasharray="'+circumference+'" stroke-dashoffset="'+dashoffset+'" stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease;"/>'
+    +'<svg width="0x6e" height="0x6e" viewBox="0 0 0x6e 0x6e">'
+    +'<circle cx="0x37" cy="0x37" r="0x2c" fill="none" stroke="rgba(0xff,0xff,0xff,0.05)" stroke-width="8"/>'
+    +'<circle cx="0x37" cy="0x37" r="0x2c" fill="none" stroke="'+scoreColor+'" stroke-width="8" stroke-dasharray="'+circumference+'" stroke-dashoffset="'+dashoffset+'" stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease;"/>'
     +'</svg>'
     +'<div class="score-ring-val">'
     +'<div class="score-num" style="color:'+scoreColor+';">'+score+'</div>'
     +'<div class="score-lbl">FAKE SCORE</div>'
     +'</div>'
     +'</div>'
-    +'<div class="verdict-badge" style="background:'+vCol+'18;border:1px solid '+vCol+'44;color:'+vCol+';">'+r.verdict+'</div>'
+    +'<div class="verdict-badge" style="background:'+vCol+'0x12;border:1px solid '+vCol+'0x2c;color:'+vCol+';">'+r.verdict+'</div>'
     +'<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:6px;">CONFIDENCE: '+r.confidence+'</div>'
     +'</div>'
 
     // Summary
-    +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.7;padding:12px;background:rgba(255,255,255,0.02);border-radius:6px;margin-bottom:14px;">'+r.summary+'</div>';
+    +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.7;padding:12px;background:rgba(0xff,0xff,0xff,0.02);border-radius:6px;margin-bottom:14px;">'+r.summary+'</div>';
 
   // Indicators
   if(r.indicators&&r.indicators.length){
     html+='<div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.12em;margin-bottom:10px;">FORENSIC INDICATORS</div>';
     r.indicators.forEach(function(ind){
-      var ic=ind.level>=66?'#ef4444':ind.level>=31?'#f59e0b':'#10b981';
+      var ic=ind.level>=0x42?'#ef4444':ind.level>=0x1f?'#f59e0b':'#10b981';
       html+='<div class="indicator">'
         +'<div class="indicator-head"><span class="indicator-name">'+ind.name.toUpperCase()+'</span><span class="indicator-val" style="color:'+ic+';">'+ind.level+'%</span></div>'
         +'<div class="indicator-bar"><div class="indicator-fill" style="width:'+ind.level+'%;background:'+ic+';"></div></div>'
@@ -819,7 +823,7 @@ function renderResult(r){
   if(r.recommendation){
     html+='<div class="card">'
       +'<div style="font-family:var(--mono);font-size:8px;color:var(--teal);letter-spacing:0.1em;margin-bottom:8px;">RECOMMENDATION</div>'
-      +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.7;padding:10px;background:rgba(14,165,176,0.04);border-left:2px solid rgba(14,165,176,0.3);border-radius:0 4px 4px 0;">'+r.recommendation+'</div>'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.7;padding:10px;background:rgba(0xe,0xa5,0xb0,0.04);border-left:2px solid rgba(0xe,0xa5,0xb0,0.3);border-radius:0 4px 4px 0;">'+r.recommendation+'</div>'
       +'</div>';
   }
 
@@ -838,10 +842,10 @@ function renderResult(r){
 // ── COPY RESULT ──
 function copyResult(){
   var r=window.lastResult;
-  if(!r){toast('No result to copy');return;}
+  if(!r){toast('\x4e\x6f\x20\x72\x65\x73\x75\x6c\x74\x20\x74\x6f\x20\x63\x6f\x70\x79');return;}
   var lines=['VERITAS — DEEPFAKE ANALYSIS REPORT','RIAKOINE-EMPIRE · '+new Date().toLocaleString(),''];
   lines.push('VERDICT: '+r.verdict);
-  lines.push('FAKE SCORE: '+r.score+'/100');
+  lines.push('FAKE SCORE: '+r.score+'/0x64');
   lines.push('CONFIDENCE: '+r.confidence);
   lines.push('');
   lines.push('SUMMARY:');
@@ -850,14 +854,14 @@ function copyResult(){
   if(r.flags&&r.flags.length){lines.push('RED FLAGS:');r.flags.forEach(function(f){lines.push('  ⚠ '+f);});lines.push('');}
   if(r.positives&&r.positives.length){lines.push('AUTHENTICITY SIGNALS:');r.positives.forEach(function(p){lines.push('  ✓ '+p);});lines.push('');}
   if(r.recommendation){lines.push('RECOMMENDATION:');lines.push(r.recommendation);}
-  navigator.clipboard.writeText(lines.join('\n')).then(function(){toast('Report copied to clipboard');}).catch(function(){toast('Copy failed');});
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){toast('Report copied to clipboard');}).catch(function(){toast('\x43\x6f\x70\x79\x20\x66\x61\x69\x6c\x65\x64');});
 }
 
 // ── HISTORY ──
 function saveToHistory(r){
-  var fname=currentFile?currentFile.name:'Unknown';
-  if(currentMode==='url'&&document.getElementById('urlField')){
-    fname=document.getElementById('urlField').value.trim().slice(0,40)+'...';
+  var fname=currentFile?currentFile.name:'\x55\x6e\x6b\x6e\x6f\x77\x6e';
+  if(currentMode==='url'&&document.getElementById('\x75\x72\x6c\x46\x69\x65\x6c\x64')){
+    fname=document.getElementById('\x75\x72\x6c\x46\x69\x65\x6c\x64').value.trim().slice(0,0x28)+'...';
   }
   var entry={
     id:Date.now(),
@@ -870,18 +874,18 @@ function saveToHistory(r){
     result:r
   };
   scanHistory.unshift(entry);
-  if(scanHistory.length>50)scanHistory=scanHistory.slice(0,50);
+  if(scanHistory.length>0x32)scanHistory=scanHistory.slice(0,0x32);
   try{localStorage.setItem('veritas_history',JSON.stringify(scanHistory));}catch(e){}
   renderHistory();
 }
 
 function renderHistory(){
-  var list=document.getElementById('historyList');
+  var list=document.getElementById('\x68\x69\x73\x74\x6f\x72\x79\x4c\x69\x73\x74');
   if(!scanHistory.length){
     list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:20px;">No scans yet.</div>';
     return;
   }
-  var scoreColor=function(s){return s>=66?'#ef4444':s>=31?'#f59e0b':'#10b981';};
+  var scoreColor=function(s){return s>=0x42?'#ef4444':s>=0x1f?'#f59e0b':'#10b981';};
   list.innerHTML=scanHistory.map(function(e){
     var icons={image:'🖼️',video:'🎬',audio:'🎙️',url:'🔗'};
     var col=scoreColor(e.score);
@@ -891,7 +895,7 @@ function renderHistory(){
       +'<div class="history-name">'+e.filename+'</div>'
       +'<div class="history-meta">'+e.date+' · '+e.type.toUpperCase()+'</div>'
       +'</div>'
-      +'<div class="history-badge" style="background:'+col+'18;border:1px solid '+col+'44;color:'+col+';">'+e.score+'</div>'
+      +'<div class="history-badge" style="background:'+col+'0x12;border:1px solid '+col+'0x2c;color:'+col+';">'+e.score+'</div>'
       +'</div>';
   }).join('');
 }
@@ -901,7 +905,7 @@ function loadHistoryResult(id){
   if(!entry)return;
   window.lastResult=entry.result;
   renderResult(entry.result);
-  switchPanel('result');
+  switchPanel('\x72\x65\x73\x75\x6c\x74');
 }
 
 function clearHistory(){
@@ -910,19 +914,19 @@ function clearHistory(){
   try{localStorage.removeItem('veritas_history');}catch(e){}
   renderHistory();
   updateStats();
-  toast('History cleared');
+  toast('\x48\x69\x73\x74\x6f\x72\x79\x20\x63\x6c\x65\x61\x72\x65\x64');
 }
 
 // ── STATS ──
 function updateStats(){
   var total=scanHistory.length;
-  var fakes=scanHistory.filter(function(e){return e.score>=66;}).length;
-  var real=scanHistory.filter(function(e){return e.score<31;}).length;
-  var suspect=scanHistory.filter(function(e){return e.score>=31&&e.score<66;}).length;
-  document.getElementById('totalScans').textContent=total;
-  document.getElementById('fakeCount').textContent=fakes;
-  document.getElementById('realCount').textContent=real;
-  document.getElementById('suspectCount').textContent=suspect;
+  var fakes=scanHistory.filter(function(e){return e.score>=0x42;}).length;
+  var real=scanHistory.filter(function(e){return e.score<0x1f;}).length;
+  var suspect=scanHistory.filter(function(e){return e.score>=0x1f&&e.score<0x42;}).length;
+  document.getElementById('\x74\x6f\x74\x61\x6c\x53\x63\x61\x6e\x73').textContent=total;
+  document.getElementById('\x66\x61\x6b\x65\x43\x6f\x75\x6e\x74').textContent=fakes;
+  document.getElementById('\x72\x65\x61\x6c\x43\x6f\x75\x6e\x74').textContent=real;
+  document.getElementById('\x73\x75\x73\x70\x65\x63\x74\x43\x6f\x75\x6e\x74').textContent=suspect;
 }
 
 // ── INIT ──
