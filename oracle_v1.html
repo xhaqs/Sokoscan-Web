@@ -32,20 +32,25 @@ body::after{content:'';position:fixed;inset:0;
              radial-gradient(ellipse at 85% 85%,rgba(201,168,76,0.05) 0%,transparent 50%);
   pointer-events:none;z-index:0;}
 
-#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:9px;letter-spacing:0.4em;color:rgba(255,255,255,0.08);pointer-events:none;z-index:9999;white-space:nowrap;font-weight:700;}
+#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:9px;letter-spacing:0.4em;color:rgba(201,168,76,0.15);pointer-events:none;z-index:9999;white-space:nowrap;font-weight:700;}
 
 /* ── PASSKEY ── */
 #pkScreen{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;}
-.pk-glyph{font-size:48px;margin-bottom:20px;animation:glyphpulse 3s ease-in-out infinite;}
-@keyframes glyphpulse{0%,100%{filter:drop-shadow(0 0 8px rgba(124,58,237,0.4));}50%{filter:drop-shadow(0 0 24px rgba(124,58,237,0.9));}}
-.pk-empire{font-family:var(--serif);font-size:8px;letter-spacing:0.45em;color:var(--dim);margin-bottom:6px;text-align:center;}
-.pk-title{font-family:var(--serif);font-size:32px;color:var(--gold);letter-spacing:0.12em;margin-bottom:4px;text-align:center;}
-.pk-sub{font-family:var(--mono);font-size:8px;color:var(--purple2);letter-spacing:0.2em;margin-bottom:6px;text-align:center;}
-.pk-tag{font-family:var(--mono);font-size:7px;color:var(--amber);border:1px solid rgba(245,158,11,0.25);padding:3px 14px;border-radius:2px;letter-spacing:0.15em;margin-bottom:28px;}
-.pk-input{width:100%;max-width:320px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);color:var(--text);font-family:var(--mono);font-size:16px;padding:14px 16px;border-radius:6px;outline:none;text-align:center;letter-spacing:0.2em;display:block;margin-bottom:12px;}
-.pk-input:focus{border-color:rgba(124,58,237,0.5);box-shadow:0 0 20px rgba(124,58,237,0.1);}
-.pk-btn{width:100%;max-width:320px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);color:var(--purple3);font-family:var(--mono);font-size:11px;padding:14px;border-radius:6px;cursor:pointer;letter-spacing:0.2em;display:block;transition:all 0.2s;}
-.pk-btn:hover{background:rgba(124,58,237,0.2);}
+/* Golden top bar on passkey screen */
+#pkScreen::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
+.pk-riakoine{font-family:var(--serif);font-size:22px;font-weight:900;letter-spacing:0.25em;color:var(--gold2);text-align:center;margin-bottom:2px;text-shadow:0 0 30px rgba(201,168,76,0.4);}
+.pk-empire-line{font-family:var(--serif);font-size:10px;letter-spacing:0.55em;color:var(--gold);text-align:center;margin-bottom:20px;opacity:0.8;}
+.pk-divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 20px;}
+.pk-glyph{font-size:44px;margin-bottom:16px;animation:glyphpulse 3s ease-in-out infinite;}
+@keyframes glyphpulse{0%,100%{filter:drop-shadow(0 0 8px rgba(201,168,76,0.3));}50%{filter:drop-shadow(0 0 24px rgba(201,168,76,0.7));}}
+.pk-empire{display:none;}
+.pk-title{font-family:var(--serif);font-size:28px;color:var(--gold);letter-spacing:0.12em;margin-bottom:4px;text-align:center;}
+.pk-sub{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:0.2em;margin-bottom:6px;text-align:center;opacity:0.5;}
+.pk-tag{font-family:var(--mono);font-size:7px;color:var(--gold2);border:1px solid rgba(201,168,76,0.25);padding:3px 14px;border-radius:2px;letter-spacing:0.15em;margin-bottom:28px;}
+.pk-input{width:100%;max-width:320px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.2);color:var(--text);font-family:var(--mono);font-size:16px;padding:14px 16px;border-radius:6px;outline:none;text-align:center;letter-spacing:0.2em;display:block;margin-bottom:12px;}
+.pk-input:focus{border-color:rgba(201,168,76,0.5);box-shadow:0 0 20px rgba(201,168,76,0.08);}
+.pk-btn{width:100%;max-width:320px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold2);font-family:var(--mono);font-size:11px;padding:14px;border-radius:6px;cursor:pointer;letter-spacing:0.2em;display:block;transition:all 0.2s;}
+.pk-btn:hover{background:rgba(201,168,76,0.18);}
 .pk-error{font-family:var(--mono);font-size:9px;color:var(--red);margin-top:10px;letter-spacing:0.1em;text-align:center;min-height:16px;}
 
 /* ── APP ── */
@@ -210,8 +215,11 @@ body::after{content:'';position:fixed;inset:0;
 
 <!-- PASSKEY -->
 <div id="pkScreen">
+  <div class="pk-riakoine">RIAKOINE</div>
+  <div class="pk-empire-line">E M P I R E</div>
+  <div class="pk-divider"></div>
   <div class="pk-glyph">🔮</div>
-  <div class="pk-empire">RIAKOINE · EMPIRE</div>
+  <div class="pk-empire"></div>
   <div class="pk-title">ORACLE</div>
   <div class="pk-sub">PREDICTION INTELLIGENCE</div>
   <div class="pk-tag">⚡ LAYER 9</div>
@@ -450,9 +458,29 @@ body::after{content:'';position:fixed;inset:0;
       <div class="detail-section-title">AI ANALYSIS</div>
       <div class="detail-ai-text" id="detailAI"><span class="loading">Analysing market</span></div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn btn-green" style="flex:1;" onclick="openPolymarket()">🔗 OPEN ON POLYMARKET</button>
-      <button class="btn btn-purple" style="flex:1;" onclick="logFromDetail()">📊 LOG POSITION</button>
+
+    <!-- KELLY QUICK CALC -->
+    <div class="detail-section">
+      <div class="detail-section-title">QUICK KELLY</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <div style="flex:1;">
+          <div class="field-label">YOUR PROB (%)</div>
+          <input class="field-input" id="detailMyProb" type="number" placeholder="e.g. 65" min="1" max="99" style="margin-top:4px;">
+        </div>
+        <button class="btn btn-purple" onclick="detailKelly()" style="margin-bottom:0;white-space:nowrap;">CALC</button>
+      </div>
+      <div id="detailKellyResult" style="font-family:var(--mono);font-size:9px;color:var(--dim);min-height:14px;"></div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+      <button class="btn btn-green btn-full" onclick="openPolymarket()" style="font-size:12px;padding:12px;">
+        🎯 BET ON POLYMARKET
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-purple" style="flex:1;" onclick="logFromDetail()">📊 LOG POSITION</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeDetail()">← BACK</button>
+      </div>
     </div>
   </div>
 </div>
@@ -716,7 +744,56 @@ function openMarket(conditionId){
 }
 
 function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');}
-function openPolymarket(){if(currentMarket&&currentMarket.slug)window.open('https://polymarket.com/event/'+currentMarket.slug,'_blank');}
+
+function openPolymarket(){
+  if(!currentMarket)return;
+  var url='';
+  // Try all known URL patterns
+  if(currentMarket.slug){
+    url='https://polymarket.com/event/'+currentMarket.slug;
+  } else if(currentMarket.marketSlug){
+    url='https://polymarket.com/event/'+currentMarket.marketSlug;
+  } else if(currentMarket.conditionId){
+    url='https://polymarket.com/market/'+currentMarket.conditionId;
+  } else {
+    // Fallback — search by question
+    url='https://polymarket.com/markets?q='+encodeURIComponent(currentMarket.question.substring(0,50));
+  }
+  window.open(url,'_blank');
+  toast('Opening Polymarket...');
+}
+
+function detailKelly(){
+  if(!currentMarket)return;
+  var myProbPct=parseFloat(document.getElementById('detailMyProb').value);
+  if(isNaN(myProbPct)||myProbPct<1||myProbPct>99){
+    document.getElementById('detailKellyResult').textContent='Enter your probability estimate first';
+    return;
+  }
+  var yes=parseFloat(currentMarket.outcomePrices&&currentMarket.outcomePrices[0]||currentMarket.yes||0);
+  if(yes>1)yes=yes/100;
+  var p=myProbPct/100;
+  var q=1-p;
+  var b=(1-yes)/yes;
+  var kelly=(p*b-q)/b;
+  var halfKelly=kelly/2;
+  var resultEl=document.getElementById('detailKellyResult');
+  if(kelly<=0){
+    resultEl.style.color='var(--red2)';
+    resultEl.textContent='NO EDGE at these odds — skip this market';
+    return;
+  }
+  var halfPct=(halfKelly*100).toFixed(1);
+  var dollarAmt=bankroll>0?(bankroll*halfKelly).toFixed(2):null;
+  var edge=((p-yes)*100).toFixed(1);
+  resultEl.style.color='var(--green2)';
+  resultEl.textContent='Edge: +'+edge+'% · Bet '+(dollarAmt?'$'+dollarAmt+' ('+halfPct+'%)':halfPct+'% of bankroll')+' (half-Kelly)';
+  // Pre-fill log position fields
+  document.getElementById('posOdds').value=yes.toFixed(2);
+  document.getElementById('posMyProb').value=myProbPct;
+  if(dollarAmt)document.getElementById('posStake').value=dollarAmt;
+}
+
 function logFromDetail(){
   if(!currentMarket)return;
   closeDetail();
