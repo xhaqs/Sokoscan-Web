@@ -422,7 +422,10 @@ body::after{content:'';position:fixed;inset:0;
           <div class="field-label">MIN VOLUME FILTER (USDC)</div>
           <input class="field-input" id="settingsMinVol" type="number" placeholder="10000" value="10000">
         </div>
-        <button class="btn btn-gold btn-full" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-gold" style="flex:1;" onclick="saveSettings()">💾 SAVE</button>
+          <button class="btn btn-purple" id="testTgBtn" style="flex:1;" onclick="testTelegram()">📱 TEST ALERT</button>
+        </div>
       </div>
 
       <div class="card">
@@ -649,19 +652,20 @@ function renderMarkets(){
     return;
   }
   document.getElementById('marketsList').innerHTML=list.slice(0,50).map(function(m){
-    var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||m.yes||0);
-    var no=parseFloat(m.outcomePrices&&m.outcomePrices[1]||m.no||0);
-    if(yes>1)yes=yes/100;
-    if(no>1)no=no/100;
-    var vol=m.volume||m.volumeNum||0;
+    var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||0);
+    var no=parseFloat(m.outcomePrices&&m.outcomePrices[1]||0);
+    // outcomePrices are already 0-1 decimals as strings
+    var vol=parseFloat(m.volumeNum||m.volume||0);
     var volStr=vol>1000000?'$'+(vol/1000000).toFixed(1)+'M':vol>1000?'$'+(vol/1000).toFixed(0)+'K':'$'+vol.toFixed(0);
     var barW=Math.round(yes*100);
-    var edgeClass='low-edge';var edgeBadge='LOW EDGE';var edgeBadgeClass='edge-low';
-    // Simple edge: if market yes price is low (<0.3) or high (>0.7) = potentially strong signal
     var edge=Math.abs(yes-0.5)*100;
+    var edgeClass='low-edge';var edgeBadge='LOW EDGE';var edgeBadgeClass='edge-low';
     if(edge>25){edgeClass='high-edge';edgeBadge='HIGH EDGE';edgeBadgeClass='edge-high';}
     else if(edge>12){edgeClass='med-edge';edgeBadge='WATCH';edgeBadgeClass='edge-med';}
-    var cat=m.category||m.tags&&m.tags[0]&&m.tags[0].label||'General';
+    // Get category from events array or groupItemTitle
+    var cat='General';
+    if(m.events&&m.events[0]&&m.events[0].category){cat=m.events[0].category;}
+    else if(m.groupItemTitle){cat=m.groupItemTitle;}
     return '<div class="market-card '+edgeClass+'" onclick="openMarket(\''+m.conditionId+'\')">'
       +'<div class="mc-title">'+m.question+'</div>'
       +'<div class="mc-row">'
@@ -690,11 +694,10 @@ function openMarket(conditionId){
   var m=allMarkets.find(function(x){return x.conditionId===conditionId;});
   if(!m)return;
   currentMarket=m;
-  var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||m.yes||0);
-  var no=parseFloat(m.outcomePrices&&m.outcomePrices[1]||m.no||0);
-  if(yes>1)yes=yes/100;
-  if(no>1)no=no/100;
-  var vol=m.volume||m.volumeNum||0;
+  var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||0);
+  var no=parseFloat(m.outcomePrices&&m.outcomePrices[1]||0);
+  var vol=parseFloat(m.volumeNum||m.volume||0);
+  var liq=parseFloat(m.liquidityNum||m.liquidity||0);
   var volStr=vol>1000000?'$'+(vol/1000000).toFixed(1)+'M':vol>1000?'$'+(vol/1000).toFixed(0)+'K':'$'+vol.toFixed(0);
   document.getElementById('detailTitle').textContent=m.question;
   // Stats
@@ -702,7 +705,7 @@ function openMarket(conditionId){
     '<div class="detail-stat"><div class="detail-stat-val">'+(yes*100).toFixed(1)+'%</div><div class="detail-stat-lbl">YES ODDS</div></div>'
     +'<div class="detail-stat"><div class="detail-stat-val" style="color:var(--red2);">'+(no*100).toFixed(1)+'%</div><div class="detail-stat-lbl">NO ODDS</div></div>'
     +'<div class="detail-stat"><div class="detail-stat-val" style="color:var(--amber2);">'+volStr+'</div><div class="detail-stat-lbl">VOLUME</div></div>'
-    +'<div class="detail-stat"><div class="detail-stat-val" style="color:var(--purple2);">'+(m.liquidity||m.liquidityNum||0).toFixed(0)+'</div><div class="detail-stat-lbl">LIQUIDITY</div></div>';
+    +'<div class="detail-stat"><div class="detail-stat-val" style="color:var(--purple2);">$'+liq.toFixed(0)+'</div><div class="detail-stat-lbl">LIQUIDITY</div></div>';
   // Ring
   var pct=Math.round(yes*100);
   var r=40,cx=50,cy=50,circ=2*Math.PI*r;
@@ -770,8 +773,7 @@ function detailKelly(){
     document.getElementById('detailKellyResult').textContent='Enter your probability estimate first';
     return;
   }
-  var yes=parseFloat(currentMarket.outcomePrices&&currentMarket.outcomePrices[0]||currentMarket.yes||0);
-  if(yes>1)yes=yes/100;
+  var yes=parseFloat(currentMarket.outcomePrices&&currentMarket.outcomePrices[0]||0);
   var p=myProbPct/100;
   var q=1-p;
   var b=(1-yes)/yes;
@@ -801,8 +803,7 @@ function logFromDetail(){
   showAddPosition();
   setTimeout(function(){
     document.getElementById('posMarket').value=currentMarket.question;
-    var yes=parseFloat(currentMarket.outcomePrices&&currentMarket.outcomePrices[0]||currentMarket.yes||0);
-    if(yes>1)yes=yes/100;
+    var yes=parseFloat(currentMarket.outcomePrices&&currentMarket.outcomePrices[0]||0);
     document.getElementById('posOdds').value=yes.toFixed(2);
   },100);
 }
@@ -947,45 +948,86 @@ function calcKelly(){
   }
 }
 
-// ── SCAN ──
+// ── SCAN (server-side — fires Telegram too) ──
 function runManualScan(){
   var threshold=parseFloat(document.getElementById('edgeThreshold').value)||15;
-  document.getElementById('scanStatus').textContent='Scanning '+allMarkets.length+' markets...';
+  var tgId=document.getElementById('settingsTgId').value.trim();
+  var minVol=parseFloat(document.getElementById('settingsMinVol').value)||10000;
+  var btn=document.querySelector('[onclick="runManualScan()"]');
+  if(btn){btn.disabled=true;btn.textContent='⏳ SCANNING...';}
+  document.getElementById('scanStatus').textContent='Scanning 100 markets on server...';
+  var token='';try{token=sessionStorage.getItem(SK)||'';}catch(e){}
+  fetch(BASE+'/api/oracle/scan',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-keystone-token':token},
+    body:JSON.stringify({edgeThreshold:threshold,minVolume:minVol,tgChatId:tgId})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(btn){btn.disabled=false;btn.textContent='🔍 SCAN NOW';}
+    if(!d.ok){document.getElementById('scanStatus').textContent='Scan failed: '+(d.error||'unknown');return;}
+    var found=d.alerts||[];
+    // Merge into local alerts
+    var newAlerts=found.map(function(a){
+      return {market:a.question,yes:a.yes,no:a.no,edge:a.edge,vol:a.volume,slug:a.slug,time:a.time};
+    });
+    if(newAlerts.length){
+      alerts=newAlerts.concat(alerts).slice(0,50);
+      saveLocal();
+      renderAlerts();
+      document.getElementById('alertCount').textContent=found.length+' NEW';
+      document.getElementById('scanStatus').textContent='Found '+found.length+' markets above '+threshold+'% edge'+(tgId?' · Telegram sent':'')+'.';}
+    else{
+      document.getElementById('scanStatus').textContent='No markets above '+threshold+'% edge threshold.';
+    }
+    toast(found.length?'🔔 '+found.length+' edge alerts'+(tgId?' sent to Telegram':''):'No edge found above '+threshold+'%');
+  })
+  .catch(function(e){
+    if(btn){btn.disabled=false;btn.textContent='🔍 SCAN NOW';}
+    // Fallback to client-side scan if server route missing
+    clientSideScan(threshold,minVol);
+  });
+}
+
+// Fallback client-side scan
+function clientSideScan(threshold,minVol){
   var found=[];
   allMarkets.forEach(function(m){
-    var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||m.yes||0);
-    if(yes>1)yes=yes/100;
+    var yes=parseFloat(m.outcomePrices&&m.outcomePrices[0]||0);
+    var vol=parseFloat(m.volumeNum||m.volume||0);
     var edge=Math.abs(yes-0.5)*100;
-    var vol=m.volume||m.volumeNum||0;
-    if(edge>threshold&&vol>settings.minVol){
-      found.push({market:m.question,yes:(yes*100).toFixed(0),edge:edge.toFixed(0),vol:vol,time:new Date().toISOString()});
+    if(edge>=threshold&&vol>=minVol){
+      found.push({market:m.question,yes:(yes*100).toFixed(1),no:((1-yes)*100).toFixed(1),edge:edge.toFixed(1),vol:vol,slug:m.slug||'',time:new Date().toISOString()});
     }
   });
-  found.sort(function(a,b){return b.edge-a.edge;});
+  found.sort(function(a,b){return parseFloat(b.edge)-parseFloat(a.edge);});
   if(found.length){
     alerts=found.concat(alerts).slice(0,50);
-    saveLocal();
-    renderAlerts();
+    saveLocal();renderAlerts();
     document.getElementById('alertCount').textContent=found.length+' NEW';
-    document.getElementById('scanStatus').textContent='Found '+found.length+' markets above '+threshold+'% edge.';
-    toast('🔔 '+found.length+' edge opportunities found');
+    document.getElementById('scanStatus').textContent='Found '+found.length+' markets (client scan).';
+    toast('🔔 '+found.length+' edge alerts');
   } else {
-    document.getElementById('scanStatus').textContent='No markets above '+threshold+'% edge threshold.';
-    toast('No edge found above '+threshold+'%');
+    document.getElementById('scanStatus').textContent='No markets above threshold.';
+    toast('No edge found');
   }
 }
 
 function renderAlerts(){
   if(!alerts.length)return;
-  document.getElementById('alertsList').innerHTML=alerts.slice(0,20).map(function(a){
+  document.getElementById('alertsList').innerHTML=alerts.slice(0,30).map(function(a){
     var edgeNum=parseFloat(a.edge);
     var icon=edgeNum>25?'🟢':edgeNum>15?'🟡':'⬜';
-    var vol=a.vol>1000000?'$'+(a.vol/1000000).toFixed(1)+'M':a.vol>1000?'$'+(a.vol/1000).toFixed(0)+'K':'$'+a.vol;
-    return '<div class="alert-row">'
+    var vol=parseFloat(a.vol||0);
+    var volStr=vol>1000000?'$'+(vol/1000000).toFixed(1)+'M':vol>1000?'$'+(vol/1000).toFixed(0)+'K':'$'+vol.toFixed(0);
+    var timeStr=new Date(a.time).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'});
+    var slug=a.slug||'';
+    var url=slug?'https://polymarket.com/event/'+slug:'';
+    return '<div class="alert-row" '+(url?'onclick="window.open(\''+url+'\',\'_blank\')" style="cursor:pointer;"':'')+'>'
       +'<div class="alert-icon">'+icon+'</div>'
       +'<div class="alert-body">'
       +'<div class="alert-title">'+a.market+'</div>'
-      +'<div class="alert-meta">YES: '+a.yes+'% · Edge: '+a.edge+'% · Vol: '+vol+' · '+new Date(a.time).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'})+' EAT</div>'
+      +'<div class="alert-meta">YES: '+a.yes+'% · Edge: <b style="color:var(--gold2);">'+a.edge+'%</b> · Vol: '+volStr+' · '+timeStr+' EAT'+(url?' · <span style="color:var(--teal2);">TAP TO OPEN</span>':'')+'</div>'
       +'</div></div>';
   }).join('');
 }
@@ -997,7 +1039,43 @@ function saveSettings(){
   settings.edgeThreshold=parseFloat(document.getElementById('edgeThreshold').value)||15;
   settings.scanInterval=parseInt(document.getElementById('settingsScanInterval').value)||60;
   saveLocal();
-  toast('✅ Settings saved');
+  // Push to server
+  var token='';try{token=sessionStorage.getItem(SK)||'';}catch(e){}
+  fetch(BASE+'/api/oracle/settings',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-keystone-token':token},
+    body:JSON.stringify({
+      edgeThreshold:settings.edgeThreshold,
+      minVolume:settings.minVol,
+      scanInterval:settings.scanInterval,
+      tgChatId:settings.tgId
+    })
+  }).then(function(r){return r.json();})
+  .then(function(d){toast(d.ok?'✅ Settings saved':'⚠️ Saved locally only');})
+  .catch(function(){toast('✅ Settings saved locally');});
+}
+
+// ── TEST TELEGRAM ──
+function testTelegram(){
+  var tgId=document.getElementById('settingsTgId').value.trim();
+  if(!tgId){toast('Enter Telegram Chat ID first');return;}
+  var token='';try{token=sessionStorage.getItem(SK)||'';}catch(e){}
+  var btn=document.getElementById('testTgBtn');
+  if(btn){btn.disabled=true;btn.textContent='SENDING...';}
+  fetch(BASE+'/api/oracle/test-alert',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-keystone-token':token},
+    body:JSON.stringify({tgChatId:tgId})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(btn){btn.disabled=false;btn.textContent='📱 TEST ALERT';}
+    toast(d.ok?'✅ Telegram message sent!':'❌ Failed — check chat ID');
+  })
+  .catch(function(){
+    if(btn){btn.disabled=false;btn.textContent='📱 TEST ALERT';}
+    toast('❌ Connection error');
+  });
 }
 </script>
 </body>
