@@ -277,6 +277,7 @@ body::after{content:'';position:fixed;inset:0;
           <span class="card-title">LIVE MARKETS</span>
           <span class="card-tag" id="marketsCount">-- MARKETS</span>
         </div>
+        <div id="cacheStatus" style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-bottom:8px;min-height:12px;"></div>
         <div id="marketsList"><div class="loading">Fetching markets</div></div>
       </div>
     </div>
@@ -772,11 +773,26 @@ function saveLocal(){
 // ── LOAD MARKETS via server proxy ──
 function loadMarkets(){
   document.getElementById('marketsList').innerHTML='<div class="loading">Fetching markets</div>';
+  var resp;
   fetch(BASE+'/api/polymarket/markets')
-  .then(function(r){return r.json();})
+  .then(function(r){resp=r;return r.json();})
   .then(function(data){
     allMarkets=data||[];
     document.getElementById('tbMarketCount').textContent=allMarkets.length+' MARKETS';
+    // Show cache age
+    var age=resp.headers.get('X-Cache-Age');
+    var count=resp.headers.get('X-Market-Count');
+    var cacheEl=document.getElementById('cacheStatus');
+    if(cacheEl){
+      if(age){
+        var ageNum=parseInt(age);
+        var ageStr=ageNum<60?ageNum+'s ago':Math.round(ageNum/60)+'m ago';
+        cacheEl.textContent='Cache: '+( count||allMarkets.length)+' markets · refreshed '+ageStr+' · auto-updates every 30m';
+        cacheEl.style.color=ageNum<300?'var(--green2)':ageNum<1200?'var(--amber2)':'var(--dim)';
+      } else {
+        cacheEl.textContent=allMarkets.length+' active markets loaded';
+      }
+    }
     renderMarkets();
   })
   .catch(function(e){
