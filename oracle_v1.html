@@ -989,6 +989,7 @@ function logSearchResult(){
 }
 
 // ── MARKETS ──
+function filterMarkets(){renderMarkets();}
 function setCategory(cat,el){
   activeCategory=cat;
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
