@@ -32,7 +32,7 @@ body::after{content:'';position:fixed;inset:0;
              radial-gradient(ellipse at 85% 85%,rgba(201,168,76,0.05) 0%,transparent 50%);
   pointer-events:none;z-index:0;}
 
-#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:9px;letter-spacing:0.4em;color:rgba(201,168,76,0.15);pointer-events:none;z-index:9999;white-space:nowrap;font-weight:700;}
+#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:9px;letter-spacing:0.4em;color:rgba(201,168,76,0.45);pointer-events:none;z-index:9999;white-space:nowrap;font-weight:700;text-shadow:0 0 12px rgba(201,168,76,0.3);}
 
 /* ── PASSKEY ── */
 #pkScreen{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;}
@@ -967,15 +967,9 @@ function aiAnalyseTopResult(){
   });
 }
 
-function openPolymarketBySlug(slug){
-  if(!slug){window.open('https://polymarket.com','_blank');return;}
-  slug=slug.replace(/^https?:\/\/[^\/]+/,'').replace(/^\//,'');
-  var url='';
-  if(slug.indexOf('event/')===0||slug.indexOf('market/')===0){
-    url='https://polymarket.com/'+slug;
-  } else {
-    url='https://polymarket.com/event/'+slug;
-  }
+function openPolymarketBySlug(slug,conditionId){
+  var fakeMarket={slug:slug,conditionId:conditionId||''};
+  var url=buildPolymarketUrl(fakeMarket);
   window.open(url,'_blank');
 }
 
@@ -1213,47 +1207,43 @@ function openMarket(conditionId){
 
 function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');}
 
+function buildPolymarketUrl(m){
+  var cid=m.conditionId||'';
+  if(cid) return 'https://polymarket.com/event/'+cid;
+  var slug=m.slug||m.marketSlug||'';
+  slug=slug.replace(/^https?:\/\/[^\/]+/,'').replace(/^\//,'');
+  if(slug) return 'https://polymarket.com/event/'+slug;
+  return 'https://polymarket.com/?s='+encodeURIComponent((m.question||'').substring(0,60));
+}
+
 function openPolymarket(){
   if(!currentMarket)return;
-  var slug=currentMarket.slug||currentMarket.marketSlug||'';
-  slug=slug.replace(/^https?:\/\/[^\/]+/,'').replace(/^\//,'');
-  var url='';
-  if(slug){
-    // Sports markets use /sports/SPORT/SLUG, others use /event/SLUG
-    var q=(currentMarket.question||'').toLowerCase();
-    var isSports=q.indexOf(' vs')>=0||q.indexOf(' vs.')>=0;
-    var cat=(currentMarket.category||currentMarket.groupItemTitle||'').toLowerCase();
-    isSports=isSports||(cat.indexOf('sport')>=0||cat.indexOf('soccer')>=0||cat.indexOf('football')>=0||cat.indexOf('ucl')>=0||cat.indexOf('nba')>=0);
-    if(slug.indexOf('sports/')===0||slug.indexOf('event/')===0||slug.indexOf('market/')===0){
-      url='https://polymarket.com/'+slug;
-    } else if(isSports){
-      // Try sports path first — Polymarket sports use /sports/CATEGORY/SLUG
-      url='https://polymarket.com/sports/'+slug;
-    } else {
-      url='https://polymarket.com/event/'+slug;
-    }
-  } else {
-    url='https://polymarket.com/?s='+encodeURIComponent((currentMarket.question||'').substring(0,60));
-  }
+  var url=buildPolymarketUrl(currentMarket);
   window.open(url,'_blank');
   toast('Opening Polymarket...');
 }
 
 function copyPolymarketLink(){
   if(!currentMarket)return;
-  var slug=currentMarket.slug||currentMarket.marketSlug||'';
-  slug=slug.replace(/^https?:\/\/[^\/]+/,'').replace(/^\//,'');
-  var url=slug?'https://polymarket.com/event/'+slug:'https://polymarket.com';
-  // Try navigator clipboard
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(url).then(function(){
-      toast('🔗 Link copied — paste in browser');
-    }).catch(function(){
-      prompt('Copy this Polymarket link:',url);
-    });
-  } else {
-    prompt('Copy this Polymarket link:',url);
-  }
+  var url=buildPolymarketUrl(currentMarket);
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(url).then(function(){
+        toast('Copied! Paste in your browser');
+      }).catch(function(){copyFallback(url);});
+    } else { copyFallback(url); }
+  }catch(e){copyFallback(url);}
+}
+
+function copyFallback(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus();ta.select();
+  try{document.execCommand('copy');toast('Copied! Paste in your browser');}
+  catch(e){toast('Link: '+text);}
+  document.body.removeChild(ta);
 }
 
 function detailKelly(){
@@ -1268,10 +1258,9 @@ function detailKelly(){
   var q=1-p;
   var b=(1-yes)/yes;
   var kelly=(p*b-q)/b;
-  var halfKelly=kelly/2;
+  var halfKelly=Math.max(0,kelly/2);
   var resultEl=document.getElementById('detailKellyResult');
-  if(kelly<=0){
-    resultEl.style.color='var(--red2)';
+  if(halfKelly<=0){
     resultEl.textContent='NO EDGE at these odds — skip this market';
     return;
   }
@@ -1280,7 +1269,6 @@ function detailKelly(){
   var edge=((p-yes)*100).toFixed(1);
   resultEl.style.color='var(--green2)';
   resultEl.textContent='Edge: +'+edge+'% · Bet '+(dollarAmt?'$'+dollarAmt+' ('+halfPct+'%)':halfPct+'% of bankroll')+' (half-Kelly)';
-  // Pre-fill log position fields
   document.getElementById('posOdds').value=yes.toFixed(2);
   document.getElementById('posMyProb').value=myProbPct;
   if(dollarAmt)document.getElementById('posStake').value=dollarAmt;
