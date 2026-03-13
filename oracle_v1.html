@@ -277,25 +277,56 @@ body::after{content:'';position:fixed;inset:0;
 
     <!-- ALERTS -->
     <div class="panel" id="panel-alerts">
+
+      <!-- SMART SCAN CARD -->
+      <div class="card" style="border-color:rgba(201,168,76,0.2);background:rgba(201,168,76,0.03);">
+        <div class="card-head">
+          <span class="card-title">🧠 SMART SCAN</span>
+          <span class="card-tag" style="color:var(--gold2);border-color:rgba(201,168,76,0.3);">AI-POWERED</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);line-height:1.8;margin-bottom:12px;">
+          AI analyses each market using current knowledge, estimates true probability, and surfaces only genuine edges. Takes ~60 seconds.
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">MIN EDGE (%)</div>
+            <input class="field-input" id="smartMinEdge" type="number" value="12" min="5" max="40">
+          </div>
+          <div class="field">
+            <div class="field-label">MIN VOLUME</div>
+            <input class="field-input" id="smartMinVol" type="number" value="5000" min="1000">
+          </div>
+        </div>
+        <button class="btn btn-gold btn-full" id="smartScanBtn" onclick="runSmartScan()" style="margin-bottom:8px;">🧠 RUN SMART SCAN</button>
+        <div id="smartScanStatus" style="font-family:var(--mono);font-size:8px;color:var(--dim);text-align:center;min-height:14px;"></div>
+      </div>
+
+      <!-- BASIC SCAN CARD -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">EDGE ALERTS</span>
+          <span class="card-title">⚡ QUICK SCAN</span>
           <span class="card-tag" id="alertCount">0 NEW</span>
         </div>
-        <div id="alertsList"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">No alerts yet — scan markets to generate alerts.</div></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-title">AUTO-SCAN</span></div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
-          ORACLE scans all markets every hour and alerts you on Telegram when edge &gt; your threshold. Set your Telegram chat ID in Settings to activate.
+        <div class="field-row" style="margin-bottom:8px;">
+          <div class="field">
+            <div class="field-label">EDGE THRESHOLD (%)</div>
+            <input class="field-input" id="edgeThreshold" type="number" value="15" min="5" max="50">
+          </div>
+          <div class="field">
+            <div class="field-label">MIN VOLUME</div>
+            <input class="field-input" id="scanMinVol" type="number" value="1000">
+          </div>
         </div>
-        <div class="field">
-          <div class="field-label">EDGE THRESHOLD (%)</div>
-          <input class="field-input" id="edgeThreshold" type="number" value="15" min="5" max="50" placeholder="15">
-        </div>
-        <button class="btn btn-purple btn-full" onclick="runManualScan()">🔍 SCAN NOW</button>
+        <button class="btn btn-purple btn-full" onclick="runManualScan()">🔍 QUICK SCAN</button>
         <div id="scanStatus" style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;margin-top:8px;min-height:14px;"></div>
       </div>
+
+      <!-- RESULTS -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">OPPORTUNITIES</span></div>
+        <div id="alertsList"><div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:16px;">Run Smart Scan to find AI-verified opportunities.</div></div>
+      </div>
+
     </div>
 
     <!-- POSITIONS -->
@@ -948,7 +979,72 @@ function calcKelly(){
   }
 }
 
-// ── SCAN (server-side — fires Telegram too) ──
+// ── SMART SCAN (AI-powered) ──
+function runSmartScan(){
+  var minEdge=parseFloat(document.getElementById('smartMinEdge').value)||12;
+  var minVol=parseFloat(document.getElementById('smartMinVol').value)||5000;
+  var btn=document.getElementById('smartScanBtn');
+  var status=document.getElementById('smartScanStatus');
+  if(btn){btn.disabled=true;btn.textContent='🧠 ANALYSING MARKETS...';}
+  status.textContent='Fetching markets and running AI analysis... (~60s)';
+  status.style.color='var(--amber2)';
+  var token='';try{token=sessionStorage.getItem(SK)||'';}catch(e){}
+  // Animate status
+  var dots=0;
+  var ticker=setInterval(function(){
+    dots=(dots+1)%4;
+    var d='.'.repeat(dots);
+    status.textContent='AI analysing markets'+d+' (this takes ~60s)';
+  },800);
+  fetch(BASE+'/api/oracle/smart-scan',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-keystone-token':token},
+    body:JSON.stringify({minEdge:minEdge,minVolume:minVol,maxMarkets:15})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    clearInterval(ticker);
+    if(btn){btn.disabled=false;btn.textContent='🧠 RUN SMART SCAN';}
+    if(!d.ok){
+      status.textContent='Scan failed: '+(d.error||'unknown');
+      status.style.color='var(--red2)';
+      return;
+    }
+    var found=d.alerts||[];
+    var analysed=d.analysed||0;
+    if(found.length){
+      // Merge smart alerts into local alerts
+      var newAlerts=found.map(function(a){
+        return {
+          market:a.question,yes:a.yes,no:a.no,
+          edge:a.edge,absEdge:a.absEdge,
+          aiProb:a.aiProb,direction:a.direction,
+          confidence:a.confidence,reasoning:a.reasoning,
+          keyFactor:a.keyFactor,vol:a.volume,
+          slug:a.slug,time:a.time,smart:true
+        };
+      });
+      alerts=newAlerts.concat(alerts.filter(function(a){return !a.smart;})).slice(0,50);
+      saveLocal();
+      renderAlerts();
+      document.getElementById('alertCount').textContent=found.length+' AI PICKS';
+      status.textContent='✅ Analysed '+analysed+' markets → '+found.length+' AI edge'+( found.length>1?'s':'')+' found.';
+      status.style.color='var(--green2)';
+      toast('🧠 '+found.length+' AI-verified edge'+(found.length>1?'s':'')+' found');
+    } else {
+      status.textContent='Analysed '+analysed+' markets — no edges above '+minEdge+'% with '+d.confidence||'MEDIUM'+' confidence.';
+      status.style.color='var(--dim)';
+      toast('No AI edges found — try lower threshold');
+    }
+  })
+  .catch(function(e){
+    clearInterval(ticker);
+    if(btn){btn.disabled=false;btn.textContent='🧠 RUN SMART SCAN';}
+    status.textContent='Error: '+e.message;
+    status.style.color='var(--red2)';
+    toast('Smart scan failed');
+  });
+}
 function runManualScan(){
   var threshold=parseFloat(document.getElementById('edgeThreshold').value)||15;
   var tgId=document.getElementById('settingsTgId').value.trim();
@@ -1016,26 +1112,42 @@ function clientSideScan(threshold,minVol){
 function renderAlerts(){
   if(!alerts.length)return;
   document.getElementById('alertsList').innerHTML=alerts.slice(0,30).map(function(a){
-    var edgeNum=parseFloat(a.edge);
+    var edgeNum=parseFloat(a.absEdge||a.edge||0);
+    var isSmart=!!a.smart;
+    var isPos=parseFloat(a.edge||0)>0;
     var icon=edgeNum>25?'🟢':edgeNum>15?'🟡':'⬜';
     var vol=parseFloat(a.vol||0);
     var volStr=vol>1000000?'$'+(vol/1000000).toFixed(1)+'M':vol>1000?'$'+(vol/1000).toFixed(0)+'K':'$'+vol.toFixed(0);
     var timeStr=new Date(a.time).toLocaleTimeString('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',minute:'2-digit'});
-    var slug=a.slug||'';
-    var url=slug?'https://polymarket.com/event/'+slug:'';
-    return '<div class="alert-row" '+(url?'onclick="window.open(\''+url+'\',\'_blank\')" style="cursor:pointer;"':'')+'>'
-      +'<div class="alert-icon">'+icon+'</div>'
-      +'<div class="alert-body">'
-      +'<div class="alert-title">'+a.market+'</div>'
-      +'<div class="alert-meta">YES: '+a.yes+'% · Edge: <b style="color:var(--gold2);">'+a.edge+'%</b> · Vol: '+volStr+' · '+timeStr+' EAT'+(url?' · <span style="color:var(--teal2);">TAP TO OPEN</span>':'')+'</div>'
-      +'</div></div>';
+    var url=a.slug?'https://polymarket.com/event/'+a.slug:'';
+    var dirColor=a.direction==='BUY_YES'?'var(--green2)':a.direction==='BUY_NO'?'var(--red2)':'var(--dim)';
+    var confColor=a.confidence==='HIGH'?'var(--gold2)':a.confidence==='MEDIUM'?'var(--amber2)':'var(--dim)';
+    var smartBadge=isSmart?'<span style="font-family:var(--mono);font-size:7px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);color:var(--gold2);padding:1px 6px;border-radius:2px;margin-left:6px;">AI</span>':'';
+    var aiRow=isSmart&&a.aiProb?
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:5px;flex-wrap:wrap;">'
+      +'<span style="font-family:var(--mono);font-size:8px;color:var(--text2);">Market: <b>'+a.yes+'%</b></span>'
+      +'<span style="font-family:var(--mono);font-size:8px;color:var(--purple2);">AI: <b>'+a.aiProb+'%</b></span>'
+      +'<span style="font-family:var(--mono);font-size:8px;color:'+dirColor+';">→ <b>'+(a.direction||'').replace('_',' ')+'</b></span>'
+      +(a.confidence?'<span style="font-family:var(--mono);font-size:7px;color:'+confColor+';">'+a.confidence+'</span>':'')
+      +'</div>'
+      +(a.keyFactor?'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:3px;">💡 '+a.keyFactor+'</div>':'')
+      :'';
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--border);'+(url?'cursor:pointer;':'')+'" '
+      +(url?'onclick="window.open(\''+url+'\',\'_blank\')"':'')+' >'
+      +'<div style="display:flex;align-items:flex-start;gap:8px;">'
+      +'<span style="font-size:14px;flex-shrink:0;">'+icon+'</span>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-family:var(--cond);font-size:12px;color:var(--text);font-weight:600;line-height:1.3;">'+a.market+smartBadge+'</div>'
+      +'<div style="font-family:var(--mono);font-size:7px;color:var(--dim);margin-top:3px;">Edge: <b style="color:var(--gold2);">'+edgeNum.toFixed(1)+'%</b> · Vol: '+volStr+' · '+timeStr+' EAT'+(url?' · <span style="color:var(--teal2);">TAP TO OPEN</span>':'')+'</div>'
+      +aiRow
+      +'</div></div></div>';
   }).join('');
 }
 
 // ── SETTINGS ──
 function saveSettings(){
   settings.tgId=document.getElementById('settingsTgId').value.trim();
-  settings.minVol=parseFloat(document.getElementById('settingsMinVol').value)||10000;
+  settings.minVol=parseFloat((document.getElementById('settingsMinVol')||document.getElementById('scanMinVol')||{value:'10000'}).value)||10000;
   settings.edgeThreshold=parseFloat(document.getElementById('edgeThreshold').value)||15;
   settings.scanInterval=parseInt(document.getElementById('settingsScanInterval').value)||60;
   saveLocal();
